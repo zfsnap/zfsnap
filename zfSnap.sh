@@ -1,8 +1,7 @@
 #!/bin/sh
 # beerware license, written by Aldis Berjoza (aldis@bsdroot.lv)
 
-#age=2592000	# max snapshot age in seconds
-age=100	# max snapshot age in seconds
+age=2592000	# max snapshot age in seconds
 
 tfrmt="%Y-%m-%d_%T"
 
