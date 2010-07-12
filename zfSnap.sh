@@ -16,7 +16,7 @@ tfrmt="%Y-%m-%d_%T"
 
 ntime=`date +$tfrmt`
 while [ $1 ]; do
-	[ $1 = '-r' ] && { zopt=$1; shift 2; } || zopt=''
+	[ $1 = '-r' ] && { zopt=$1; shift; } || zopt=''
 	zfs snapshot $zopt $1@$ntime
 	shift
 done
