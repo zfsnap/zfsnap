@@ -1,15 +1,24 @@
 #!/bin/sh
 # beerware license, written by Aldis Berjoza (aldis@bsdroot.lv)
 
-age=2592000	# max snapshot age in seconds
+# if arg1 is -a. snapshot max age will be set to arg2
+# all next args are zfs filesystems
+# before zfs filesystem you can pass optional arg -r, to specify
+#   that zfs should create recursive snapshots for given filesystem
+
+# Syntax:
+# zfSnap.sh [-a MaxSnapshotAgeInSeconds] [-r] z/fs1 [[[-r] z/fs2] ...]
+
+age=2592000	# default max snapshot age in seconds
+[ $1 = '-a' ] && { age=$2; shift 2; }
 
 tfrmt="%Y-%m-%d_%T"
 
-[ "$1" = "-r" ] && { zopt=-r; shift; } # if arg1 = -r them make recursive snapshots
-
 ntime=`date +$tfrmt`
-for i in $*; do 
-	zfs snapshot $zopt $i@$ntime
+while [ $1 ]; do
+	[ $1 = '-r' ] && { zopt=$1; shift 2; } || zopt=''
+	zfs snapshot $zopt $1@$ntime
+	shift
 done
 
 dtime=`date +%s-$age | bc -l`
