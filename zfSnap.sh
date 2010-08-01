@@ -7,8 +7,8 @@ ${0##./} [-a seconds|-D] [-p prefix] [-P postifx] [-r] z/fs1 [[[-r] z/fs2] ...]
 
 Options:
 -a seconds   = set how long snapshot should be kept (in seconds)
--p prefix    = prefix snapshots with prefix
 -D           = don't delete snapshots
+-p prefix    = prefix snapshots with prefix
 -P postfix   = postifx snapshots with postfix
 -r           = recursive snapshots
 EOF
