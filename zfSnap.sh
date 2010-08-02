@@ -67,6 +67,13 @@ modifiers. Just specifie modifiers that you need (for example '1y', '3w',
   ttl can also be specified as label, in which case snapshot won't be deleted
 (ever)
 
+  when you use -r option, this means that all zfs filesystems specified on
+command line after will make recursive snapshots. To cansel recursive
+snapshots use -R. For example:
+  ${0##./} zpool/zfs1 -r zpool/zfs3 zpool/zfs4 -R zpool/zfs4 zpool/zfs5
+  * zpool/zfs3 zpool/zfs4             - will be recrusive
+  * zpool/zfs1 zpool/zfs4 zpool/zfs5  - won't be recursive
+
 Generic options must be specified before anything else
 EOF
 	exit
