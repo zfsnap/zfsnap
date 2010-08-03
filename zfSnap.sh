@@ -73,10 +73,10 @@ EOF
 [ $# = 0 ] && help
 [ "$1" = '-h' -o $1 = "--help" ] && help
 
-tfrmt="%Y-%m-%d_%T"
+tfrmt='%Y-%m-%d_%T'
 htime_pattern='(([0-9])+y)?(([0-9])+m)?(([0-9])+w)?(([0-9])+d)?(([0-9])+h)?(([0-9])+M)?(([0-9])+(s)?)?'
 date_pattern='20[0-9]{2}-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-6][0-9]:[0-6][0-9]'
-age=`s2time 2592000`	# default max snapshot age in seconds (30 days)
+age='1m'	# default max snapshot age
 delete_snapshots=0
 verbose=0
 dry_run=0
