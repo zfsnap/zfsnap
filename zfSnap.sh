@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.1.6
+VERSION=1.1.7
 
 s2time() {
 	# convert seconds to human readable time
@@ -46,10 +46,10 @@ time2s() {
 
 help() {
 	cat << EOF
-${0##./} v${VERSION} by Aldis Berjoza <aldis@bsdroot.lv>
+${0##*/} v${VERSION} by Aldis Berjoza <aldis@bsdroot.lv>
 
 Syntax:
-${0##./} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
+${0##*/} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
 
 GENERIC OPTIONS:
   -d       = delete old snapshots
