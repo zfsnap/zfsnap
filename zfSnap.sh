@@ -1,7 +1,7 @@
 #!/bin/sh
 # beerware license, written by Aldis Berjoza (aldis@bsdroot.lv)
 
-VERSION=1.1
+VERSION=1.2
 
 s2time() {
 	# convert seconds to human readable time
@@ -42,39 +42,22 @@ help() {
 ${0##./} v${VERSION} by Aldis Berjoza
 
 Syntax:
-${0##./} [generic options] [[-a ttl] [-r|-R] z/fs1 ...]
+${0##./} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
 
 GENERIC OPTIONS:
--d       = delete old snapshots
--v       = verbose output
+  -d       = delete old snapshots
+  -v       = verbose output
 
 OPTIONS:
--a ttl   = set how long snapshot should be kept
--r       = recursive snapshots
--R       = Not recursive snapshots
+  -a ttl   = set how long snapshot should be kept
+  -r       = create recursive snapshots for all zfs file systems that fallow
+             this switch
+  -R       = create non-recursive snapshots for all zfs file systems that
+             fallow this switch
 
-NOTES:
-  ttl can be specified as number in which case it is treated as value in
-seconds, or it can be specified as numbers and modifiers [For example 1y6m
-- if you want to keep snapshot for 1 year and 6 months].
+MORE INFO:
+  http://wiki.bsdroot.lv/zfsnap
 
-  Valid modifiers: y - years (365 days / year), m - months (30 days / month),
-w - weeks, d - days, h - hours, M - minutes, s - seconds (can be omitted)
-  Modifiers must be in order mentioned above. You don't need to specify all
-modifiers. Just specifie modifiers that you need (for example '1y', '3w',
-'6m10d')
-
-  ttl can also be specified as label, in which case snapshot won't be deleted
-(ever)
-
-  when you use -r option, this means that all zfs filesystems specified on
-command line after will make recursive snapshots. To cansel recursive
-snapshots use -R. For example:
-  ${0##./} zpool/zfs1 -r zpool/zfs3 zpool/zfs4 -R zpool/zfs4 zpool/zfs5
-  * zpool/zfs3 zpool/zfs4             - will be recrusive
-  * zpool/zfs1 zpool/zfs4 zpool/zfs5  - won't be recursive
-
-Generic options must be specified before anything else
 EOF
 	exit
 }
