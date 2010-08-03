@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.6
+VERSION=1.1.6
 
 s2time() {
 	# convert seconds to human readable time
