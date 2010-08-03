@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.5
+VERSION=1.6
 
 s2time() {
 	# convert seconds to human readable time
@@ -93,13 +93,13 @@ while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' ]; do
 		[ "$1" = '-r' ] && zopt='-r' && shift
 		[ "$1" = '-R' ] && zopt='' && shift
-		[ "$1" = '-a' ] && age="$2" && shift 2 && echo "$age" | grep -E -e "^[0-9]+$" 2> /dev/null > /dev/null && age=`s2time $age`
+		[ "$1" = '-a' ] && age="$2" && shift 2 && echo "$age" | grep -q -E -e "^[0-9]+$" && age=`s2time $age`
 	done
 
 	if [ $1 ]; then
 		if [ $dry_run -eq 0 ]; then
 			[ $verbose -eq 1 ] && echo -n "zfs snapshot $zopt $1@${ntime}--${age}	... "
-			zfs snapshot $zopt "$1@${ntime}--${age}" 1> /dev/stderr > /dev/stderr \
+			zfs snapshot $zopt "$1@${ntime}--${age}" > /dev/stderr \
 				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
 				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
 		else
@@ -120,7 +120,7 @@ if [ "$delete_snapshots" -eq 1 ]; then
 		if [ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -e "s/^.*@//" -E -e "s/--${htime_pattern}$//") +%s) ]; then
 			if [ $dry_run -eq 0 ]; then
 				[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
-				zfs destroy "$i" 2> /dev/stderr > /dev/stderr \
+				zfs destroy "$i" > /dev/stderr \
 					&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
 					|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
 			else
