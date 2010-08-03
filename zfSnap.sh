@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.4
+VERSION=1.5
 
 s2time() {
 	# convert seconds to human readable time
@@ -54,6 +54,7 @@ ${0##./} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
 GENERIC OPTIONS:
   -d       = delete old snapshots
   -v       = verbose output
+  -n       = show actions that would be performed (don't make/delete snapshots)
 
 OPTIONS:
   -a ttl   = set how long snapshot should be kept
@@ -78,12 +79,15 @@ date_pattern='20[0-9]{2}-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-6][0-9]:[0-6][0-9]'
 age=`s2time 2592000`	# default max snapshot age in seconds (30 days)
 delete_snapshots=0
 verbose=0
+dry_run=0
 
-while [ "$1" = '-d' -o "$1" = '-v' ]; do
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' ]; do
 	[ "$1" = "-d" ] && delete_snapshots=1 && shift
 	[ "$1" = "-v" ] && verbose=1 && shift
+	[ "$1" = "-n" ] && dry_run=1 && shift
 done
 
+[ $dry_run -eq 1 ] && zfs_list=`zfs list -H | awk '{print $1}'`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' ]; do
@@ -93,10 +97,19 @@ while [ "$1" ]; do
 	done
 
 	if [ $1 ]; then
-		[ $verbose -eq 1 ] && echo -n "zfs snapshot $zopt $1@${ntime}--${age}	... "
-		zfs snapshot $zopt "$1@${ntime}--${age}" 1> /dev/stderr > /dev/stderr \
-			&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
-			|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+		if [ $dry_run -eq 0 ]; then
+			[ $verbose -eq 1 ] && echo -n "zfs snapshot $zopt $1@${ntime}--${age}	... "
+			zfs snapshot $zopt "$1@${ntime}--${age}" 1> /dev/stderr > /dev/stderr \
+				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
+				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+		else
+			echo "zfs snapshot $zopt $1@${ntime}--${age}"
+			good_fs=0
+			for i in $zfs_list; do
+				[ "$i" = "$1" ] && { good_fs=1; break; }
+			done
+			[ $good_fs -eq 0 ] && echo "ERR: looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+		fi
 		shift
 	fi
 done
@@ -105,10 +118,14 @@ if [ "$delete_snapshots" -eq 1 ]; then
 	for i in `zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$"`; do
 		dtime=$(time2s `echo $i | sed -E -e "s/.*@${date_pattern}--//"`)
 		if [ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -e "s/^.*@//" -E -e "s/--${htime_pattern}$//") +%s) ]; then
-			[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
-			zfs destroy "$i" 2> /dev/stderr > /dev/stderr \
-				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
-				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+			if [ $dry_run -eq 0 ]; then
+				[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
+				zfs destroy "$i" 2> /dev/stderr > /dev/stderr \
+					&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
+					|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+			else
+				echo "zfs destroy $i"
+			fi
 		fi
 	done
 fi
