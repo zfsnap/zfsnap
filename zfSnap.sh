@@ -1,7 +1,8 @@
 #!/bin/sh
-# beerware license, written by Aldis Berjoza (aldis@bsdroot.lv)
+# beerware license, written by Aldis Berjoza <aldis@bsdroot.lv>
+#    http://wiki.bsdroot.lv/zfsnap
 
-VERSION=1.2
+VERSION=1.3
 
 s2time() {
 	# convert seconds to human readable time
@@ -39,7 +40,7 @@ time2s() {
 
 help() {
 	cat << EOF
-${0##./} v${VERSION} by Aldis Berjoza
+${0##./} v${VERSION} by Aldis Berjoza <aldis@bsdroot.lv>
 
 Syntax:
 ${0##./} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
@@ -102,7 +103,6 @@ if [ "$delete_snapshots" -eq 1 ]; then
 			zfs destroy "$i" 2> /dev/stderr > /dev/stderr \
 				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
 				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
-
 		fi
 	done
 fi
