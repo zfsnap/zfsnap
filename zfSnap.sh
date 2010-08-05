@@ -113,7 +113,6 @@ while [ "$1" ]; do
 	fi
 done
 
-rm_snapshots=""
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
 	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$"`
