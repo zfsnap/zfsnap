@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.2.2
+VERSION=1.2.3
 
 s2time() {
 	# convert seconds to human readable time
@@ -105,12 +105,9 @@ while [ "$1" ]; do
 				|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
 		else
 			good_fs=0
-			for i in $zfs_list; do
-				[ "$i" = "$1" ] && { good_fs=1; break; }
-			done
-			[ $good_fs -eq 0 ] \
-				&& echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr \
-				|| echo "$zfs_snapshot"
+			printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+				&& echo "$zfs_snapshot" \
+				|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
 		fi
 		shift
 	fi
