@@ -5,10 +5,11 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return Aldis Berjoza
 
-# http://wiki.bsdroot.lv/zfsnap
-# http://aldis.git.bsdroot.lv/zfSnap/
+# wiki: 			http://wiki.bsdroot.lv/zfsnap
+# repository:		http://aldis.git.bsdroot.lv/zfSnap/
+# project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.2.5
+readonly VERSION=1.2.6
 
 s2time() {
 	# convert seconds to human readable time
@@ -46,7 +47,8 @@ time2s() {
 
 help() {
 	cat << EOF
-${0##*/} v${VERSION} by Aldis Berjoza <aldis@bsdroot.lv>
+${0##*/} v${VERSION} by Aldis Berjoza
+zfsnap project email: zfsnap@bsdroot.lv
 
 Syntax:
 ${0##*/} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
