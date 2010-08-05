@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.1.9
+VERSION=1.2.0
 
 s2time() {
 	# convert seconds to human readable time
@@ -124,21 +124,23 @@ if [ "$delete_snapshots" -eq 1 ]; then
 		[ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s) ] && rm_snapshot_pattern="$rm_snapshot_pattern $i"
 	done
 
-	rm_snapshots=$(zfs list -t snapshot -H | awk '{print $1}' | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'` | sort -r)
-	while [ "$rm_snapshots" != "" ]; do
-		rm_this_snapshot=`echo "$rm_snapshots" | head -n 1`
+	if [ "$rm_snapshot_pattern" != '' ]; then
+		rm_snapshots=$(zfs list -t snapshot -H | awk '{print $1}' | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'` | sort -r)
+		while [ "$rm_snapshots" != "" ]; do
+			rm_this_snapshot=`echo "$rm_snapshots" | head -n 1`
 
-		zfs_destroy="zfs destroy -r $rm_this_snapshot"
-		if [ $dry_run -eq 0 ]; then
-			[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
-			$zfs_destroy > /dev/stderr \
-				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
-				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
-		else
-			echo "$zfs_destroy"
-		fi
+			zfs_destroy="zfs destroy -r $rm_this_snapshot"
+			if [ $dry_run -eq 0 ]; then
+				[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
+				$zfs_destroy > /dev/stderr \
+					&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
+					|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+			else
+				echo "$zfs_destroy"
+			fi
 
-		rm_snapshots=$(printf "%s\n" $rm_snapshots | sed -E -e "s#`echo $rm_this_snapshot | sed -e 's#@#(/.+)?@#'`##g" | sort -r -u)
-	done
+			rm_snapshots=$(printf "%s\n" $rm_snapshots | sed -E -e "s#`echo $rm_this_snapshot | sed -e 's#@#(/.+)?@#'`##g" | sort -r -u)
+		done
+	fi
 fi
 exit 0
