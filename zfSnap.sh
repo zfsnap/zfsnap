@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.2.0
+VERSION=1.2.1
 
 s2time() {
 	# convert seconds to human readable time
@@ -119,13 +119,14 @@ done
 rm_snapshots=""
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
-	for i in `zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$" | sed -e "s/^.*@//" |  sort -u`; do
+	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$" | sort -r`
+	for i in `printf '%s\n' $zfs_snapshots | sed -e "s/^.*@//" |  sort -u`; do
 		dtime=$(time2s `echo $i | sed -E -e "s/^${date_pattern}--//"`)
 		[ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s) ] && rm_snapshot_pattern="$rm_snapshot_pattern $i"
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
-		rm_snapshots=$(zfs list -t snapshot -H | awk '{print $1}' | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'` | sort -r)
+		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'`)
 		while [ "$rm_snapshots" != "" ]; do
 			rm_this_snapshot=`echo "$rm_snapshots" | head -n 1`
 
