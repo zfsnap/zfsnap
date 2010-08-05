@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.2.3
+readonly VERSION=1.2.4
 
 s2time() {
 	# convert seconds to human readable time
@@ -73,10 +73,10 @@ EOF
 [ $# = 0 ] && help
 [ "$1" = '-h' -o $1 = "--help" ] && help
 
-tfrmt='%Y-%m-%d_%T'
-htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
-date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
-age='1m'	# default max snapshot age
+readonly tfrmt='%Y-%m-%d_%T'
+readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
+readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
+ttl='1m'	# default min snapshot ttl
 delete_snapshots=0
 verbose=0
 dry_run=0
@@ -93,12 +93,12 @@ while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' ]; do
 		[ "$1" = '-r' ] && zopt='-r' && shift
 		[ "$1" = '-R' ] && zopt='' && shift
-		[ "$1" = '-a' ] && age="$2" && shift 2 && echo "$age" | grep -q -E -e "^[0-9]+$" && age=`s2time $age`
+		[ "$1" = '-a' ] && ttl="$2" && shift 2 && echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
 	done
 
 	# create snapshots
 	if [ $1 ]; then
-		zfs_snapshot="zfs snapshot $zopt $1@${ntime}--${age}"
+		zfs_snapshot="zfs snapshot $zopt $1@${ntime}--${ttl}"
 		if [ $dry_run -eq 0 ]; then
 			$zfs_snapshot > /dev/stderr \
 				&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
@@ -115,7 +115,7 @@ done
 
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
-	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$"`
+	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$" | sed 's#/.*@#@#'`
 	for i in `printf '%s\n' $zfs_snapshots | sed -e "s/^.*@//" |  sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s)
 		stay_time=$(time2s `echo $i | sed -E -e "s/^${date_pattern}--//"`)
