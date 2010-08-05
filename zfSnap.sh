@@ -119,14 +119,16 @@ done
 rm_snapshots=""
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
-	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$" | sort -r`
+	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$"`
 	for i in `printf '%s\n' $zfs_snapshots | sed -e "s/^.*@//" |  sort -u`; do
-		dtime=$(time2s `echo $i | sed -E -e "s/^${date_pattern}--//"`)
-		[ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s) ] && rm_snapshot_pattern="$rm_snapshot_pattern $i"
+		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s)
+		stay_time=$(time2s `echo $i | sed -E -e "s/^${date_pattern}--//"`)
+		[ `date +%s` -gt `expr $create_time + $stay_time` ] \
+			&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
-		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'`)
+		rm_snapshots=$(printf '%s\n' $zfs_snapshots | sort -r | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'`)
 		while [ "$rm_snapshots" != "" ]; do
 			rm_this_snapshot=`echo "$rm_snapshots" | head -n 1`
 
