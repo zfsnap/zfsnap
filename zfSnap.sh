@@ -100,17 +100,17 @@ while [ "$1" ]; do
 	if [ $1 ]; then
 		zfs_snapshot="zfs snapshot $zopt $1@${ntime}--${age}"
 		if [ $dry_run -eq 0 ]; then
-			[ $verbose -eq 1 ] && echo -n "zfs snapshot $zopt $1@${ntime}--${age}	... "
 			$zfs_snapshot > /dev/stderr \
-				&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
-				|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+				&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
+				|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
 		else
-			echo "$zfs_snapshot"
 			good_fs=0
 			for i in $zfs_list; do
 				[ "$i" = "$1" ] && { good_fs=1; break; }
 			done
-			[ $good_fs -eq 0 ] && echo "ERR: looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+			[ $good_fs -eq 0 ] \
+				&& echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr \
+				|| echo "$zfs_snapshot"
 		fi
 		shift
 	fi
