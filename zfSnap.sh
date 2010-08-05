@@ -129,15 +129,18 @@ if [ "$delete_snapshots" -eq 1 ]; then
 			zfs_destroy="zfs destroy -r $i"
 			if [ $dry_run -eq 0 ]; then
 				# hardening: make really, really sure we are deleting snapshot
-				echo $i | grep -q -e '@' \
-					&& { $zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }; } \
-					|| {
+				echo $i | grep -q -e '@'
+				if [ $? -eq 0 ]; then
+					$zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
+				else
+					{
 						echo "ERR: trying to delete zfs pool or filesystem? WTF?"
 						echo "  This is bug, we definatly don't want that."
 						echo "  Please report it to zfsnap@bsdroot.lv"
 						echo "  Don't panic, nothing was deleted :)"
 						exit 1
 					} > /dev/stderr
+				fi
 			else
 				echo "$zfs_destroy"
 			fi
