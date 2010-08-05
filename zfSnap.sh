@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-readonly VERSION=1.2.4
+readonly VERSION=1.2.5
 
 s2time() {
 	# convert seconds to human readable time
@@ -124,11 +124,13 @@ if [ "$delete_snapshots" -eq 1 ]; then
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
-		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e `echo $rm_snapshot_pattern | sed -e 's/ /|/g'` | sort -u)
+		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
 			zfs_destroy="zfs destroy -r $i"
 			if [ $dry_run -eq 0 ]; then
-				$zfs_destroy > /dev/stderr \
+				# hardening: make really, really sure we are deleting snapshot
+				echo $i | grep -q -e '@' \
+					&& $zfs_destroy > /dev/stderr \
 					&& { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
 			else
 				echo "$zfs_destroy"
