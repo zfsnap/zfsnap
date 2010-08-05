@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.1.8
+VERSION=1.1.9
 
 s2time() {
 	# convert seconds to human readable time
@@ -117,7 +117,7 @@ done
 
 if [ "$delete_snapshots" -eq 1 ]; then
 	for i in `zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$"`; do
-		dtime=$(time2s `echo $i | sed -E -e "s/.*@${date_pattern}--//"`)
+		dtime=$(time2s `echo $i | sed -E -e "s/^.*@${date_pattern}--//"`)
 		if [ `expr $(date +%s) - $dtime` -gt $(date -j -f "$tfrmt" $(echo "$i" | sed -e "s/^.*@//" -E -e "s/--${htime_pattern}$//") +%s) ]; then
 			zfs_destroy="zfs destroy $i"
 			if [ $dry_run -eq 0 ]; then
