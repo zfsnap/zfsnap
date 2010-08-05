@@ -8,7 +8,7 @@
 # http://wiki.bsdroot.lv/zfsnap
 # http://aldis.git.bsdroot.lv/zfSnap/
 
-VERSION=1.2.1
+VERSION=1.2.2
 
 s2time() {
 	# convert seconds to human readable time
@@ -134,10 +134,8 @@ if [ "$delete_snapshots" -eq 1 ]; then
 
 			zfs_destroy="zfs destroy -r $rm_this_snapshot"
 			if [ $dry_run -eq 0 ]; then
-				[ $verbose -eq 1 ] && echo -n "zfs destroy $i	... "
 				$zfs_destroy > /dev/stderr \
-					&& { [ $verbose -eq 1 ] && echo 'DONE'; } \
-					|| { [ $verbose -eq 1 ] && echo 'FAIL'; }
+					&& { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
 			else
 				echo "$zfs_destroy"
 			fi
