@@ -135,7 +135,7 @@ if [ "$delete_snapshots" -eq 1 ]; then
 				else
 					{
 						echo "ERR: trying to delete zfs pool or filesystem? WTF?"
-						echo "  This is bug, we definatly don't want that."
+						echo "  This is bug, we definitely don't want that."
 						echo "  Please report it to zfsnap@bsdroot.lv"
 						echo "  Don't panic, nothing was deleted :)"
 						exit 1
