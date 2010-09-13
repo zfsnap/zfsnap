@@ -5,7 +5,7 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
-# wiki: 			http://wiki.bsdroot.lv/zfsnap
+# wiki: 		http://wiki.bsdroot.lv/zfsnap
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
@@ -78,7 +78,7 @@ EOF
 readonly tfrmt='%Y-%m-%d_%T'
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
 readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
-ttl='1m'	# default min snapshot ttl
+ttl='1m'	# default snapshot ttl
 delete_snapshots=0
 verbose=0
 dry_run=0
