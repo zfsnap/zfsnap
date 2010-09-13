@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.2.6
+readonly VERSION=1.3.0
 
 s2time() {
 	# convert seconds to human readable time
@@ -54,17 +54,18 @@ Syntax:
 ${0##*/} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
 
 GENERIC OPTIONS:
-  -d       = delete old snapshots
-  -v       = verbose output
-  -n       = show actions that would be performed (don't make/delete snapshots)
+  -d         = delete old snapshots
+  -v         = verbose output
+  -n         = only show actions that would be performed
 
 OPTIONS:
-  -a ttl   = set how long snapshot should be kept
-  -r       = create recursive snapshots for all zfs file systems that fallow
-             this switch
-  -R       = create non-recursive snapshots for all zfs file systems that
-             fallow this switch
-
+  -a ttl     = set how long snapshot should be kept
+  -r         = create recursive snapshots for all zfs file systems that fallow
+               this switch
+  -R         = create non-recursive snapshots for all zfs file systems that
+               fallow this switch
+  -p prefix  = use prefix for snapshots afterh this switch
+  -P         = don't use prefix for snapshots after this switch
 MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
 
@@ -82,6 +83,8 @@ ttl='1m'	# default snapshot ttl
 delete_snapshots=0
 verbose=0
 dry_run=0
+prefx=""	# default pretfix
+prefxes=""
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' ]; do
 	[ "$1" = "-d" ] && delete_snapshots=1 && shift
@@ -92,15 +95,17 @@ done
 [ $dry_run -eq 1 ] && zfs_list=`zfs list -H | awk '{print $1}'`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
-	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' ]; do
+	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' ]; do
 		[ "$1" = '-r' ] && zopt='-r' && shift
 		[ "$1" = '-R' ] && zopt='' && shift
 		[ "$1" = '-a' ] && ttl="$2" && shift 2 && echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
+		[ "$1" = '-p' ] && prefx="$2" && shift 2 && prefxes="$prefxes|$prefx"
+		[ "$1" = '-P' ] && prefx="" && shift
 	done
 
 	# create snapshots
 	if [ $1 ]; then
-		zfs_snapshot="zfs snapshot $zopt $1@${ntime}--${ttl}"
+		zfs_snapshot="zfs snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 		if [ $dry_run -eq 0 ]; then
 			$zfs_snapshot > /dev/stderr \
 				&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
@@ -115,12 +120,14 @@ while [ "$1" ]; do
 	fi
 done
 
+prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
+
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
-	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@${date_pattern}--${htime_pattern}$" | sed 's#/.*@#@#'`
-	for i in `printf '%s\n' $zfs_snapshots | sed -e "s/^.*@//" | sort -u`; do
-		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//") +%s)
-		stay_time=$(time2s `echo $i | sed -E -e "s/^${date_pattern}--//"`)
+	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+	for i in `printf '%s\n' $zfs_snapshots | sed -E -e "s/^.*@//" | sort -u`; do
+		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
+		stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
 		[ `date +%s` -gt `expr $create_time + $stay_time` ] \
 			&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 	done
