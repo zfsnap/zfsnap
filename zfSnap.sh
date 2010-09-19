@@ -64,7 +64,7 @@ OPTIONS:
                this switch
   -R         = create non-recursive snapshots for all zfs file systems that
                fallow this switch
-  -p prefix  = use prefix for snapshots afterh this switch
+  -p prefix  = use prefix for snapshots after this switch
   -P         = don't use prefix for snapshots after this switch
 MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
