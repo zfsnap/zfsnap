@@ -9,7 +9,8 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.3.0
+readonly VERSION=1.3.2
+readonly zfs_cmd=/sbin/zfs
 
 s2time() {
 	# convert seconds to human readable time
@@ -92,7 +93,7 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' ]; do
 	[ "$1" = "-n" ] && dry_run=1 && shift
 done
 
-[ $dry_run -eq 1 ] && zfs_list=`zfs list -H | awk '{print $1}'`
+[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H | awk '{print $1}'`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' ]; do
@@ -105,7 +106,7 @@ while [ "$1" ]; do
 
 	# create snapshots
 	if [ $1 ]; then
-		zfs_snapshot="zfs snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
+		zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 		if [ $dry_run -eq 0 ]; then
 			$zfs_snapshot > /dev/stderr \
 				&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
@@ -124,7 +125,7 @@ prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
 if [ "$delete_snapshots" -eq 1 ]; then
-	zfs_snapshots=`zfs list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+	zfs_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
 	for i in `printf '%s\n' $zfs_snapshots | sed -E -e "s/^.*@//" | sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
 		stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
@@ -135,7 +136,7 @@ if [ "$delete_snapshots" -eq 1 ]; then
 	if [ "$rm_snapshot_pattern" != '' ]; then
 		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
-			zfs_destroy="zfs destroy -r $i"
+			zfs_destroy="$zfs_cmd destroy -r $i"
 			if [ $dry_run -eq 0 ]; then
 				# hardening: make really, really sure we are deleting snapshot
 				echo $i | grep -q -e '@'
