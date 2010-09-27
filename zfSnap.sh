@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.3.2
+readonly VERSION=1.4.0
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -55,18 +55,22 @@ Syntax:
 ${0##*/} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
 
 GENERIC OPTIONS:
+  -F age     = Force delete all snapshots exceeding age
   -d         = delete old snapshots
-  -v         = verbose output
   -n         = only show actions that would be performed
+  -v         = verbose output
+  -o         = use old timestamp format used before v1.4.0 (for backward
+               compability)
 
 OPTIONS:
-  -a ttl     = set how long snapshot should be kept
-  -r         = create recursive snapshots for all zfs file systems that fallow
-               this switch
-  -R         = create non-recursive snapshots for all zfs file systems that
-               fallow this switch
-  -p prefix  = use prefix for snapshots after this switch
   -P         = don't use prefix for snapshots after this switch
+  -R         = create non-recursive snapshots for all zfs file systems
+               that fallow this switch
+  -a ttl     = set how long snapshot should be kept
+  -p prefix  = use prefix for snapshots after this switch
+  -r         = create recursive snapshots for all zfs file systems that
+               fallow this switch
+
 MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
 
@@ -77,45 +81,96 @@ EOF
 [ $# = 0 ] && help
 [ "$1" = '-h' -o $1 = "--help" ] && help
 
-readonly tfrmt='%Y-%m-%d_%T'
-readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
-readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 ttl='1m'	# default snapshot ttl
+force_delete_snapshots_age=-1
 delete_snapshots=0
 verbose=0
 dry_run=0
+old_format=0
 prefx=""	# default pretfix
 prefxes=""
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' ]; do
-	[ "$1" = "-d" ] && delete_snapshots=1 && shift
-	[ "$1" = "-v" ] && verbose=1 && shift
-	[ "$1" = "-n" ] && dry_run=1 && shift
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' ]; do
+	if [ "$1" = "-d" ]; then
+		delete_snapshots=1
+		shift
+	fi
+	if [ "$1" = "-v" ]; then
+		verbose=1
+		shift
+	fi
+	if [ "$1" = "-n" ]; then
+		dry_run=1
+		shift
+	fi
+	if [ "$1" = "-F" ]; then
+		force_delete_snapshots_age=`time2s $2`
+		shift 2
+	fi
+	if [ "$1" = "-o" ]; then
+		old_format=1
+		shift
+	fi
 done
+
+
+if [ "$old_format" -eq 0 ]; then
+	# new format (easier to navigate snapshots using shell)
+	readonly tfrmt='%F_%H.%M.%S'
+	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
+else
+	# old format
+	readonly tfrmt='%F_%H:%M:%S'
+	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
+fi
+
+readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
+
 
 [ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H | awk '{print $1}'`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' ]; do
-		[ "$1" = '-r' ] && zopt='-r' && shift
-		[ "$1" = '-R' ] && zopt='' && shift
-		[ "$1" = '-a' ] && ttl="$2" && shift 2 && echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
-		[ "$1" = '-p' ] && prefx="$2" && shift 2 && prefxes="$prefxes|$prefx"
-		[ "$1" = '-P' ] && prefx="" && shift
+		if [ "$1" = '-r' ]; then
+			zopt='-r'
+			shift
+		fi
+		if [ "$1" = '-R' ]; then
+			zopt=''
+			shift
+		fi
+		if [ "$1" = '-a' ]; then
+			ttl="$2"
+			echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
+			shift 2
+		fi
+		if [ "$1" = '-p' ]; then
+			prefx="$2"
+			prefxes="$prefxes|$prefx"
+			shift 2 
+		fi
+		if [ "$1" = '-P' ]; then 
+			prefx=""
+			shift
+		fi
 	done
 
 	# create snapshots
 	if [ $1 ]; then
-		zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
-		if [ $dry_run -eq 0 ]; then
-			$zfs_snapshot > /dev/stderr \
-				&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
-				|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
+		if [ $1 = `echo $1 | sed -E -e 's/^-//'` ]; then
+			zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
+			if [ $dry_run -eq 0 ]; then
+				$zfs_snapshot > /dev/stderr \
+					&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
+					|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
+			else
+				good_fs=0
+				printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+					&& echo "$zfs_snapshot" \
+					|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+			fi
 		else
-			good_fs=0
-			printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
-				&& echo "$zfs_snapshot" \
-				|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+			echo "WARN: '$1' doesn't look like valid argument. Ignoring" > /dev/stderr
 		fi
 		shift
 	fi
@@ -124,13 +179,22 @@ done
 prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
-if [ "$delete_snapshots" -eq 1 ]; then
+if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
 	zfs_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+
+	current_time=`date +%s`
 	for i in `printf '%s\n' $zfs_snapshots | sed -E -e "s/^.*@//" | sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
-		stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
-		[ `date +%s` -gt `expr $create_time + $stay_time` ] \
-			&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
+		if [ "$delete_snapshots" -eq 1 ]; then
+			stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
+			[ $current_time -gt `expr $create_time + $stay_time` ] \
+				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
+		fi
+		if [ "$force_delete_snapshots_age" -ne -1 ]; then
+			[ $current_time -gt `expr $create_time + $force_delete_snapshots_age` ] \
+				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
+
+		fi
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
@@ -157,4 +221,6 @@ if [ "$delete_snapshots" -eq 1 ]; then
 		done
 	fi
 fi
+
+
 exit 0
