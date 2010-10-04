@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.4.0
+readonly VERSION=1.5.0
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -49,27 +49,28 @@ time2s() {
 help() {
 	cat << EOF
 ${0##*/} v${VERSION} by Aldis Berjoza
-zfsnap project email: zfsnap@bsdroot.lv
+zfsnap project e-mail: zfsnap@bsdroot.lv
 
 Syntax:
-${0##*/} [ generic options ] [[ -a ttl ] [ -r|-R ] z/fs1 ... ] ...
+${0##*/} [ generic options ] [[[ -a ttl ] [ -r|-R ] z/fs1 ] | [ -r|-R ] -D z/fs2 ] ...
 
 GENERIC OPTIONS:
-  -F age     = Force delete all snapshots exceeding age
-  -d         = delete old snapshots
-  -n         = only show actions that would be performed
-  -v         = verbose output
-  -o         = use old timestamp format used before v1.4.0 (for backward
-               compability)
+  -F age       = Force delete all snapshots exceeding age
+  -d           = delete old snapshots
+  -n           = only show actions that would be performed
+  -v           = verbose output
+  -o           = use old timestamp format used before v1.4.0 (for backward
+                 compability)
 
 OPTIONS:
-  -P         = don't use prefix for snapshots after this switch
-  -R         = create non-recursive snapshots for all zfs file systems
-               that fallow this switch
-  -a ttl     = set how long snapshot should be kept
-  -p prefix  = use prefix for snapshots after this switch
-  -r         = create recursive snapshots for all zfs file systems that
-               fallow this switch
+  -P           = don't use prefix for snapshots after this switch
+  -R           = create non-recursive snapshots for all zfs file systems
+                 that fallow this switch
+  -a ttl       = set how long snapshot should be kept
+  -p prefix    = use prefix for snapshots after this switch
+  -r           = create recursive snapshots for all zfs file systems that
+                 fallow this switch
+  -D pool/fs   = delete all zfSnap snapshots of specific pool/fs (ignore ttl)
 
 MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
@@ -78,17 +79,42 @@ EOF
 	exit
 }
 
+rm_zfs_snapshot() {
+	zfs_destroy="$zfs_cmd destroy $*"
+	if [ $dry_run -eq 0 ]; then
+		# hardening: make really, really sure we are deleting snapshot
+		echo $i | grep -q -e '@'
+		if [ $? -eq 0 ]; then
+			$zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
+		else
+			{
+				echo "ERR: trying to delete zfs pool or filesystem? WTF?"
+				echo "  This is bug, we definitely don't want that."
+				echo "  Please report it to zfsnap@bsdroot.lv"
+				echo "  Don't panic, nothing was deleted :)"
+				exit 1
+			} > /dev/stderr
+		fi
+	else
+		echo "$zfs_destroy"
+	fi
+}
+
+
 [ $# = 0 ] && help
 [ "$1" = '-h' -o $1 = "--help" ] && help
 
 ttl='1m'	# default snapshot ttl
 force_delete_snapshots_age=-1
 delete_snapshots=0
+delete_specific_snapshots=0
 verbose=0
 dry_run=0
 old_format=0
 prefx=""	# default pretfix
 prefxes=""
+delete_specific_fs_snapshots=""
+delete_specific_fs_snapshots_recurively=""
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' ]; do
 	if [ "$1" = "-d" ]; then
@@ -130,7 +156,7 @@ readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]
 [ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H | awk '{print $1}'`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
-	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' ]; do
+	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
 		if [ "$1" = '-r' ]; then
 			zopt='-r'
 			shift
@@ -152,6 +178,14 @@ while [ "$1" ]; do
 		if [ "$1" = '-P' ]; then 
 			prefx=""
 			shift
+		fi
+		if [ "$1" = '-D' ]; then
+			if [ "$zopt" != '-r' ]; then
+				delete_specific_fs_snapshots="$delete_specific_fs_snapshots $2"
+			else
+				delete_specific_fs_snapshots_recurively="$delete_specific_fs_snapshots_recurively $2"
+			fi
+			shift 2
 		fi
 	done
 
@@ -200,27 +234,26 @@ if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
 	if [ "$rm_snapshot_pattern" != '' ]; then
 		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
-			zfs_destroy="$zfs_cmd destroy -r $i"
-			if [ $dry_run -eq 0 ]; then
-				# hardening: make really, really sure we are deleting snapshot
-				echo $i | grep -q -e '@'
-				if [ $? -eq 0 ]; then
-					$zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
-				else
-					{
-						echo "ERR: trying to delete zfs pool or filesystem? WTF?"
-						echo "  This is bug, we definitely don't want that."
-						echo "  Please report it to zfsnap@bsdroot.lv"
-						echo "  Don't panic, nothing was deleted :)"
-						exit 1
-					} > /dev/stderr
-				fi
-			else
-				echo "$zfs_destroy"
-			fi
+			rm_zfs_snapshot -r $i
 		done
 	fi
 fi
 
+# delete all snap
+if [ "$delete_specific_snapshots" ]; then
+	if [ "$delete_specific_fs_snapshots" ]; then
+		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+		for i in $rm_snapshots; do
+			rm_zfs_snapshot $i
+		done
+	fi
+
+	if [ "$delete_specific_fs_snapshots_recurively" ]; then
+		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recurively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+		for i in $rm_snapshots; do
+			rm_zfs_snapshot -r $i
+		done
+	fi
+fi
 
 exit 0
