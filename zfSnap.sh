@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.5.0
+readonly VERSION=1.5.1
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -114,7 +114,7 @@ old_format=0
 prefx=""	# default pretfix
 prefxes=""
 delete_specific_fs_snapshots=""
-delete_specific_fs_snapshots_recurively=""
+delete_specific_fs_snapshots_recursively=""
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' ]; do
 	if [ "$1" = "-d" ]; then
@@ -183,7 +183,7 @@ while [ "$1" ]; do
 			if [ "$zopt" != '-r' ]; then
 				delete_specific_fs_snapshots="$delete_specific_fs_snapshots $2"
 			else
-				delete_specific_fs_snapshots_recurively="$delete_specific_fs_snapshots_recurively $2"
+				delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $2"
 			fi
 			shift 2
 		fi
@@ -248,8 +248,8 @@ if [ "$delete_specific_snapshots" ]; then
 		done
 	fi
 
-	if [ "$delete_specific_fs_snapshots_recurively" ]; then
-		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recurively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+	if [ "$delete_specific_fs_snapshots_recursively" ]; then
+		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
 			rm_zfs_snapshot -r $i
 		done
