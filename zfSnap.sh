@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.5.1
+readonly VERSION=1.6.0
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -217,7 +217,7 @@ if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
 	zfs_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
 
 	current_time=`date +%s`
-	for i in `printf '%s\n' $zfs_snapshots | sed -E -e "s/^.*@//" | sort -u`; do
+	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
 		if [ "$delete_snapshots" -eq 1 ]; then
 			stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
@@ -232,7 +232,7 @@ if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
-		rm_snapshots=$(printf '%s\n' $zfs_snapshots | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
+		rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
 			rm_zfs_snapshot -r $i
 		done
