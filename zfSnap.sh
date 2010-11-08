@@ -9,7 +9,7 @@
 # repository:		http://aldis.git.bsdroot.lv/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.6.0
+readonly VERSION=1.7.0
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -61,6 +61,7 @@ GENERIC OPTIONS:
   -v           = verbose output
   -o           = use old timestamp format used before v1.4.0 (for backward
                  compability)
+  -z           = force new snapshots to have 00 seconds!
 
 OPTIONS:
   -P           = don't use prefix for snapshots after this switch
@@ -115,8 +116,9 @@ prefx=""	# default pretfix
 prefxes=""
 delete_specific_fs_snapshots=""
 delete_specific_fs_snapshots_recursively=""
+zero_seconds=0
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' ]; do
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' ]; do
 	if [ "$1" = "-d" ]; then
 		delete_snapshots=1
 		shift
@@ -137,16 +139,30 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 		old_format=1
 		shift
 	fi
+	if [ "$1" = "-z" ]; then
+		zero_seconds=1
+		shift
+	fi
 done
 
 
 if [ "$old_format" -eq 0 ]; then
 	# new format (easier to navigate snapshots using shell)
-	readonly tfrmt='%F_%H.%M.%S'
+	if [ $zero_seconds -eq 0 ]; then
+		readonly tfrmt='%F_%H.%M.%S'
+	else
+		readonly tfrmt='%F_%H.%M.00'
+	fi
+
 	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 else
 	# old format
-	readonly tfrmt='%F_%H:%M:%S'
+	if [ $zero_seconds -eq 0 ]; then
+		readonly tfrmt='%F_%H:%M:%S'
+	else
+		readonly tfrmt='%F_%H:%M:00'
+	fi
+
 	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 fi
 
