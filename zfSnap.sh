@@ -6,10 +6,10 @@
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
 # wiki: 		http://wiki.bsdroot.lv/zfsnap
-# repository:		http://aldis.git.bsdroot.lv/zfSnap/
+# repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.7.0
+readonly VERSION=1.7.1
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
