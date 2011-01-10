@@ -9,7 +9,7 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.7.1
+readonly VERSION=1.7.2
 readonly zfs_cmd=/sbin/zfs
 
 s2time() {
@@ -43,16 +43,16 @@ s2time() {
 
 time2s() {
 	# convert human readable time to seconds
-	echo "$1" | sed -e 's/y/*31536000+/' -e 's/m/*2592000+/' -e 's/w/*604800+/' -e 's/d/*86400+/' -e 's/h/*3600+/' -e 's/M/*60+/' -e 's/s//' -e 's/\+$//' | bc -l
+	echo "$1" | sed -e 's/y/*31536000+/g' -e 's/m/*2592000+/g' -e 's/w/*604800+/g' -e 's/d/*86400+/g' -e 's/h/*3600+/g' -e 's/M/*60+/g' -e 's/s//g' -e 's/\+$//' | bc -l
 }
 
 help() {
 	cat << EOF
 ${0##*/} v${VERSION} by Aldis Berjoza
-zfsnap project e-mail: zfsnap@bsdroot.lv
+zfSnap project e-mail: zfsnap@bsdroot.lv
 
 Syntax:
-${0##*/} [ generic options ] [[[ -a ttl ] [ -r|-R ] z/fs1 ] | [ -r|-R ] -D z/fs2 ] ...
+${0##*/} [ generic options ] [ options ] zpool/filesystem ...
 
 GENERIC OPTIONS:
   -F age       = Force delete all snapshots exceeding age
@@ -60,7 +60,7 @@ GENERIC OPTIONS:
   -n           = only show actions that would be performed
   -v           = verbose output
   -o           = use old timestamp format used before v1.4.0 (for backward
-                 compability)
+                 compatibility)
   -z           = force new snapshots to have 00 seconds!
 
 OPTIONS:
@@ -214,7 +214,6 @@ while [ "$1" ]; do
 					&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
 					|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
 			else
-				good_fs=0
 				printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
 					&& echo "$zfs_snapshot" \
 					|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
@@ -273,3 +272,4 @@ if [ "$delete_specific_snapshots" ]; then
 fi
 
 exit 0
+# vim: set ts=4 sw=4:
