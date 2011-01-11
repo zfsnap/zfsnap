@@ -9,33 +9,34 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.7.2
+readonly VERSION=1.8.0
 readonly zfs_cmd=/sbin/zfs
+readonly zpool_cmd=/sbin/zpool
 
 s2time() {
 	# convert seconds to human readable time
-	xtime=$*
+	xtime=$1
 
-	years=`expr $xtime / 31536000`
-	xtime=`expr $xtime % 31536000`
+	years=$(($xtime / 31536000))
+	xtime=$(($xtime % 31536000))
 	[ ${years:-0} -gt 0 ] && years="${years}y" || years=""
 
-	months=`expr $xtime / 2592000`
-	xtime=`expr $xtime % 2592000`
+	months=$(($xtime / 2592000))
+	xtime=$(($xtime % 2592000))
 	[ ${months:-0} -gt 0 ] && months="${months}m" || months=""
 
-	days=`expr $xtime / 86400`
-	xtime=`expr $xtime % 86400`
+	days=$(($xtime / 86400))
+	xtime=$(($xtime % 86400))
 	[ ${days:-0} -gt 0 ] && days="${days}d" || days=""
 
-	hours=`expr $xtime / 3600`
-	xtime=`expr $xtime % 3600`
+	hours=$(($xtime / 3600))
+	xtime=$(($xtime % 3600))
 	[ ${hours:-0} -gt 0 ] && hours="${hours}h" || hours=""
 
-	minutes=`expr $xtime / 60`
+	minutes=$(($xtime / 60))
 	[ ${minutes:-0} -gt 0 ] && minutes="${minutes}M" || minutes=""
 
-	seconds=`expr $xtime % 60`
+	seconds=$(($xtime % 60))
 	[ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
 
 	echo "${years}${months}${days}${hours}${minutes}${seconds}"
@@ -62,6 +63,8 @@ GENERIC OPTIONS:
   -o           = use old timestamp format used before v1.4.0 (for backward
                  compatibility)
   -z           = force new snapshots to have 00 seconds!
+  -S           = Don't make scnapshots on zpools running scrub
+  -s           = Don't make scnapshots on zpools running resilver
 
 OPTIONS:
   -P           = don't use prefix for snapshots after this switch
@@ -82,23 +85,36 @@ EOF
 
 rm_zfs_snapshot() {
 	zfs_destroy="$zfs_cmd destroy $*"
-	if [ $dry_run -eq 0 ]; then
-		# hardening: make really, really sure we are deleting snapshot
-		echo $i | grep -q -e '@'
-		if [ $? -eq 0 ]; then
+	# hardening: make really, really sure we are deleting snapshot
+	if echo $i | grep -q -e '@'; then
+		if [ $dry_run -eq 0 ]; then
 			$zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
 		else
-			{
-				echo "ERR: trying to delete zfs pool or filesystem? WTF?"
-				echo "  This is bug, we definitely don't want that."
-				echo "  Please report it to zfsnap@bsdroot.lv"
-				echo "  Don't panic, nothing was deleted :)"
-				exit 1
-			} > /dev/stderr
+			echo "$zfs_destroy"
 		fi
 	else
-		echo "$zfs_destroy"
+		echo "ERR: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
+		echo "  This is bug, we definitely don't want that." > /dev/stderr
+		echo "  Please report it to zfsnap@bsdroot.lv" > /dev/stderr
+		echo "  Don't panic, nothing was deleted :)" > /dev/stderr
+		exit 1
 	fi
+}
+
+skip_pool() {
+	# more like skip pool???
+	skip_this_pool=0;
+	if [ $scrub_skip -eq 1 ]; then
+		for i in $scrub_pools; do
+			[ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ] && return 1
+		done
+	fi
+	if [ $skip_this_pool -eq 0 -a $resilver_skip -eq 1 ]; then
+		for i in $resilver_pools; do
+			[ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ] && return 1
+		done
+	fi
+	return 0
 }
 
 
@@ -117,8 +133,14 @@ prefxes=""
 delete_specific_fs_snapshots=""
 delete_specific_fs_snapshots_recursively=""
 zero_seconds=0
+scrub_pools=""
+resilver_pools=""
+pools=""
+get_pools=0
+resilver_skip=0
+scrub_skip=0
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' ]; do
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' ]; do
 	if [ "$1" = "-d" ]; then
 		delete_snapshots=1
 		shift
@@ -143,10 +165,31 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 		zero_seconds=1
 		shift
 	fi
+	if [ "$1" = '-s' ]; then
+		get_pools=1
+		resilver_skip=1
+		shift
+	fi
+	if [ "$1" = '-S' ]; then
+		get_pools=1
+		scrub_skip=1
+		shift
+	fi
 done
 
+if [ $get_pools -eq 1 ]; then
+	pools=`$zpool_cmd list -H | awk '{print $1}'`
+	for i in $pools; do
+		if [ $resilver_skip -eq 1 ]; then
+			$zpool_cmd status $i | grep -q -e 'resilver in progress' && resilber_pools="$resilver_pools $i"
+		fi
+		if [ $scrub_skip -eq 1 ]; then
+			$zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
+		fi
+	done
+fi
 
-if [ "$old_format" -eq 0 ]; then
+if [ $old_format -eq 0 ]; then
 	# new format (easier to navigate snapshots using shell)
 	if [ $zero_seconds -eq 0 ]; then
 		readonly tfrmt='%F_%H.%M.%S'
@@ -207,19 +250,21 @@ while [ "$1" ]; do
 
 	# create snapshots
 	if [ $1 ]; then
-		if [ $1 = `echo $1 | sed -E -e 's/^-//'` ]; then
-			zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
-			if [ $dry_run -eq 0 ]; then
-				$zfs_snapshot > /dev/stderr \
-					&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
-					|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
+		if skip_pool $1; then
+			if [ $1 = `echo $1 | sed -E -e 's/^-//'` ]; then
+				zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
+				if [ $dry_run -eq 0 ]; then
+					$zfs_snapshot > /dev/stderr \
+						&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
+						|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
+				else
+					printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+						&& echo "$zfs_snapshot" \
+						|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+				fi
 			else
-				printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
-					&& echo "$zfs_snapshot" \
-					|| echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+				echo "WARN: '$1' doesn't look like valid argument. Ignoring" > /dev/stderr
 			fi
-		else
-			echo "WARN: '$1' doesn't look like valid argument. Ignoring" > /dev/stderr
 		fi
 		shift
 	fi
@@ -228,13 +273,13 @@ done
 prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
-if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
+if [ $delete_snapshots -eq 1 -o $force_delete_snapshots_age -ne -1 ]; then
 	zfs_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
-		if [ "$delete_snapshots" -eq 1 ]; then
+		if [ $delete_snapshots -eq 1 ]; then
 			stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt `expr $create_time + $stay_time` ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
@@ -242,14 +287,13 @@ if [ "$delete_snapshots" -eq 1 -o "$force_delete_snapshots_age" -ne -1 ]; then
 		if [ "$force_delete_snapshots_age" -ne -1 ]; then
 			[ $current_time -gt `expr $create_time + $force_delete_snapshots_age` ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
-
 		fi
 	done
 
 	if [ "$rm_snapshot_pattern" != '' ]; then
 		rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
-			rm_zfs_snapshot -r $i
+			skip_pool $i && rm_zfs_snapshot -r $i
 		done
 	fi
 fi
@@ -259,14 +303,14 @@ if [ "$delete_specific_snapshots" ]; then
 	if [ "$delete_specific_fs_snapshots" ]; then
 		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
-			rm_zfs_snapshot $i
+			skip_pool $i && rm_zfs_snapshot $i
 		done
 	fi
 
 	if [ "$delete_specific_fs_snapshots_recursively" ]; then
 		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
-			rm_zfs_snapshot -r $i
+			skip_pool $i && rm_zfs_snapshot -r $i
 		done
 	fi
 fi
