@@ -9,7 +9,7 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.8.2
+readonly VERSION=1.9.0
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -57,6 +57,7 @@ ${0##*/} [ generic options ] [ options ] zpool/filesystem ...
 
 GENERIC OPTIONS:
   -d           = Delete old snapshots
+  -e           = Return number of failed actions as exit code.
   -F age       = Force delete all snapshots exceeding age
   -n           = Only show actions that would be performed
   -o           = Use old timestamp format used before v1.4.0 (for backward
@@ -80,7 +81,7 @@ MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
 
 EOF
-	exit
+	exit 0
 }
 
 rm_zfs_snapshot() {
@@ -88,7 +89,12 @@ rm_zfs_snapshot() {
 	# hardening: make really, really sure we are deleting snapshot
 	if echo $i | grep -q -e '@'; then
 		if [ $dry_run -eq 0 ]; then
-			$zfs_destroy > /dev/stderr && { [ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"; }
+			if $zfs_destroy /dev/stderr; then
+				[ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"
+			else
+				[ $verbose -eq 1 ] && echo "$zfs_destroy	... FAIL"
+				[ $count_fails -eq 1 ] && fails=$(($fails + 1))
+			fi
 		else
 			echo "$zfs_destroy"
 		fi
@@ -97,6 +103,7 @@ rm_zfs_snapshot() {
 		echo "  This is bug, we definitely don't want that." > /dev/stderr
 		echo "  Please report it to zfsnap@bsdroot.lv" > /dev/stderr
 		echo "  Don't panic, nothing was deleted :)" > /dev/stderr
+		[ $count_fails -eq 1 -a $fails > 0 ] && exit $fails
 		exit 1
 	fi
 }
@@ -145,42 +152,59 @@ pools=""
 get_pools=0
 resilver_skip=0
 scrub_skip=0
+fails=0
+count_fails=0
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' ]; do
-	if [ "$1" = "-d" ]; then
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' ]; do
+	case "$1" in
+	'-d')
 		delete_snapshots=1
 		shift
-	fi
-	if [ "$1" = "-v" ]; then
+		;;
+
+	'-v')
 		verbose=1
 		shift
-	fi
-	if [ "$1" = "-n" ]; then
+		;;
+
+	'-n')
 		dry_run=1
 		shift
-	fi
-	if [ "$1" = "-F" ]; then
+		;;
+
+	'-F')
 		force_delete_snapshots_age=`time2s $2`
 		shift 2
-	fi
-	if [ "$1" = "-o" ]; then
+		;;
+
+	'-o')
 		old_format=1
 		shift
-	fi
-	if [ "$1" = "-z" ]; then
+		;;
+
+	'-z')
 		zero_seconds=1
 		shift
-	fi
-	if [ "$1" = '-s' ]; then
+		;;
+
+	'-s')
 		get_pools=1
 		resilver_skip=1
 		shift
-	fi
-	if [ "$1" = '-S' ]; then
+		;;
+
+	'-S')
 		get_pools=1
 		scrub_skip=1
 		shift
-	fi
+		;;
+
+	'-e')
+		count_fails=1
+		shift
+		;;
+
+	esac
 done
 
 if [ $get_pools -eq 1 ]; then
@@ -222,36 +246,39 @@ readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
-		if [ "$1" = '-r' ]; then
+		case "$1" in
+		'-r')
 			zopt='-r'
 			shift
-		fi
-		if [ "$1" = '-R' ]; then
+			;;
+		'-R')
 			zopt=''
 			shift
-		fi
-		if [ "$1" = '-a' ]; then
+			;;
+		'-a')
 			ttl="$2"
 			echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
 			shift 2
-		fi
-		if [ "$1" = '-p' ]; then
+			;;
+		'-p')
 			prefx="$2"
 			prefxes="$prefxes|$prefx"
 			shift 2 
-		fi
-		if [ "$1" = '-P' ]; then 
+			;;
+		'-P') 
 			prefx=""
 			shift
-		fi
-		if [ "$1" = '-D' ]; then
+			;;
+		'-D')
 			if [ "$zopt" != '-r' ]; then
 				delete_specific_fs_snapshots="$delete_specific_fs_snapshots $2"
 			else
 				delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $2"
 			fi
 			shift 2
-		fi
+			;;
+
+		esac
 	done
 
 	# create snapshots
@@ -260,9 +287,12 @@ while [ "$1" ]; do
 			if [ $1 = `echo $1 | sed -E -e 's/^-//'` ]; then
 				zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 				if [ $dry_run -eq 0 ]; then
-					$zfs_snapshot > /dev/stderr \
-						&& { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"; } \
-						|| { [ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"; }
+					if $zfs_snapshot > /dev/stderr; then
+						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"
+					else
+						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"
+						[ $count_fails -eq 1 ] && fails=$(($fails + 1))
+					fi
 				else
 					printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
 						&& echo "$zfs_snapshot" \
@@ -321,5 +351,7 @@ if [ "$delete_specific_snapshots" ]; then
 	fi
 fi
 
+
+[ $count_fails -eq 1 ] && exit $fails
 exit 0
 # vim: set ts=4 sw=4:
