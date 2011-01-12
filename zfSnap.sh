@@ -93,7 +93,7 @@ rm_zfs_snapshot() {
 				[ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"
 			else
 				[ $verbose -eq 1 ] && echo "$zfs_destroy	... FAIL"
-				[ $count_fails -eq 1 ] && fails=$(($fails + 1))
+				[ $count_failures -eq 1 ] && fails=$(($fails + 1))
 			fi
 		else
 			echo "$zfs_destroy"
@@ -103,7 +103,7 @@ rm_zfs_snapshot() {
 		echo "  This is bug, we definitely don't want that." > /dev/stderr
 		echo "  Please report it to zfsnap@bsdroot.lv" > /dev/stderr
 		echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-		[ $count_fails -eq 1 -a $fails > 0 ] && exit $fails
+		[ $count_failures -eq 1 -a $fails > 0 ] && exit $fails
 		exit 1
 	fi
 }
@@ -153,7 +153,7 @@ get_pools=0
 resilver_skip=0
 scrub_skip=0
 fails=0
-count_fails=0
+count_failures=0
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' ]; do
 	case "$1" in
@@ -200,7 +200,7 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 		;;
 
 	'-e')
-		count_fails=1
+		count_failures=1
 		shift
 		;;
 
@@ -291,7 +291,7 @@ while [ "$1" ]; do
 						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"
 					else
 						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"
-						[ $count_fails -eq 1 ] && fails=$(($fails + 1))
+						[ $count_failures -eq 1 ] && fails=$(($fails + 1))
 					fi
 				else
 					printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
@@ -352,6 +352,6 @@ if [ "$delete_specific_snapshots" ]; then
 fi
 
 
-[ $count_fails -eq 1 ] && exit $fails
+[ $count_failures -eq 1 ] && exit $fails
 exit 0
 # vim: set ts=4 sw=4:
