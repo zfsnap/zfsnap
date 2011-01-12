@@ -56,25 +56,25 @@ Syntax:
 ${0##*/} [ generic options ] [ options ] zpool/filesystem ...
 
 GENERIC OPTIONS:
+  -d           = Delete old snapshots
   -F age       = Force delete all snapshots exceeding age
-  -d           = delete old snapshots
-  -n           = only show actions that would be performed
-  -v           = verbose output
-  -o           = use old timestamp format used before v1.4.0 (for backward
+  -n           = Only show actions that would be performed
+  -o           = Use old timestamp format used before v1.4.0 (for backward
                  compatibility)
-  -z           = force new snapshots to have 00 seconds!
-  -S           = Don't make scnapshots on zpools running scrub
-  -s           = Don't make scnapshots on zpools running resilver
+  -s           = Don't do anything on pools running resilver
+  -S           = Don't do anything on pools running scrub
+  -v           = Verbose output
+  -z           = Force new snapshots to have 00 seconds!
 
 OPTIONS:
-  -P           = don't use prefix for snapshots after this switch
-  -R           = create non-recursive snapshots for all zfs file systems
-                 that fallow this switch
-  -a ttl       = set how long snapshot should be kept
-  -p prefix    = use prefix for snapshots after this switch
-  -r           = create recursive snapshots for all zfs file systems that
+  -a ttl       = Set how long snapshot should be kept
+  -D pool/fs   = Delete all zfSnap snapshots of specific pool/fs (ignore ttl)
+  -p prefix    = Use prefix for snapshots after this switch
+  -P           = Don't use prefix for snapshots after this switch
+  -r           = Create recursive snapshots for all zfs file systems that
                  fallow this switch
-  -D pool/fs   = delete all zfSnap snapshots of specific pool/fs (ignore ttl)
+  -R           = Create non-recursive snapshots for all zfs file systems that
+                 fallow this switch
 
 MORE INFO:
   http://wiki.bsdroot.lv/zfsnap
