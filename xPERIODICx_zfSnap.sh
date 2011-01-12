@@ -36,7 +36,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 		'hourly')
 			default_ttl='3d'
 			;;
-		'daily'|'boot')
+		'daily'|'reboot')
 			default_ttl='1w'
 			;;
 		'weekly')
