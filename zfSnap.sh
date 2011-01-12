@@ -9,7 +9,7 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.9.0
+readonly VERSION=1.9.1
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -89,7 +89,7 @@ rm_zfs_snapshot() {
 	# hardening: make really, really sure we are deleting snapshot
 	if echo $i | grep -q -e '@'; then
 		if [ $dry_run -eq 0 ]; then
-			if $zfs_destroy /dev/stderr; then
+			if $zfs_destroy > /dev/stderr; then
 				[ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"
 			else
 				[ $verbose -eq 1 ] && echo "$zfs_destroy	... FAIL"
