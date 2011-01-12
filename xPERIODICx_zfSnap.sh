@@ -7,17 +7,17 @@ if [ -r /etc/defaults/periodic.conf ]; then
 	source_periodic_confs
 fi
 
-# xPERIODICx_zfsnap_delete 			- Delete old snapshots (values: YES | NO)
 # xPERIODICx_zfsnap_enable			- Enable xPERIODICx snapshots (values: YES | NO)
 # xPERIODICx_zfsnap_flags			- zfSnap generic flags (except -v and -d)
 # xPERIODICx_zfsnap_fs				- Space separated zfs filesystems to create non-recursive snapshots
 # xPERIODICx_zfsnap_recursive_fs	- Space separated zfs filesystems to create recursive snapshots
 # xPERIODICx_zfsnap_ttl				- Set Time To Live
 # xPERIODICx_zfsnap_verbose			- Verbose output (values: YES | NO)
+# xPERIODICx_zfsnap_enable_prefix	- Create snapshots with prefix (values: YES | NO) (Default = YES)
+# xPERIODICx_zfsnap_prefix			- set prefix for snapshots (Default = xPERIODICx)
 
 case "${xPERIODICx_zfsnap_enable-"NO"}" in
 	[Yy][Ee][Ss])
-		delete_snapshots=0
 		OPTIONS="$xPERIODICx_zfsnap_flags"
 
 		case "${xPERIODICx_zfsnap_verbose-"NO"}" in
@@ -26,18 +26,15 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 			;;
 		esac
 
-		case "${xPERIODICx_zfsnap_delete-"NO"}" in
+		case "${xPERIODICx_zfsnap_enable_prefix-"NO"}" in
 		[Yy][Ee][Ss])
-			OPTIONS="$OPTIONS -d"
-			delete_snapshots=1
+			OPTIONS="$OPTIONS -p ${xPERIODICx_zfsnap_prefix:-"xPERIODICx-"}"
 			;;
 		esac
-		
+
 		case 'xPERIODICx' in
 		'hourly')
 			default_ttl='3d'
-			[ $delete_snapshots -ne 0 ] \
-				&& echo "WARN: It is not recommended to delete old snapshots every hour" > /dev/stderr
 			;;
 		'daily')
 			default_ttl='1w'
