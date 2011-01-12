@@ -26,7 +26,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 			;;
 		esac
 
-		case "${xPERIODICx_zfsnap_enable_prefix-"NO"}" in
+		case "${xPERIODICx_zfsnap_enable_prefix-"YES"}" in
 		[Yy][Ee][Ss])
 			OPTIONS="$OPTIONS -p ${xPERIODICx_zfsnap_prefix:-"xPERIODICx-"}"
 			;;
