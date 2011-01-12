@@ -27,7 +27,7 @@ case "${xPERIODICx_zfsnap_delete_enable-"NO"}" in
 			OPTIONS="$OPTIONS -p $prefix"
 		done
 
-		zfSnap -d $OPTIONS -p 'hourly-' -p 'daily-' -p 'weekly-' -p 'monthly-' -p 'reboot-'
+		xPREFIXx/zfSnap -d $OPTIONS -p 'hourly-' -p 'daily-' -p 'weekly-' -p 'monthly-' -p 'reboot-'
 		exit $?
 		;;
 

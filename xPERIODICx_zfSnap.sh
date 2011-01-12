@@ -51,7 +51,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 			;;
 		esac
 
-		zfSnap $OPTIONS -a ${xPERIODICx_zfsnap_ttl:-"$default_ttl"} $xPERIODICx_zfsnap_fs -r $xPERIODICx_zfsnap_recursive_fs
+		xPREFIXx/zfSnap $OPTIONS -a ${xPERIODICx_zfsnap_ttl:-"$default_ttl"} $xPERIODICx_zfsnap_fs -r $xPERIODICx_zfsnap_recursive_fs
 		exit $?
 		;;
 
