@@ -11,7 +11,7 @@ fi
 # xPERIODICx_zfsnap_delete_flags	- zfSnap generic flags (except -v and -d)
 # xPERIODICx_zfsnap_delete_verbose	- Verbose output (values: YES | NO)
 # xPERIODICx_zfsnap_delete_prefixes	- Space separated list of prefixes of old zfSnap snapshots to delete
-#                                     'hourly-', 'daily-', 'weekly-', and 'monthly-' prefixes are hardcoded
+#                                     'hourly-', 'daily-', 'weekly-', 'monthly-' and 'boot-' prefixes are hardcoded
 
 case "${xPERIODICx_zfsnap_delete_enable-"NO"}" in
 	[Yy][Ee][Ss])
@@ -27,7 +27,7 @@ case "${xPERIODICx_zfsnap_delete_enable-"NO"}" in
 			OPTIONS="$OPTIONS -p $prefix"
 		done
 
-		zfSnap -d $OPTIONS -p 'hourly-' -p 'daily-' -p 'weekly-' -p 'monthly-'
+		zfSnap -d $OPTIONS -p 'hourly-' -p 'daily-' -p 'weekly-' -p 'monthly-' -p 'boot-'
 		exit $?
 		;;
 
