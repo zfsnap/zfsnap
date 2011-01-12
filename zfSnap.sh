@@ -106,12 +106,18 @@ skip_pool() {
 	skip_this_pool=0;
 	if [ $scrub_skip -eq 1 ]; then
 		for i in $scrub_pools; do
-			[ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ] && return 1
+			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
+				[ $verbose -eq 1 ] && echo "NOTE: No action will be performed on '$1'. Scrub is running on pool." > /dev/stderr
+				return 1
+			fi
 		done
 	fi
 	if [ $skip_this_pool -eq 0 -a $resilver_skip -eq 1 ]; then
 		for i in $resilver_pools; do
-			[ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ] && return 1
+			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
+				[ $verbose -eq 1 ] && echo "NOTE: No action will be performed on '$1'. Resilver is running on pool." > /dev/stderr
+				return 1
+			fi
 		done
 	fi
 	return 0
