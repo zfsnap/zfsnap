@@ -21,22 +21,22 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 		OPTIONS="$xPERIODICx_zfsnap_flags"
 
 		case "${xPERIODICx_zfsnap_verbose-"NO"}" in
-			[Yy][Ee][Ss])
-				OPTIONS="$OPTIONS -v"
-				;;
+		[Yy][Ee][Ss])
+			OPTIONS="$OPTIONS -v"
+			;;
 		esac
 
 		case "${xPERIODICx_zfsnap_delete-"NO"}" in
-			[Yy][Ee][Ss])
-				OPTIONS="$OPTIONS -d"
-				delete_snapshots=1
-				;;
+		[Yy][Ee][Ss])
+			OPTIONS="$OPTIONS -d"
+			delete_snapshots=1
+			;;
 		esac
 		
-		case 'xPERIODICx' in )
+		case 'xPERIODICx' in
 		'hourly')
 			default_ttl='3d'
-			[ $delete_snapshots -ne 1 ] \
+			[ $delete_snapshots -ne 0 ] \
 				&& echo "WARN: It is not recommended to delete old snapshots every hour" > /dev/stderr
 			;;
 		'daily')
