@@ -9,7 +9,7 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.9.1
+readonly VERSION=1.9.2
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -208,7 +208,7 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 done
 
 if [ $get_pools -eq 1 ]; then
-	pools=`$zpool_cmd list -H | awk '{print $1}'`
+	pools=`$zpool_cmd list -H -o name`
 	for i in $pools; do
 		if [ $resilver_skip -eq 1 ]; then
 			$zpool_cmd status $i | grep -q -e 'resilver in progress' && resilber_pools="$resilver_pools $i"
@@ -242,7 +242,7 @@ fi
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
 
 
-[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H | awk '{print $1}'`
+[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
@@ -310,7 +310,7 @@ prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
 if [ $delete_snapshots -eq 1 -o $force_delete_snapshots_age -ne -1 ]; then
-	zfs_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
@@ -337,14 +337,14 @@ fi
 # delete all snap
 if [ "$delete_specific_snapshots" ]; then
 	if [ "$delete_specific_fs_snapshots" ]; then
-		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
 			skip_pool $i && rm_zfs_snapshot $i
 		done
 	fi
 
 	if [ "$delete_specific_fs_snapshots_recursively" ]; then
-		rm_snapshots=`$zfs_cmd list -H -t snapshot | awk '{print $1}' | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
 			skip_pool $i && rm_zfs_snapshot -r $i
 		done
