@@ -242,7 +242,7 @@ fi
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
 
 
-[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -o name`
+[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
