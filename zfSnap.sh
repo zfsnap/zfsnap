@@ -9,7 +9,7 @@
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
 # project email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.9.2
+readonly VERSION=1.9.3
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -90,10 +90,10 @@ rm_zfs_snapshot() {
 	if echo $i | grep -q -e '@'; then
 		if [ $dry_run -eq 0 ]; then
 			if $zfs_destroy > /dev/stderr; then
-				[ $verbose -eq 1 ] && echo "$zfs_destroy	... DONE"
+				[ $verbose -ne 0 ] && echo "$zfs_destroy	... DONE"
 			else
-				[ $verbose -eq 1 ] && echo "$zfs_destroy	... FAIL"
-				[ $count_failures -eq 1 ] && fails=$(($fails + 1))
+				[ $verbose -ne 0 ] && echo "$zfs_destroy	... FAIL"
+				[ $count_failures -ne 0 ] && failures=$(($failures + 1))
 			fi
 		else
 			echo "$zfs_destroy"
@@ -103,26 +103,25 @@ rm_zfs_snapshot() {
 		echo "  This is bug, we definitely don't want that." > /dev/stderr
 		echo "  Please report it to zfsnap@bsdroot.lv" > /dev/stderr
 		echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-		[ $count_failures -eq 1 -a $fails > 0 ] && exit $fails
+		[ $count_failures -ne 0 -a $failures > 0 ] && exit $failures
 		exit 1
 	fi
 }
 
 skip_pool() {
 	# more like skip pool???
-	skip_this_pool=0;
-	if [ $scrub_skip -eq 1 ]; then
+	if [ $scrub_skip -ne 0 ]; then
 		for i in $scrub_pools; do
 			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
-				[ $verbose -eq 1 ] && echo "NOTE: No action will be performed on '$1'. Scrub is running on pool." > /dev/stderr
+				[ $verbose -ne 0 ] && echo "NOTE: No action will be performed on '$1'. Scrub is running on pool." > /dev/stderr
 				return 1
 			fi
 		done
 	fi
-	if [ $skip_this_pool -eq 0 -a $resilver_skip -eq 1 ]; then
+	if [ $resilver_skip -ne 0 ]; then
 		for i in $resilver_pools; do
 			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
-				[ $verbose -eq 1 ] && echo "NOTE: No action will be performed on '$1'. Resilver is running on pool." > /dev/stderr
+				[ $verbose -ne 0 ] && echo "NOTE: No action will be performed on '$1'. Resilver is running on pool." > /dev/stderr
 				return 1
 			fi
 		done
@@ -135,25 +134,25 @@ skip_pool() {
 [ "$1" = '-h' -o $1 = "--help" ] && help
 
 ttl='1m'	# default snapshot ttl
-force_delete_snapshots_age=-1
-delete_snapshots=0
-delete_specific_snapshots=0
-verbose=0
-dry_run=0
-old_format=0
-prefx=""	# default prefix
-prefxes=""
-delete_specific_fs_snapshots=""
-delete_specific_fs_snapshots_recursively=""
-zero_seconds=0
-scrub_pools=""
-resilver_pools=""
-pools=""
-get_pools=0
-resilver_skip=0
-scrub_skip=0
-fails=0
-count_failures=0
+force_delete_snapshots_age=-1	# Delete snapshots older than x seconds. -1 means NO
+delete_snapshots=0				# Delete old snapshots? 0 = NO
+delete_specific_snapshots=0		# Delete specific snapshots? 0 = NO
+verbose=0						# Verbose output? 0 = NO
+dry_run=0						# Dry run? 0 = NO
+old_format=0					# Use old timestamp format? 0 = NO
+prefx=""						# Default prefix
+prefxes=""						# List of prefixes
+delete_specific_fs_snapshots=""	# List of specific snapshots to delete
+delete_specific_fs_snapshots_recursively=""	# List of specific snapshots to delete recursively
+zero_seconds=0					# Should new snapshots always have 00 seconds? 0 = NO
+scrub_pools=""					# List of pools that are in precess of scrubing
+resilver_pools=""				# List of pools that are in process of resilvering
+pools=""						# List of pools
+get_pools=0						# Should I get list of pools? 0 = NO.
+resilver_skip=0					# Should I skip processing pools in process of resilvering. 0 = NO
+scrub_skip=0					# Should I skip processing pools in process of scrubing. 0 = NO
+failures=0						# Number of failed actions.
+count_failures=0				# Should I coundt failed actions? 0 = NO
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' ]; do
 	case "$1" in
@@ -207,42 +206,40 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 	esac
 done
 
-if [ $get_pools -eq 1 ]; then
+if [ $get_pools -ne 0 ]; then
 	pools=`$zpool_cmd list -H -o name`
 	for i in $pools; do
-		if [ $resilver_skip -eq 1 ]; then
+		if [ $resilver_skip -ne 0 ]; then
 			$zpool_cmd status $i | grep -q -e 'resilver in progress' && resilber_pools="$resilver_pools $i"
 		fi
-		if [ $scrub_skip -eq 1 ]; then
+		if [ $scrub_skip -ne 0 ]; then
 			$zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
 		fi
 	done
 fi
 
 if [ $old_format -eq 0 ]; then
-	# new format (easier to navigate snapshots using shell)
+	# new snapshot name format (easier to navigate snapshots using shell)
+	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 	if [ $zero_seconds -eq 0 ]; then
 		readonly tfrmt='%F_%H.%M.%S'
 	else
 		readonly tfrmt='%F_%H.%M.00'
 	fi
-
-	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 else
-	# old format
+	# old snapshot name format
+	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 	if [ $zero_seconds -eq 0 ]; then
 		readonly tfrmt='%F_%H:%M:%S'
 	else
 		readonly tfrmt='%F_%H:%M:00'
 	fi
-
-	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 fi
 
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
 
 
-[ $dry_run -eq 1 ] && zfs_list=`$zfs_cmd list -H -o name`
+[ $dry_run -ne 0 ] && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
 	while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
@@ -288,10 +285,10 @@ while [ "$1" ]; do
 				zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 				if [ $dry_run -eq 0 ]; then
 					if $zfs_snapshot > /dev/stderr; then
-						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... DONE"
+						[ $verbose -ne 0 ] && echo "$zfs_snapshot	... DONE"
 					else
-						[ $verbose -eq 1 ] && echo "$zfs_snapshot	... FAIL"
-						[ $count_failures -eq 1 ] && fails=$(($fails + 1))
+						[ $verbose -ne 0 ] && echo "$zfs_snapshot	... FAIL"
+						[ $count_failures -ne 0 ] && failures=$(($failures + 1))
 					fi
 				else
 					printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
@@ -309,13 +306,13 @@ done
 prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
-if [ $delete_snapshots -eq 1 -o $force_delete_snapshots_age -ne -1 ]; then
+if [ $delete_snapshots -ne 0 -o $force_delete_snapshots_age -ne -1 ]; then
 	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
 		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
-		if [ $delete_snapshots -eq 1 ]; then
+		if [ $delete_snapshots -ne 0 ]; then
 			stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt `expr $create_time + $stay_time` ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
@@ -335,15 +332,15 @@ if [ $delete_snapshots -eq 1 -o $force_delete_snapshots_age -ne -1 ]; then
 fi
 
 # delete all snap
-if [ "$delete_specific_snapshots" ]; then
-	if [ "$delete_specific_fs_snapshots" ]; then
+if [ "$delete_specific_snapshots" != '' ]; then
+	if [ "$delete_specific_fs_snapshots" != '' ]; then
 		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
 			skip_pool $i && rm_zfs_snapshot $i
 		done
 	fi
 
-	if [ "$delete_specific_fs_snapshots_recursively" ]; then
+	if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
 		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
 			skip_pool $i && rm_zfs_snapshot -r $i
@@ -352,6 +349,6 @@ if [ "$delete_specific_snapshots" ]; then
 fi
 
 
-[ $count_failures -eq 1 ] && exit $fails
+[ $count_failures -ne 0 ] && exit $failures
 exit 0
 # vim: set ts=4 sw=4:
