@@ -5,9 +5,10 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
-# wiki: 		http://wiki.bsdroot.lv/zfsnap
+# wiki: 			http://wiki.bsdroot.lv/zfsnap
 # repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
-# project email:	zfsnap@bsdroot.lv
+# Bug tracking:		https://bugs.bsdroot.lv/
+# feedback email:	zfsnap@bsdroot.lv
 
 readonly VERSION=1.9.3
 readonly zfs_cmd=/sbin/zfs
@@ -77,8 +78,11 @@ OPTIONS:
   -R           = Create non-recursive snapshots for all zfs file systems that
                  fallow this switch
 
-MORE INFO:
-  http://wiki.bsdroot.lv/zfsnap
+LINKS:
+  wiki:            http://wiki.bsdroot.lv/zfsnap
+  repository:      http://hg.bsdroot.lv/pub/aldis/zfSnap/
+  bug tracking:    https://bugs.bsdroot.lv/
+  feedback email:  zfsnap@bsdroot.lv
 
 EOF
 	exit 0
