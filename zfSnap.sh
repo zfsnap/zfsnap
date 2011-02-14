@@ -6,11 +6,11 @@
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
 # wiki: 			http://wiki.bsdroot.lv/zfsnap
-# repository:		http://hg.bsdroot.lv/pub/aldis/zfSnap/
+# repository:		http://hg.bsdroot.lv/aldis/zfSnap/
 # Bug tracking:		https://bugs.bsdroot.lv/
 # feedback email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.9.3
+readonly VERSION=1.9.4
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
