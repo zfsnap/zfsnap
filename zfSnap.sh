@@ -10,7 +10,7 @@
 # Bug tracking:		https://bugs.bsdroot.lv/
 # feedback email:	zfsnap@bsdroot.lv
 
-readonly VERSION=1.9.4
+readonly VERSION=1.10.0
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -67,6 +67,7 @@ GENERIC OPTIONS:
   -S           = Don't do anything on pools running scrub
   -v           = Verbose output
   -z           = Force new snapshots to have 00 seconds!
+  -zpool28fix  = Workaround for zpool v28 zfs destroy -r bug
 
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept
@@ -89,7 +90,16 @@ EOF
 }
 
 rm_zfs_snapshot() {
+# WORKAROUND CODE
+if [ $zpool28fix -eq 1 -a "$1" = '-r' ]; then
+	# get rid or '-r' parameter
+	rm_zfs_snapshot $2
+	return
+fi
+# END OF WORKAROUND CODE
+
 	zfs_destroy="$zfs_cmd destroy $*"
+
 	# hardening: make really, really sure we are deleting snapshot
 	if echo $i | grep -q -e '@'; then
 		if [ $dry_run -eq 0 ]; then
@@ -157,8 +167,11 @@ resilver_skip=0					# Should I skip processing pools in process of resilvering. 
 scrub_skip=0					# Should I skip processing pools in process of scrubing. 0 = NO
 failures=0						# Number of failed actions.
 count_failures=0				# Should I coundt failed actions? 0 = NO
+# WORKAROUND CODE
+zpool28fix=0					# Workaround for zpool v28 zfs destroy -r bug
+# END OF WORKAROUND CODE
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' ]; do
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
 	case "$1" in
 	'-d')
 		delete_snapshots=1
@@ -206,6 +219,13 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 		count_failures=1
 		shift
 		;;
+
+# WORKAROUND CODE
+	'-zpool28fix')
+		zpool28fix=1
+		shift
+		;;
+# END OF WORKAROUND CODE
 
 	esac
 done
@@ -311,7 +331,16 @@ prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 
 # delete snapshots
 if [ $delete_snapshots -ne 0 -o $force_delete_snapshots_age -ne -1 ]; then
+
+# WORKAROUND CODE
+if [ $zpool28fix -eq 0 ]; then
+# END OF WORKAROUND CODE
 	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+# WORKAROUND CODE
+else
+	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+fi
+# END OF WORKAROUND CODE
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
