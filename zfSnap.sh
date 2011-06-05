@@ -92,7 +92,7 @@ EOF
 rm_zfs_snapshot() {
 # WORKAROUND CODE
 if [ $zpool28fix -eq 1 -a "$1" = '-r' ]; then
-	# get rid or '-r' parameter
+	# get rid of '-r' parameter
 	rm_zfs_snapshot $2
 	return
 fi
