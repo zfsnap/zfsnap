@@ -14,6 +14,16 @@ readonly VERSION=1.10.0
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
+OS=`uname`
+case $OS in
+'FreeBSD')
+	SED_E_SWITCH='-E'
+	;;
+*)
+	SED_E_SWITCH=''
+	;;
+esac
+
 s2time() {
 	# convert seconds to human readable time
 	xtime=$1
@@ -46,6 +56,19 @@ s2time() {
 time2s() {
 	# convert human readable time to seconds
 	echo "$1" | sed -e 's/y/*31536000+/g' -e 's/m/*2592000+/g' -e 's/w/*604800+/g' -e 's/d/*86400+/g' -e 's/h/*3600+/g' -e 's/M/*60+/g' -e 's/s//g' -e 's/\+$//' | bc -l
+}
+
+date2timestamp() {
+	date_normal="`echo $1 | sed -e 's/_/ /' -e 's/\./:/g'`"
+
+	case $OS in
+	'FreeBSD')
+		date -j -f '%F %H:%M:%S' "$date_normal" '+%s'
+		;;
+	*)
+		date --date "$date_normal" '+%s'
+		;;
+	esac
 }
 
 help() {
@@ -97,6 +120,12 @@ if [ $zpool28fix -eq 1 -a "$1" = '-r' ]; then
 	return
 fi
 # END OF WORKAROUND CODE
+
+	if [ "$1" = '-r' ]; then
+		skip_pool $2 || return 1
+	else 
+		skip_pool $1 || return 1
+	fi
 
 	zfs_destroy="$zfs_cmd destroy $*"
 
@@ -246,17 +275,17 @@ if [ $old_format -eq 0 ]; then
 	# new snapshot name format (easier to navigate snapshots using shell)
 	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 	if [ $zero_seconds -eq 0 ]; then
-		readonly tfrmt='%F_%H.%M.%S'
+		readonly tfrmt='%Y-%m-%d_%H.%M.%S'
 	else
-		readonly tfrmt='%F_%H.%M.00'
+		readonly tfrmt='%Y-%m-%d_%H.%M.00'
 	fi
 else
 	# old snapshot name format
 	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
 	if [ $zero_seconds -eq 0 ]; then
-		readonly tfrmt='%F_%H:%M:%S'
+		readonly tfrmt='%Y-%m-%d_%H:%M:%S'
 	else
-		readonly tfrmt='%F_%H:%M:00'
+		readonly tfrmt='%Y-%m-%d_%H:%M:00'
 	fi
 fi
 
@@ -305,7 +334,7 @@ while [ "$1" ]; do
 	# create snapshots
 	if [ $1 ]; then
 		if skip_pool $1; then
-			if [ $1 = `echo $1 | sed -E -e 's/^-//'` ]; then
+			if [ $1 = `echo $1 | sed $SED_E_SWITCH -e 's/^-//'` ]; then
 				zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 				if [ $dry_run -eq 0 ]; then
 					if $zfs_snapshot > /dev/stderr; then
@@ -343,10 +372,10 @@ fi
 # END OF WORKAROUND CODE
 
 	current_time=`date +%s`
-	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed -E -e "s/^.*@//" | sort -u`; do
-		create_time=$(date -j -f "$tfrmt" $(echo "$i" | sed -E -e "s/--${htime_pattern}$//" -E -e "s/^(${prefxes})?//") +%s)
+	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed $SED_E_SWITCH -e "s/^.*@//" | sort -u`; do
+		create_time=$(date2timestamp `echo "$i" | sed $SED_E_SWITCH -e "s/--${htime_pattern}$//" $SED_E_SWITCH -e "s/^(${prefxes})?//"`)
 		if [ $delete_snapshots -ne 0 ]; then
-			stay_time=$(time2s `echo $i | sed -E -e "s/^(${prefxes})?${date_pattern}--//"`)
+			stay_time=$(time2s `echo $i | sed $SED_E_SWITCH -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt `expr $create_time + $stay_time` ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 		fi
@@ -359,7 +388,7 @@ fi
 	if [ "$rm_snapshot_pattern" != '' ]; then
 		rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
 		for i in $rm_snapshots; do
-			skip_pool $i && rm_zfs_snapshot -r $i
+			rm_zfs_snapshot -r $i
 		done
 	fi
 fi
@@ -369,14 +398,14 @@ if [ "$delete_specific_snapshots" != '' ]; then
 	if [ "$delete_specific_fs_snapshots" != '' ]; then
 		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
-			skip_pool $i && rm_zfs_snapshot $i
+			rm_zfs_snapshot $i
 		done
 	fi
 
 	if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
 		rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
 		for i in $rm_snapshots; do
-			skip_pool $i && rm_zfs_snapshot -r $i
+			rm_zfs_snapshot -r $i
 		done
 	fi
 fi
