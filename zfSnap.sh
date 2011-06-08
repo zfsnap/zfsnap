@@ -59,7 +59,7 @@ time2s() {
 }
 
 date2timestamp() {
-	date_normal="`echo $1 | sed -e 's/_/ /' -e 's/\./:/g'`"
+	date_normal="`echo $1 | sed -e 's/\./:/g' $SED_E_SWITCH -e 's/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
 	case $OS in
 	'FreeBSD')
@@ -84,8 +84,6 @@ GENERIC OPTIONS:
   -e           = Return number of failed actions as exit code.
   -F age       = Force delete all snapshots exceeding age
   -n           = Only show actions that would be performed
-  -o           = Use old timestamp format used before v1.4.0 (for backward
-                 compatibility)
   -s           = Don't do anything on pools running resilver
   -S           = Don't do anything on pools running scrub
   -v           = Verbose output
@@ -182,7 +180,6 @@ delete_snapshots=0				# Delete old snapshots? 0 = NO
 delete_specific_snapshots=0		# Delete specific snapshots? 0 = NO
 verbose=0						# Verbose output? 0 = NO
 dry_run=0						# Dry run? 0 = NO
-old_format=0					# Use old timestamp format? 0 = NO
 prefx=""						# Default prefix
 prefxes=""						# List of prefixes
 delete_specific_fs_snapshots=""	# List of specific snapshots to delete
@@ -271,22 +268,11 @@ if [ $get_pools -ne 0 ]; then
 	done
 fi
 
-if [ $old_format -eq 0 ]; then
-	# new snapshot name format (easier to navigate snapshots using shell)
-	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
-	if [ $zero_seconds -eq 0 ]; then
-		readonly tfrmt='%Y-%m-%d_%H.%M.%S'
-	else
-		readonly tfrmt='%Y-%m-%d_%H.%M.00'
-	fi
+readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
+if [ $zero_seconds -eq 0 ]; then
+	readonly tfrmt='%Y-%m-%d_%H.%M.%S'
 else
-	# old snapshot name format
-	readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]:[0-5][0-9]:[0-5][0-9]'
-	if [ $zero_seconds -eq 0 ]; then
-		readonly tfrmt='%Y-%m-%d_%H:%M:%S'
-	else
-		readonly tfrmt='%Y-%m-%d_%H:%M:00'
-	fi
+	readonly tfrmt='%Y-%m-%d_%H.%M.00'
 fi
 
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
@@ -376,11 +362,11 @@ fi
 		create_time=$(date2timestamp `echo "$i" | sed $SED_E_SWITCH -e "s/--${htime_pattern}$//" $SED_E_SWITCH -e "s/^(${prefxes})?//"`)
 		if [ $delete_snapshots -ne 0 ]; then
 			stay_time=$(time2s `echo $i | sed $SED_E_SWITCH -e "s/^(${prefxes})?${date_pattern}--//"`)
-			[ $current_time -gt `expr $create_time + $stay_time` ] \
+			[ $current_time -gt $(($create_time + $stay_time)) ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 		fi
 		if [ "$force_delete_snapshots_age" -ne -1 ]; then
-			[ $current_time -gt `expr $create_time + $force_delete_snapshots_age` ] \
+			[ $current_time -gt $(($create_time + $force_delete_snapshots_age)) ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 		fi
 	done
