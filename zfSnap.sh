@@ -23,7 +23,8 @@ case $OS in
 	SED_EXTENDED_REGEXP_SWITCH='-r'
 	;;
 *)
-	SED_EXTENDED_REGEXP_SWITCH=''
+	echo "ERR: Your OS isn't supported" > /dev/stderr
+	exit 1
 	;;
 esac
 
@@ -66,7 +67,7 @@ date2timestamp() {
 
 	case $OS in
 	'FreeBSD')
-		date -j -f '%F %H:%M:%S' "$date_normal" '+%s'
+		date -j -f '%Y-%m-%d %H:%M:%S' "$date_normal" '+%s'
 		;;
 	*)
 		date --date "$date_normal" '+%s'
@@ -200,7 +201,7 @@ count_failures=0				# Should I coundt failed actions? 0 = NO
 zpool28fix=0					# Workaround for zpool v28 zfs destroy -r bug
 # END OF WORKAROUND CODE
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
+while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
 	case "$1" in
 	'-d')
 		delete_snapshots=1
@@ -220,11 +221,6 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-o' 
 	'-F')
 		force_delete_snapshots_age=`time2s $2`
 		shift 2
-		;;
-
-	'-o')
-		old_format=1
-		shift
 		;;
 
 	'-z')
