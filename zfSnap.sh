@@ -362,7 +362,7 @@ fi
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^.*@//" | sort -u`; do
-		create_time=$(date2timestamp `echo "$i" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/--${htime_pattern}$//" $SED_EXTENDED_REGEXP_SWITCH -e "s/^(${prefxes})?//"`)
+		create_time=$(date2timestamp `echo "$i" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/--${htime_pattern}$//" -e "s/^(${prefxes})?//"`)
 		if [ $delete_snapshots -ne 0 ]; then
 			stay_time=$(time2s `echo $i | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt $(($create_time + $stay_time)) ] \
