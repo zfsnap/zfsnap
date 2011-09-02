@@ -1,16 +1,16 @@
 #!/bin/sh
 
 # "THE BEER-WARE LICENSE":
-# <aldis@bsdroot.lv> wrote this file. As long as you retain this notice you
+# <graudeejs@gmail.com> wrote this file. As long as you retain this notice you
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
-# wiki: 			http://wiki.bsdroot.lv/zfsnap
-# repository:		http://hg.bsdroot.lv/aldis/zfSnap/
-# Bug tracking:		https://bugs.bsdroot.lv/
-# feedback email:	zfsnap@bsdroot.lv
+# wiki:             https://github.com/graudeejs/zfSnap/wiki
+# repository:       https://github.com/graudeejs/zfSnap
+# Bug tracking:     https://github.com/graudeejs/zfSnap/issues
+# feedback email:   graudeejs@gmail.com
 
-readonly VERSION=1.10.0
+readonly VERSION=1.10.1
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -78,7 +78,6 @@ date2timestamp() {
 help() {
 	cat << EOF
 ${0##*/} v${VERSION} by Aldis Berjoza
-zfSnap project e-mail: zfsnap@bsdroot.lv
 
 Syntax:
 ${0##*/} [ generic options ] [ options ] zpool/filesystem ...
@@ -105,10 +104,10 @@ OPTIONS:
                  fallow this switch
 
 LINKS:
-  wiki:            http://wiki.bsdroot.lv/zfsnap
-  repository:      http://hg.bsdroot.lv/pub/aldis/zfSnap/
-  bug tracking:    https://bugs.bsdroot.lv/
-  feedback email:  zfsnap@bsdroot.lv
+  wiki:             https://github.com/graudeejs/zfSnap/wiki
+  repository:       https://github.com/graudeejs/zfSnap
+  Bug tracking:     https://github.com/graudeejs/zfSnap/issues
+  feedback email:   graudeejs@gmail.com
 
 EOF
 	exit 0
