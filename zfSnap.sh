@@ -10,7 +10,7 @@
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 # feedback email:   graudeejs@gmail.com
 
-readonly VERSION=1.10.1
+readonly VERSION=1.10.2
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -59,11 +59,11 @@ s2time() {
 
 time2s() {
 	# convert human readable time to seconds
-	echo "$1" | sed -e 's/y/*31536000+/g' -e 's/m/*2592000+/g' -e 's/w/*604800+/g' -e 's/d/*86400+/g' -e 's/h/*3600+/g' -e 's/M/*60+/g' -e 's/s//g' -e 's/\+$//' | bc -l
+	echo "$1" | sed -e 's/y/*31536000+/g; s/m/*2592000+/g; s/w/*604800+/g; s/d/*86400+/g; s/h/*3600+/g; s/M/*60+/g; s/s//g; s/\+$//' | bc -l
 }
 
 date2timestamp() {
-	date_normal="`echo $1 | sed -e 's/\./:/g' $SED_EXTENDED_REGEXP_SWITCH -e 's/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
+	date_normal="`echo $1 | sed $SED_EXTENDED_REGEXP_SWITCH -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
 	case $OS in
 	'FreeBSD')
@@ -156,7 +156,7 @@ skip_pool() {
 	# more like skip pool???
 	if [ $scrub_skip -ne 0 ]; then
 		for i in $scrub_pools; do
-			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
+			if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
 				[ $verbose -ne 0 ] && echo "NOTE: No action will be performed on '$1'. Scrub is running on pool." > /dev/stderr
 				return 1
 			fi
@@ -164,7 +164,7 @@ skip_pool() {
 	fi
 	if [ $resilver_skip -ne 0 ]; then
 		for i in $resilver_pools; do
-			if [ `echo $1 | sed -e 's#/.*$##' -e 's/@.*//'` = $i ]; then
+			if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
 				[ $verbose -ne 0 ] && echo "NOTE: No action will be performed on '$1'. Resilver is running on pool." > /dev/stderr
 				return 1
 			fi
@@ -357,7 +357,7 @@ fi
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^.*@//" | sort -u`; do
-		create_time=$(date2timestamp `echo "$i" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/--${htime_pattern}$//" -e "s/^(${prefxes})?//"`)
+		create_time=$(date2timestamp `echo "$i" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/--${htime_pattern}$//; s/^(${prefxes})?//"`)
 		if [ $delete_snapshots -ne 0 ]; then
 			stay_time=$(time2s `echo $i | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt $(($create_time + $stay_time)) ] \
