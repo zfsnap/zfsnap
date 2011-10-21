@@ -114,13 +114,11 @@ EOF
 }
 
 rm_zfs_snapshot() {
-# WORKAROUND CODE
-if [ $zpool28fix -eq 1 -a "$1" = '-r' ]; then
-	# get rid of '-r' parameter
-	rm_zfs_snapshot $2
-	return
-fi
-# END OF WORKAROUND CODE
+	if [ $zpool28fix -eq 1 -a "$1" = '-r' ]; then
+		# get rid of '-r' parameter
+		rm_zfs_snapshot $2
+		return
+	fi
 
 	if [ "$1" = '-r' ]; then
 		skip_pool $2 || return 1
@@ -244,12 +242,10 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
 		shift
 		;;
 
-# WORKAROUND CODE
 	'-zpool28fix')
 		zpool28fix=1
 		shift
 		;;
-# END OF WORKAROUND CODE
 
 	esac
 done
@@ -345,15 +341,11 @@ prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 # delete snapshots
 if [ $delete_snapshots -ne 0 -o $force_delete_snapshots_age -ne -1 ]; then
 
-# WORKAROUND CODE
-if [ $zpool28fix -eq 0 ]; then
-# END OF WORKAROUND CODE
-	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
-# WORKAROUND CODE
-else
-	zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
-fi
-# END OF WORKAROUND CODE
+	if [ $zpool28fix -eq 0 ]; then
+		zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+	else
+		zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+	fi
 
 	current_time=`date +%s`
 	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^.*@//" | sort -u`; do
