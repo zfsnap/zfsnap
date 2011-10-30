@@ -17,10 +17,10 @@ readonly zpool_cmd=/sbin/zpool
 OS=`uname`
 case $OS in
 'FreeBSD')
-	SED_EXTENDED_REGEXP_SWITCH='-E'
+	ESED='sed -E'
 	;;
 'SunOS')
-	SED_EXTENDED_REGEXP_SWITCH='-r'
+	ESED='sed -r'
 	;;
 *)
 	echo "ERR: Your OS isn't supported" > /dev/stderr
@@ -63,7 +63,7 @@ time2s() {
 }
 
 date2timestamp() {
-	date_normal="`echo $1 | sed $SED_EXTENDED_REGEXP_SWITCH -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
+	date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
 	case $OS in
 	'FreeBSD')
@@ -314,7 +314,7 @@ while [ "$1" ]; do
 	# create snapshots
 	if [ $1 ]; then
 		if skip_pool $1; then
-			if [ $1 = `echo $1 | sed $SED_EXTENDED_REGEXP_SWITCH -e 's/^-//'` ]; then
+			if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
 				zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
 				if [ $dry_run -eq 0 ]; then
 					if $zfs_snapshot > /dev/stderr; then
@@ -348,10 +348,10 @@ if [ $delete_snapshots -ne 0 -o $force_delete_snapshots_age -ne -1 ]; then
 	fi
 
 	current_time=`date +%s`
-	for i in `echo $zfs_snapshots | xargs printf "%s\n" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^.*@//" | sort -u`; do
-		create_time=$(date2timestamp `echo "$i" | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/--${htime_pattern}$//; s/^(${prefxes})?//"`)
+	for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
+		create_time=$(date2timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefxes})?//"`)
 		if [ $delete_snapshots -ne 0 ]; then
-			stay_time=$(time2s `echo $i | sed $SED_EXTENDED_REGEXP_SWITCH -e "s/^(${prefxes})?${date_pattern}--//"`)
+			stay_time=$(time2s `echo $i | $ESED -e "s/^(${prefxes})?${date_pattern}--//"`)
 			[ $current_time -gt $(($create_time + $stay_time)) ] \
 				&& rm_snapshot_pattern="$rm_snapshot_pattern $i"
 		fi
