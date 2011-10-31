@@ -194,9 +194,7 @@ resilver_skip=0					# Should I skip processing pools in process of resilvering. 
 scrub_skip=0					# Should I skip processing pools in process of scrubing. 0 = NO
 failures=0						# Number of failed actions.
 count_failures=0				# Should I coundt failed actions? 0 = NO
-# WORKAROUND CODE
 zpool28fix=0					# Workaround for zpool v28 zfs destroy -r bug
-# END OF WORKAROUND CODE
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
 	case "$1" in
