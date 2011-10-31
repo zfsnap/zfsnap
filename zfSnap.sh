@@ -10,7 +10,7 @@
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 # feedback email:   graudeejs@gmail.com
 
-readonly VERSION=1.10.2
+readonly VERSION=1.10.3
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
