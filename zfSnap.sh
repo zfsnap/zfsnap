@@ -19,7 +19,7 @@ case $OS in
 'FreeBSD')
 	ESED='sed -E'
 	;;
-'SunOS')
+'SunOS' | 'Linux')
 	ESED='sed -r'
 	;;
 *)
