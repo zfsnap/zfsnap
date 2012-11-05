@@ -10,7 +10,7 @@
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 # feedback email:   graudeejs@gmail.com
 
-readonly VERSION=1.10.3
+readonly VERSION=1.10.4
 readonly zfs_cmd=/sbin/zfs
 readonly zpool_cmd=/sbin/zpool
 
@@ -122,7 +122,7 @@ rm_zfs_snapshot() {
 
 	if [ "$1" = '-r' ]; then
 		skip_pool $2 || return 1
-	else 
+	else
 		skip_pool $1 || return 1
 	fi
 
@@ -252,7 +252,7 @@ if [ $get_pools -ne 0 ]; then
 	pools=`$zpool_cmd list -H -o name`
 	for i in $pools; do
 		if [ $resilver_skip -ne 0 ]; then
-			$zpool_cmd status $i | grep -q -e 'resilver in progress' && resilber_pools="$resilver_pools $i"
+			$zpool_cmd status $i | grep -q -e 'resilver in progress' && resilver_pools="$resilver_pools $i"
 		fi
 		if [ $scrub_skip -ne 0 ]; then
 			$zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
@@ -291,9 +291,9 @@ while [ "$1" ]; do
 		'-p')
 			prefx="$2"
 			prefxes="$prefxes|$prefx"
-			shift 2 
+			shift 2
 			;;
-		'-P') 
+		'-P')
 			prefx=""
 			shift
 			;;
