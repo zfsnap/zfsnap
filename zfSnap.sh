@@ -10,16 +10,22 @@
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
 readonly VERSION=1.10.4
-readonly zfs_cmd=/sbin/zfs
-readonly zpool_cmd=/sbin/zpool
+
+ESED='sed -E'
+zfs_cmd='/sbin/zfs'
+zpool_cmd='/sbin/zpool'
+
 
 OS=`uname`
 case $OS in
 'FreeBSD')
-    ESED='sed -E'
     ;;
 'SunOS' | 'Linux')
     ESED='sed -r'
+    ;;
+'Darwin')
+    zfs_cmd='/usr/sbin/zfs'
+    zpool_cmd='/usr/sbin/zpool'
     ;;
 *)
     echo "ERR: Your OS isn't supported" > /dev/stderr
