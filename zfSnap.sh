@@ -16,6 +16,24 @@ zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
 
 
+note() {
+    echo "NOTE: $*" > /dev/stderr
+}
+
+err() {
+    echo "ERROR: $*" > /dev/stderr
+}
+
+fatal() {
+    echo "FATAL: $*" > /dev/stderr
+    exit 1
+}
+
+warn() {
+    echo "WARNING: $*" > /dev/stderr
+}
+
+
 OS=`uname`
 case $OS in
 'FreeBSD')
@@ -28,8 +46,7 @@ case $OS in
     zpool_cmd='/usr/sbin/zpool'
     ;;
 *)
-    echo "ERR: Your OS isn't supported" > /dev/stderr
-    exit 1
+    fatal "Your OS isn't supported"
     ;;
 esac
 
@@ -43,8 +60,8 @@ is_true() {
             return 1
             ;;
         *)
-            echo "ERR: must be yes or no" > /dev/stderr
-            exit 1
+            fatal "must be yes or no"
+            ;;
     esac
 }
 
@@ -164,11 +181,11 @@ rm_zfs_snapshot() {
             echo "$zfs_destroy"
         fi
     else
-        echo "ERR: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
+        echo "FATAL: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
         echo "  This is bug, we definitely don't want that." > /dev/stderr
-        echo "  Please report it to zfsnap@bsdroot.lv" > /dev/stderr
+        echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        is_true $count_failures && [ $failures > 0 ] && exit $failures
+        is_true $count_failures && [ $failures -gt 0 ] && exit $failures
         exit 1
     fi
 }
@@ -178,7 +195,7 @@ skip_pool() {
     if is_true $scrub_skip; then
         for i in $scrub_pools; do
             if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                is_true $verbose && echo "NOTE: No action will be performed on '$1'. Scrub is running on pool." > /dev/stderr
+                is_true $verbose && note "No action will be performed on '$1'. Scrub is running on pool."
                 return 1
             fi
         done
@@ -186,7 +203,7 @@ skip_pool() {
     if is_true $resilver_skip; then
         for i in $resilver_pools; do
             if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                is_true $verbose && echo "NOTE: No action will be performed on '$1'. Resilver is running on pool." > /dev/stderr
+                is_true $verbose && note "No action will be performed on '$1'. Resilver is running on pool."
                 return 1
             fi
         done
@@ -347,10 +364,10 @@ while [ "$1" ]; do
                 else
                     printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
                         && echo "$zfs_snapshot" \
-                        || echo "ERR: Looks like zfs filesystem '$1' doesn't exist" > /dev/stderr
+                        || err "Looks like zfs filesystem '$1' doesn't exist"
                 fi
             else
-                echo "WARN: '$1' doesn't look like valid argument. Ignoring" > /dev/stderr
+                warn "'$1' doesn't look like valid argument. Ignoring"
             fi
         fi
         shift
