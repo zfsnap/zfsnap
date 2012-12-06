@@ -10,12 +10,21 @@
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
 readonly VERSION=1.10.4
-readonly zfs_cmd=/sbin/zfs
-readonly zpool_cmd=/sbin/zpool
 
 OS=`uname`
 case $OS in
-'FreeBSD')
+'Darwin')
+	readonly zfs_cmd=/usr/sbin/zfs
+	readonly zpool_cmd=/usr/sbin/zpool
+	;;
+*)
+	readonly zfs_cmd=/sbin/zfs
+	readonly zpool_cmd=/sbin/zpool
+	;;
+esac
+
+case $OS in
+'Darwin' | 'FreeBSD')
 	ESED='sed -E'
 	;;
 'SunOS' | 'Linux')
