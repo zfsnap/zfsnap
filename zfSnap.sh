@@ -225,23 +225,23 @@ skip_pool() {
 
 ttl='1m'    # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
-delete_snapshots=false              # Delete old snapshots? 0 = NO
-delete_specific_snapshots=false     # Delete specific snapshots? 0 = NO
-verbose=false                       # Verbose output? 0 = NO
-dry_run=false                       # Dry run? 0 = NO
+delete_snapshots=false              # Delete old snapshots?
+delete_specific_snapshots=false     # Delete specific snapshots?
+verbose=false                       # Verbose output?
+dry_run=false                       # Dry run?
 prefx=""                            # Default prefix
 prefxes=""                          # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
-zero_seconds=false                  # Should new snapshots always have 00 seconds? 0 = NO
+zero_seconds=false                  # Should new snapshots always have 00 seconds?
 scrub_pools=""                      # List of pools that are in precess of scrubing
 resilver_pools=""                   # List of pools that are in process of resilvering
 pools=""                            # List of pools
-get_pools=false                     # Should I get list of pools? 0 = NO.
-resilver_skip=false                 # Should I skip processing pools in process of resilvering. 0 = NO
-scrub_skip=false                    # Should I skip processing pools in process of scrubing. 0 = NO
+get_pools=false                     # Should I get list of pools?
+resilver_skip=false                 # Should I skip processing pools in process of resilvering.
+scrub_skip=false                    # Should I skip processing pools in process of scrubing.
 failures=0                          # Number of failed actions.
-count_failures=false                # Should I coundt failed actions? 0 = NO
+count_failures=false                # Should I coundt failed actions?
 zpool28fix=false                    # Workaround for zpool v28 zfs destroy -r bug
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
