@@ -38,7 +38,15 @@ OS=`uname`
 case $OS in
 'FreeBSD')
     ;;
-'SunOS' | 'Linux')
+'SunOS')
+    ESED='sed -r'
+    if [ -d "/usr/gnu/bin" ]; then
+        export PATH=/usr/gnu/bin:$PATH
+    else
+        fatal "GNU bin direcotry not found"
+    fi
+    ;;
+'Linux')
     ESED='sed -r'
     ;;
 'Darwin')
