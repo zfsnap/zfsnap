@@ -41,7 +41,7 @@ case $OS in
 'SunOS')
     ESED='sed -r'
     if [ -d "/usr/gnu/bin" ]; then
-        export PATH=/usr/gnu/bin:$PATH
+        export PATH="/usr/gnu/bin:$PATH"
     else
         fatal "GNU bin direcotry not found"
     fi
@@ -225,38 +225,38 @@ skip_pool() {
 
 ttl='1m'    # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
-delete_snapshots=false              # Delete old snapshots?
-verbose=false                       # Verbose output?
-dry_run=false                       # Dry run?
+delete_snapshots="false"            # Delete old snapshots?
+verbose="false"                     # Verbose output?
+dry_run="false"                     # Dry run?
 prefx=""                            # Default prefix
 prefxes=""                          # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
-zero_seconds=false                  # Should new snapshots always have 00 seconds?
+zero_seconds="false"                # Should new snapshots always have 00 seconds?
 scrub_pools=""                      # List of pools that are in precess of scrubing
 resilver_pools=""                   # List of pools that are in process of resilvering
 pools=""                            # List of pools
-get_pools=false                     # Should I get list of pools?
-resilver_skip=false                 # Should I skip processing pools in process of resilvering.
-scrub_skip=false                    # Should I skip processing pools in process of scrubing.
+get_pools="false"                   # Should I get list of pools?
+resilver_skip="false"               # Should I skip processing pools in process of resilvering.
+scrub_skip="false"                  # Should I skip processing pools in process of scrubing.
 failures=0                          # Number of failed actions.
-count_failures=false                # Should I coundt failed actions?
-zpool28fix=false                    # Workaround for zpool v28 zfs destroy -r bug
+count_failures="false"              # Should I coundt failed actions?
+zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
     case "$1" in
     '-d')
-        delete_snapshots=true
+        delete_snapshots="true"
         shift
         ;;
 
     '-v')
-        verbose=true
+        verbose="true"
         shift
         ;;
 
     '-n')
-        dry_run=true
+        dry_run="true"
         shift
         ;;
 
@@ -266,29 +266,29 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
         ;;
 
     '-z')
-        zero_seconds=true
+        zero_seconds="true"
         shift
         ;;
 
     '-s')
-        get_pools=1
-        resilver_skip=true
+        get_pools="true"
+        resilver_skip="true"
         shift
         ;;
 
     '-S')
-        get_pools=true
-        scrub_skip=true
+        get_pools="true"
+        scrub_skip="true"
         shift
         ;;
 
     '-e')
-        count_failures=true
+        count_failures="true"
         shift
         ;;
 
     '-zpool28fix')
-        zpool28fix=true
+        zpool28fix="true"
         shift
         ;;
 
