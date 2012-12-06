@@ -226,7 +226,6 @@ skip_pool() {
 ttl='1m'    # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
 delete_snapshots=false              # Delete old snapshots?
-delete_specific_snapshots=false     # Delete specific snapshots?
 verbose=false                       # Verbose output?
 dry_run=false                       # Dry run?
 prefx=""                            # Default prefix
@@ -416,20 +415,18 @@ if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 fi
 
 # delete all snap
-if [ "$delete_specific_snapshots" != '' ]; then
-    if [ "$delete_specific_fs_snapshots" != '' ]; then
-        rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
-        for i in $rm_snapshots; do
-            rm_zfs_snapshot $i
-        done
-    fi
+if [ "$delete_specific_fs_snapshots" != '' ]; then
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    for i in $rm_snapshots; do
+        rm_zfs_snapshot $i
+    done
+fi
 
-    if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
-        rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
-        for i in $rm_snapshots; do
-            rm_zfs_snapshot -r $i
-        done
-    fi
+if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    for i in $rm_snapshots; do
+        rm_zfs_snapshot -r $i
+    done
 fi
 
 
