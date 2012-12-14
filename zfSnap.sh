@@ -115,7 +115,7 @@ date2timestamp() {
     date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
     case $OS in
-    'FreeBSD')
+    'FreeBSD' | 'Darwin' )
         date -j -f '%Y-%m-%d %H:%M:%S' "$date_normal" '+%s'
         ;;
     *)
