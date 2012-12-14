@@ -36,26 +36,26 @@ warn() {
 
 OS=`uname`
 case $OS in
-'FreeBSD')
-    ;;
-'SunOS')
-    ESED='sed -r'
-    if [ -d "/usr/gnu/bin" ]; then
-        export PATH="/usr/gnu/bin:$PATH"
-    else
-        fatal "GNU bin direcotry not found"
-    fi
-    ;;
-'Linux')
-    ESED='sed -r'
-    ;;
-'Darwin')
-    zfs_cmd='/usr/sbin/zfs'
-    zpool_cmd='/usr/sbin/zpool'
-    ;;
-*)
-    fatal "Your OS isn't supported"
-    ;;
+    'FreeBSD')
+        ;;
+    'SunOS')
+        ESED='sed -r'
+        if [ -d "/usr/gnu/bin" ]; then
+            export PATH="/usr/gnu/bin:$PATH"
+        else
+            fatal "GNU bin direcotry not found"
+        fi
+        ;;
+    'Linux')
+        ESED='sed -r'
+        ;;
+    'Darwin')
+        zfs_cmd='/usr/sbin/zfs'
+        zpool_cmd='/usr/sbin/zpool'
+        ;;
+    *)
+        fatal "Your OS isn't supported"
+        ;;
 esac
 
 
