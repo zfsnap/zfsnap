@@ -9,7 +9,7 @@
 # repository:       https://github.com/graudeejs/zfSnap
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
-readonly VERSION=1.10.4
+readonly VERSION=1.11.0
 
 ESED='sed -E'
 zfs_cmd='/sbin/zfs'
