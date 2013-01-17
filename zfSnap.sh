@@ -183,7 +183,7 @@ rm_zfs_snapshot() {
                 is_true $verbose && echo "$zfs_destroy  ... DONE"
             else
                 is_true $verbose && echo "$zfs_destroy  ... FAIL"
-                is_true $count_failure && failures=$(($failures + 1))
+                is_true $count_failures && failures=$(($failures + 1))
             fi
         else
             echo "$zfs_destroy"
