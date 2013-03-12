@@ -68,7 +68,7 @@ is_true() {
             return 1
             ;;
         *)
-            fatal "must be yes or no"
+            fatal "must be TRUE or FALSE"
             ;;
     esac
 }
