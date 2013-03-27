@@ -177,7 +177,7 @@ rm_zfs_snapshot() {
     zfs_destroy="$zfs_cmd destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
-    if echo $i | grep -q -e '@'; then
+    if echo $* | grep -q -e '@'; then
         if is_false $dry_run; then
             if $zfs_destroy > /dev/stderr; then
                 is_true $verbose && echo "$zfs_destroy  ... DONE"
