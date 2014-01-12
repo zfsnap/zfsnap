@@ -118,6 +118,15 @@ date2timestamp() {
     'FreeBSD' | 'Darwin' )
         date -j -f '%Y-%m-%d %H:%M:%S' "$date_normal" '+%s'
         ;;
+    'SunOS' )
+        # Thanks to http://stackoverflow.com/questions/18868838/convert-a-given-time-to-seconds-in-solaris
+        typeset d=$(echo "$date_normal" | tr -d ':- ' | sed 's/..$/.&/')
+        typeset t=$(mktemp) || return -1
+        typeset s=$(touch -t $d $t 2>&1) || { rm $t ; return -1 ; }
+        [ -n "$s" ] && { rm $t ; return -1 ; }
+        truss -f -v 'lstat,lstat64' ls -d $t 2>&1 | nawk '/mt =/ {printf "%d\n",$10}'
+        rm $t
+       ;;
     *)
         date --date "$date_normal" '+%s'
         ;;
