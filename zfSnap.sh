@@ -37,6 +37,7 @@ warn() {
 OS=`uname`
 case $OS in
     'FreeBSD')
+        GREP=$(which grep)
         ;;
     'SunOS')
         ESED='sed -r'
@@ -45,13 +46,21 @@ case $OS in
         else
             fatal "GNU bin direcotry not found"
         fi
+        if [ -x /usr/gnu/bin/grep ]; then
+            GREP=/usr/gnu/bin/grep
+        else
+            # E.g. SmartOS
+            GREP=/usr/xpg4/bin/grep
+        fi
         ;;
     'Linux')
         ESED='sed -r'
+        GREP=$(which grep)
         ;;
     'Darwin')
         zfs_cmd='/usr/sbin/zfs'
         zpool_cmd='/usr/sbin/zpool'
+        GREP=$(which grep)
         ;;
     *)
         fatal "Your OS isn't supported"
@@ -186,7 +195,7 @@ rm_zfs_snapshot() {
     zfs_destroy="$zfs_cmd destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
-    if echo $* | grep -q -e '@'; then
+    if echo $* | $GREP -q -e '@'; then
         if is_false $dry_run; then
             if $zfs_destroy > /dev/stderr; then
                 is_true $verbose && echo "$zfs_destroy  ... DONE"
@@ -308,10 +317,10 @@ if is_true $get_pools; then
     pools=`$zpool_cmd list -H -o name`
     for i in $pools; do
         if is_true $resilver_skip; then
-            $zpool_cmd status $i | grep -q -e 'resilver in progress' && resilver_pools="$resilver_pools $i"
+            $zpool_cmd status $i | $GREP -q -e 'resilver in progress' && resilver_pools="$resilver_pools $i"
         fi
         if is_true $scrub_skip; then
-            $zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
+            $zpool_cmd status $i | $GREP -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
         fi
     done
 fi
@@ -341,7 +350,7 @@ while [ "$1" ]; do
             ;;
         '-a')
             ttl="$2"
-            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
+            echo "$ttl" | $GREP -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
             shift 2
             ;;
         '-p')
@@ -378,7 +387,7 @@ while [ "$1" ]; do
                         is_true $count_failures && failures=$(($failures + 1))
                     fi
                 else
-                    printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+                    printf "%s\n" $zfs_list | $GREP -m 1 -q -E -e "^$1$" \
                         && echo "$zfs_snapshot" \
                         || err "Looks like zfs filesystem '$1' doesn't exist"
                 fi
@@ -396,9 +405,9 @@ prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
 if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 
     if is_false $zpool28fix; then
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | $GREP -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
     else
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | $GREP -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
     fi
 
     current_time=`date +%s`
@@ -416,7 +425,7 @@ if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
     done
 
     if [ "$rm_snapshot_pattern" != '' ]; then
-        rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
+        rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | $GREP -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
         for i in $rm_snapshots; do
             rm_zfs_snapshot -r $i
         done
@@ -425,14 +434,14 @@ fi
 
 # delete all snap
 if [ "$delete_specific_fs_snapshots" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | $GREP -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
         rm_zfs_snapshot $i
     done
 fi
 
 if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | $GREP -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
         rm_zfs_snapshot -r $i
     done
