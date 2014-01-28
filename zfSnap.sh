@@ -240,7 +240,7 @@ get_pools="false"                   # Should I get list of pools?
 resilver_skip="false"               # Should I skip processing pools in process of resilvering.
 scrub_skip="false"                  # Should I skip processing pools in process of scrubing.
 failures=0                          # Number of failed actions.
-count_failures="false"              # Should I coundt failed actions?
+count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
