@@ -15,6 +15,9 @@ ESED='sed -E'
 zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
 
+Exit() {
+    exit $1
+}
 
 note() {
     echo "NOTE: $*" > /dev/stderr
@@ -26,7 +29,7 @@ err() {
 
 fatal() {
     echo "FATAL: $*" > /dev/stderr
-    exit 1
+    Exit 1
 }
 
 warn() {
@@ -158,7 +161,7 @@ LINKS:
   Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
 EOF
-    exit 0
+    Exit 0
 }
 
 rm_zfs_snapshot() {
@@ -193,8 +196,8 @@ rm_zfs_snapshot() {
         echo "  This is bug, we definitely don't want that." > /dev/stderr
         echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        is_true $count_failures && [ $failures -gt 0 ] && exit $failures
-        exit 1
+        is_true $count_failures && [ $failures -gt 0 ] && Exit $failures
+        Exit 1
     fi
 }
 
@@ -430,6 +433,6 @@ if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
 fi
 
 
-is_true $count_failures && exit $failures
-exit 0
+is_true $count_failures && Exit $failures
+Exit 0
 # vim: set ts=4 sw=4 expandtab:
