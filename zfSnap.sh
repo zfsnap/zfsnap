@@ -38,7 +38,7 @@ Warn() {
 }
 
 
-OS=`uname`
+readonly OS=`uname`
 case $OS in
     'FreeBSD')
         ;;
