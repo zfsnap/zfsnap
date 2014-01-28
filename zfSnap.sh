@@ -19,20 +19,20 @@ Exit() {
     exit $1
 }
 
-note() {
+Note() {
     echo "NOTE: $*" > /dev/stderr
 }
 
-err() {
+Err() {
     echo "ERROR: $*" > /dev/stderr
 }
 
-fatal() {
+Fatal() {
     echo "FATAL: $*" > /dev/stderr
     Exit 1
 }
 
-warn() {
+Warn() {
     echo "WARNING: $*" > /dev/stderr
 }
 
@@ -46,7 +46,7 @@ case $OS in
         if [ -d "/usr/gnu/bin" ]; then
             export PATH="/usr/gnu/bin:$PATH"
         else
-            fatal "GNU bin direcotry not found"
+            Fatal "GNU bin direcotry not found"
         fi
         ;;
     'Linux')
@@ -57,12 +57,12 @@ case $OS in
         zpool_cmd='/usr/sbin/zpool'
         ;;
     *)
-        fatal "Your OS isn't supported"
+        Fatal "Your OS isn't supported"
         ;;
 esac
 
 
-is_true() {
+IsTrue() {
     case "$1" in
         [Tt][Rr][Uu][Ee])
             return 0
@@ -71,16 +71,16 @@ is_true() {
             return 1
             ;;
         *)
-            fatal "must be TRUE or FALSE"
+            Fatal "must be TRUE or FALSE"
             ;;
     esac
 }
 
-is_false() {
-    is_true $1 && return 1 || return 0
+IsFalse() {
+    IsTrue $1 && return 1 || return 0
 }
 
-s2time() {
+S2Time() {
     # convert seconds to human readable time
     xtime=$1
 
@@ -109,12 +109,12 @@ s2time() {
     echo "${years}${months}${days}${hours}${minutes}${seconds}"
 }
 
-time2s() {
+Time2S() {
     # convert human readable time to seconds
     echo "$1" | sed -e 's/y/*31536000+/g; s/m/*2592000+/g; s/w/*604800+/g; s/d/*86400+/g; s/h/*3600+/g; s/M/*60+/g; s/s//g; s/\+$//' | bc -l
 }
 
-date2timestamp() {
+Date2Timestamp() {
     date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
     case $OS in
@@ -127,7 +127,7 @@ date2timestamp() {
     esac
 }
 
-help() {
+Help() {
     cat << EOF
 ${0##*/} v${VERSION} by Aldis Berjoza
 
@@ -164,29 +164,29 @@ EOF
     Exit 0
 }
 
-rm_zfs_snapshot() {
-    if is_true $zpool28fix && [ "$1" = '-r' ]; then
+RmZfsSnapshot() {
+    if IsTrue $zpool28fix && [ "$1" = '-r' ]; then
         # get rid of '-r' parameter
-        rm_zfs_snapshot $2
+        RmZfsSnapshot $2
         return
     fi
 
     if [ "$1" = '-r' ]; then
-        skip_pool $2 || return 1
+        SkipPool $2 || return 1
     else
-        skip_pool $1 || return 1
+        SkipPool $1 || return 1
     fi
 
     zfs_destroy="$zfs_cmd destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
     if echo $* | grep -q -e '@'; then
-        if is_false $dry_run; then
+        if IsFalse $dry_run; then
             if $zfs_destroy > /dev/stderr; then
-                is_true $verbose && echo "$zfs_destroy  ... DONE"
+                IsTrue $verbose && echo "$zfs_destroy  ... DONE"
             else
-                is_true $verbose && echo "$zfs_destroy  ... FAIL"
-                is_true $count_failures && failures=$(($failures + 1))
+                IsTrue $verbose && echo "$zfs_destroy  ... FAIL"
+                IsTrue $count_failures && failures=$(($failures + 1))
             fi
         else
             echo "$zfs_destroy"
@@ -196,25 +196,25 @@ rm_zfs_snapshot() {
         echo "  This is bug, we definitely don't want that." > /dev/stderr
         echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        is_true $count_failures && [ $failures -gt 0 ] && Exit $failures
+        IsTrue $count_failures && [ $failures -gt 0 ] && Exit $failures
         Exit 1
     fi
 }
 
-skip_pool() {
+SkipPool() {
     # more like skip pool???
-    if is_true $scrub_skip; then
+    if IsTrue $scrub_skip; then
         for i in $scrub_pools; do
             if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                is_true $verbose && note "No action will be performed on '$1'. Scrub is running on pool."
+                IsTrue $verbose && Note "No action will be performed on '$1'. Scrub is running on pool."
                 return 1
             fi
         done
     fi
-    if is_true $resilver_skip; then
+    if IsTrue $resilver_skip; then
         for i in $resilver_pools; do
             if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                is_true $verbose && note "No action will be performed on '$1'. Resilver is running on pool."
+                IsTrue $verbose && Note "No action will be performed on '$1'. Resilver is running on pool."
                 return 1
             fi
         done
@@ -223,8 +223,8 @@ skip_pool() {
 }
 
 
-[ $# = 0 ] && help
-[ "$1" = '-h' -o $1 = "--help" ] && help
+[ $# = 0 ] && Help
+[ "$1" = '-h' -o $1 = "--help" ] && Help
 
 ttl='1m'    # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
@@ -264,7 +264,7 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
         ;;
 
     '-F')
-        force_delete_snapshots_age=`time2s $2`
+        force_delete_snapshots_age=`Time2S $2`
         shift 2
         ;;
 
@@ -298,20 +298,20 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
     esac
 done
 
-if is_true $get_pools; then
+if IsTrue $get_pools; then
     pools=`$zpool_cmd list -H -o name`
     for i in $pools; do
-        if is_true $resilver_skip; then
+        if IsTrue $resilver_skip; then
             $zpool_cmd status $i | grep -q -e 'resilver in progress' && resilver_pools="$resilver_pools $i"
         fi
-        if is_true $scrub_skip; then
+        if IsTrue $scrub_skip; then
             $zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
         fi
     done
 fi
 
 readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
-if is_false $zero_seconds; then
+if IsFalse $zero_seconds; then
     readonly tfrmt='%Y-%m-%d_%H.%M.%S'
 else
     readonly tfrmt='%Y-%m-%d_%H.%M.00'
@@ -320,7 +320,7 @@ fi
 readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
 
 
-is_true $dry_run && zfs_list=`$zfs_cmd list -H -o name`
+IsTrue $dry_run && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
     while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
@@ -335,7 +335,7 @@ while [ "$1" ]; do
             ;;
         '-a')
             ttl="$2"
-            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`s2time $ttl`
+            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`S2Time $ttl`
             shift 2
             ;;
         '-p')
@@ -361,23 +361,23 @@ while [ "$1" ]; do
 
     # create snapshots
     if [ $1 ]; then
-        if skip_pool $1; then
+        if SkipPool $1; then
             if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
                 zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}${postfx}"
-                if is_false $dry_run; then
+                if IsFalse $dry_run; then
                     if $zfs_snapshot > /dev/stderr; then
-                        is_true $verbose && echo "$zfs_snapshot ... DONE"
+                        IsTrue $verbose && echo "$zfs_snapshot ... DONE"
                     else
-                        is_true $verbose && echo "$zfs_snapshot ... FAIL"
-                        is_true $count_failures && failures=$(($failures + 1))
+                        IsTrue $verbose && echo "$zfs_snapshot ... FAIL"
+                        IsTrue $count_failures && failures=$(($failures + 1))
                     fi
                 else
                     printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
                         && echo "$zfs_snapshot" \
-                        || err "Looks like zfs filesystem '$1' doesn't exist"
+                        || Err "Looks like zfs filesystem '$1' doesn't exist"
                 fi
             else
-                warn "'$1' doesn't look like valid argument. Ignoring"
+                Warn "'$1' doesn't look like valid argument. Ignoring"
             fi
         fi
         shift
@@ -387,9 +387,9 @@ done
 prefixes=`echo "$prefixes" | sed -e 's/^\|//'`
 
 # delete snapshots
-if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
+if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 
-    if is_false $zpool28fix; then
+    if IsFalse $zpool28fix; then
         zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
     else
         zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$"`
@@ -397,9 +397,9 @@ if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 
     current_time=`date +%s`
     for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
-        create_time=$(date2timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefixes})?//"`)
-        if is_true $delete_snapshots; then
-            stay_time=$(time2s `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
+        create_time=$(Date2Timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefixes})?//"`)
+        if IsTrue $delete_snapshots; then
+            stay_time=$(Time2S `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
             [ $current_time -gt $(($create_time + $stay_time)) ] \
                 && rm_snapshot_pattern="$rm_snapshot_pattern $i"
         fi
@@ -412,7 +412,7 @@ if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
     if [ "$rm_snapshot_pattern" != '' ]; then
         rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
         for i in $rm_snapshots; do
-            rm_zfs_snapshot -r $i
+            RmZfsSnapshot -r $i
         done
     fi
 fi
@@ -421,18 +421,18 @@ fi
 if [ "$delete_specific_fs_snapshots" != '' ]; then
     rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
-        rm_zfs_snapshot $i
+        RmZfsSnapshot $i
     done
 fi
 
 if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
     rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
-        rm_zfs_snapshot -r $i
+        RmZfsSnapshot -r $i
     done
 fi
 
 
-is_true $count_failures && Exit $failures
+IsTrue $count_failures && Exit $failures
 Exit 0
 # vim: set ts=4 sw=4 expandtab:
