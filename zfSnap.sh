@@ -84,7 +84,7 @@ IsFalse() {
 }
 
 # Converts seconds to TTL
-S2Time() {
+Seconds2TTL() {
     # convert seconds to human readable time
     xtime=$1
 
@@ -114,7 +114,7 @@ S2Time() {
 }
 
 # Converts TTL to seconds
-Time2S() {
+TTL2Seconds() {
     # convert human readable time to seconds
     echo "$1" | sed -e 's/y/*31536000+/g; s/m/*2592000+/g; s/w/*604800+/g; s/d/*86400+/g; s/h/*3600+/g; s/M/*60+/g; s/s//g; s/\+$//' | bc -l
 }
@@ -272,7 +272,7 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
         ;;
 
     '-F')
-        force_delete_snapshots_age=`Time2S $2`
+        force_delete_snapshots_age=`TTL2Seconds $2`
         shift 2
         ;;
 
@@ -343,7 +343,7 @@ while [ "$1" ]; do
             ;;
         '-a')
             ttl="$2"
-            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`S2Time $ttl`
+            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL $ttl`
             shift 2
             ;;
         '-p')
@@ -407,7 +407,7 @@ if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
     for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
         create_time=$(Date2Timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefixes})?//"`)
         if IsTrue $delete_snapshots; then
-            stay_time=$(Time2S `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
+            stay_time=$(TTL2Seconds `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
             [ $current_time -gt $(($create_time + $stay_time)) ] \
                 && rm_snapshot_pattern="$rm_snapshot_pattern $i"
         fi
