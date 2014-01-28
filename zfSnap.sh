@@ -15,6 +15,7 @@ ESED='sed -E'
 zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
 
+# Exit programm with given status code
 Exit() {
     exit $1
 }
@@ -62,12 +63,13 @@ case $OS in
 esac
 
 
+# Returns 1 if argument is "true"
 IsTrue() {
     case "$1" in
-        [Tt][Rr][Uu][Ee])
+        true)
             return 0
             ;;
-        [Ff][Aa][Ll][Ss][Ee])
+        false)
             return 1
             ;;
         *)
@@ -76,10 +78,12 @@ IsTrue() {
     esac
 }
 
+# Returns 1 if argument is "false"
 IsFalse() {
     IsTrue $1 && return 1 || return 0
 }
 
+# Converts seconds to TTL
 S2Time() {
     # convert seconds to human readable time
     xtime=$1
@@ -109,11 +113,13 @@ S2Time() {
     echo "${years}${months}${days}${hours}${minutes}${seconds}"
 }
 
+# Converts TTL to seconds
 Time2S() {
     # convert human readable time to seconds
     echo "$1" | sed -e 's/y/*31536000+/g; s/m/*2592000+/g; s/w/*604800+/g; s/d/*86400+/g; s/h/*3600+/g; s/M/*60+/g; s/s//g; s/\+$//' | bc -l
 }
 
+# Converts datetime to seconds
 Date2Timestamp() {
     date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
 
@@ -164,6 +170,7 @@ EOF
     Exit 0
 }
 
+# Removes zfs snapshot
 RmZfsSnapshot() {
     if IsTrue $zpool28fix && [ "$1" = '-r' ]; then
         # get rid of '-r' parameter
@@ -201,6 +208,7 @@ RmZfsSnapshot() {
     fi
 }
 
+# Returns 1 if zfs operations on given pool should be skipped
 SkipPool() {
     # more like skip pool???
     if IsTrue $scrub_skip; then
