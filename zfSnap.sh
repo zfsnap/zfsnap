@@ -228,8 +228,8 @@ force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 
 delete_snapshots="false"            # Delete old snapshots?
 verbose="false"                     # Verbose output?
 dry_run="false"                     # Dry run?
-prefx=""                            # Default prefix
-prefxes=""                          # List of prefixes
+prefix=""                           # Default prefix
+prefixes=""                         # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 zero_seconds="false"                # Should new snapshots always have 00 seconds?
@@ -336,12 +336,12 @@ while [ "$1" ]; do
             shift 2
             ;;
         '-p')
-            prefx="$2"
-            prefxes="$prefxes|$prefx"
+            prefix="$2"
+            prefixes="$prefixes|$prefix"
             shift 2
             ;;
         '-P')
-            prefx=""
+            prefix=""
             shift
             ;;
         '-D')
@@ -360,7 +360,7 @@ while [ "$1" ]; do
     if [ $1 ]; then
         if skip_pool $1; then
             if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
-                zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefx}${ntime}--${ttl}${postfx}"
+                zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}${postfx}"
                 if is_false $dry_run; then
                     if $zfs_snapshot > /dev/stderr; then
                         is_true $verbose && echo "$zfs_snapshot ... DONE"
@@ -381,22 +381,22 @@ while [ "$1" ]; do
     fi
 done
 
-prefxes=`echo "$prefxes" | sed -e 's/^\|//'`
+prefixes=`echo "$prefixes" | sed -e 's/^\|//'`
 
 # delete snapshots
 if is_true $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 
     if is_false $zpool28fix; then
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
     else
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$"`
     fi
 
     current_time=`date +%s`
     for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
-        create_time=$(date2timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefxes})?//"`)
+        create_time=$(date2timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefixes})?//"`)
         if is_true $delete_snapshots; then
-            stay_time=$(time2s `echo $i | $ESED -e "s/^(${prefxes})?${date_pattern}--//"`)
+            stay_time=$(time2s `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
             [ $current_time -gt $(($create_time + $stay_time)) ] \
                 && rm_snapshot_pattern="$rm_snapshot_pattern $i"
         fi
@@ -416,14 +416,14 @@ fi
 
 # delete all snap
 if [ "$delete_specific_fs_snapshots" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
         rm_zfs_snapshot $i
     done
 fi
 
 if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefxes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
     for i in $rm_snapshots; do
         rm_zfs_snapshot -r $i
     done
