@@ -17,7 +17,7 @@ zpool_cmd='/sbin/zpool'
 
 # Exit programm with given status code
 Exit() {
-    exit $1
+    IsTrue $test_mode || exit $1
 }
 
 Note() {
@@ -30,7 +30,7 @@ Err() {
 
 Fatal() {
     echo "FATAL: $*" > /dev/stderr
-    Exit 1
+    exit 1
 }
 
 Warn() {
@@ -80,7 +80,7 @@ IsTrue() {
 
 # Returns 1 if argument is "false"
 IsFalse() {
-    IsTrue $1 && return 1 || return 0
+    IsTrue "$1" && return 1 || return 0
 }
 
 # Converts seconds to TTL
@@ -121,13 +121,12 @@ TTL2Seconds() {
 
 # Converts datetime to seconds
 Date2Timestamp() {
-    date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
-
     case $OS in
     'FreeBSD' | 'Darwin' )
-        date -j -f '%Y-%m-%d %H:%M:%S' "$date_normal" '+%s'
+        date -j -f '%Y-%m-%d_%H.%M.%S' "$1" '+%s'
         ;;
     *)
+        date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
         date --date "$date_normal" '+%s'
         ;;
     esac
@@ -231,8 +230,11 @@ SkipPool() {
 }
 
 
-[ $# = 0 ] && Help
-[ "$1" = '-h' -o $1 = "--help" ] && Help
+
+if IsFalse $test_mode; then
+    [ $# = 0 ] && Help
+    [ "$1" = '-h' -o $1 = "--help" ] && Help
+fi
 
 ttl='1m'    # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
@@ -253,6 +255,7 @@ scrub_skip="false"                  # Should I skip processing pools in process 
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
+test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
     case "$1" in
