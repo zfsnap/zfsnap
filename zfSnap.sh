@@ -156,9 +156,9 @@ OPTIONS:
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefix for snapshots after this switch
   -r           = Create recursive snapshots for all zfs file systems that
-                 fallow this switch
+                 follow this switch
   -R           = Create non-recursive snapshots for all zfs file systems that
-                 fallow this switch
+                 follow this switch
 
 LINKS:
   wiki:             https://github.com/graudeejs/zfSnap/wiki
