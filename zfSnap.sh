@@ -210,7 +210,6 @@ RmZfsSnapshot() {
 
 # Returns 1 if zfs operations on given pool should be skipped
 SkipPool() {
-    # more like skip pool???
     if IsTrue $scrub_skip; then
         for i in $scrub_pools; do
             if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
@@ -237,7 +236,7 @@ if IsFalse $test_mode; then
     [ "$1" = '-h' -o $1 = "--help" ] && Help
 fi
 
-ttl='1m'    # default snapshot ttl
+ttl='1m'                            # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
 delete_snapshots="false"            # Delete old snapshots?
 verbose="false"                     # Verbose output?
@@ -247,12 +246,12 @@ prefixes=""                         # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 zero_seconds="false"                # Should new snapshots always have 00 seconds?
-scrub_pools=""                      # List of pools that are in precess of scrubing
-resilver_pools=""                   # List of pools that are in process of resilvering
+scrub_pools=""                      # List of pools that are scrubing
+resilver_pools=""                   # List of pools that are resilvering
 pools=""                            # List of pools
 get_pools="false"                   # Should I get list of pools?
-resilver_skip="false"               # Should I skip processing pools in process of resilvering.
-scrub_skip="false"                  # Should I skip processing pools in process of scrubing.
+resilver_skip="false"               # Should I skip pools that are resilvering?
+scrub_skip="false"                  # Should I skip pools that are scrubing?
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
