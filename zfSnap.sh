@@ -264,11 +264,11 @@ SendZfsSnapshot() {
             zfs_remote_snapshots=`$backup_host zfs list -H -o name -t snapshot | grep -E -e "^$backup_pool$dataset@(${prefixes})?${date_pattern}--${htime_pattern}$"`
         fi
         local base_increment=""
-        #local remote_snapshots=`echo $zfs_remote_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`
+        local remote_snapshots=$(echo $zfs_remote_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r)
 
          # check if we can go incremental: find the most recent snapshot also existing on remote
         for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`; do
-            for t in `echo $zfs_remote_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`; do
+            for t in $remote_snapshots; do
                 if [ "$i" = "$t" ]; then
                     base_increment="$1@$i"
                     break
