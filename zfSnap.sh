@@ -5,15 +5,20 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return. Aldis Berjoza
 
+# <sebastien@emmene-moi.fr> added the zfs remote sync functions
+
 # wiki:             https://github.com/graudeejs/zfSnap/wiki
 # repository:       https://github.com/graudeejs/zfSnap
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
-readonly VERSION=1.11.1
+readonly VERSION=1.12.0
 
 ESED='sed -E'
 zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
+zip_cmd='/bin/gzip'
+unzip_cmd='zcat'
+test_mode=${test_mode:="false"}
 
 # Exit programm with given status code
 Exit() {
@@ -159,6 +164,11 @@ OPTIONS:
                  fallow this switch
   -R           = Create non-recursive snapshots for all zfs file systems that
                  fallow this switch
+  -bhost host  = send the dataset to the indicated host using ssh.
+                 You can indicate the key to be used, quotes are important: 
+                 -bhost "-i <path to ssh key> <user>@<domain>" 
+  -bpool pool  = remote pool receiving the dataset 
+  -bz          = send to remote using gzip2 (both source and dest shall have gzip2 installed)
 
 LINKS:
   wiki:             https://github.com/graudeejs/zfSnap/wiki
@@ -229,6 +239,66 @@ SkipPool() {
     return 0
 }
 
+# Send snapshot to backup pool on backup host from {1: dataset, 2:snapshot}
+SendZfsSnapshot() {
+    
+    if [ "$backup_host" != '' -o "$backup_pool" != '' ]; then
+        local datapool=$(echo "$1" | $ESED -e "s/\/*.*//")
+        local dataset=$(echo "$1" | grep -o -P "(/.*)")
+
+        if [ "$backup_pool" = '' ]; then
+            backup_pool="$datapool"
+        fi
+    
+        # local snapshots list
+        if IsFalse $zpool28fix; then
+            zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1@(${prefixes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+        else
+            zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1@(${prefixes})?${date_pattern}--${htime_pattern}$"`
+        fi
+
+        # remote snapshots list
+        if IsFalse $zpool28fix; then
+            zfs_remote_snapshots=`$backup_host zfs list -H -o name -t snapshot | grep -E -e "^$backup_pool$dataset@(${prefixes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+        else
+            zfs_remote_snapshots=`$backup_host zfs list -H -o name -t snapshot | grep -E -e "^$backup_pool$dataset@(${prefixes})?${date_pattern}--${htime_pattern}$"`
+        fi
+        local base_increment=""
+        #local remote_snapshots=`echo $zfs_remote_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`
+
+         # check if we can go incremental: find the most recent snapshot also existing on remote
+        for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`; do
+            for t in `echo $zfs_remote_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u -r`; do
+                if [ "$i" = "$t" ]; then
+                    base_increment="$1@$i"
+                    break
+                fi
+            done
+            if [ "$base_increment" != "" ]; then
+                break
+            fi
+        done
+
+        local ziped="";
+        IsTrue $backup_ziped && ziped="true"
+
+        zfs_send="$zfs_cmd send $zopt ${base_increment:+-i $base_increment }$1@$2 ${ziped:+| $zip_cmd -c }| $backup_host \"${ziped:+$unzip_cmd | }zfs recv -F $backup_pool$dataset\""
+
+        if IsFalse $dry_run; then
+            if eval $zfs_send > /dev/stderr; then
+                IsTrue $verbose && echo "$zfs_send ... DONE"
+            else
+                IsTrue $verbose && echo "$zfs_send ... FAIL"
+                IsTrue $count_failures && failures=$(($failures + 1))
+            fi
+        else
+            printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+                && echo "$zfs_send" \
+                || Err "Looks like zfs filesystem '$1' doesn't exist"
+        fi
+    fi
+    return 0
+}
 
 
 if IsFalse $test_mode; then
@@ -256,6 +326,9 @@ failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
 test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
+backup_host=""                      # SSH host target to receive zfs
+backup_pool=""                      # remote pool name (could be on the same machine in no remote host specified
+backup_ziped="false"                # bzip remote zfs send
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
     case "$1" in
@@ -334,7 +407,7 @@ readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]
 IsTrue $dry_run && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
-    while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
+    while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' -o "$1" = '-bhost' -o "$1" = '-bpool' -o "$1" = '-bz' ]; do
         case "$1" in
         '-r')
             zopt='-r'
@@ -366,7 +439,18 @@ while [ "$1" ]; do
             fi
             shift 2
             ;;
-
+        '-bhost')
+            backup_host="ssh -q $2"
+            shift 2
+            ;;
+        '-bpool')
+            backup_pool="$2"
+            shift 2
+            ;;
+        '-bz')
+            backup_ziped="true"
+            shift
+            ;;
         esac
     done
 
@@ -387,6 +471,7 @@ while [ "$1" ]; do
                         && echo "$zfs_snapshot" \
                         || Err "Looks like zfs filesystem '$1' doesn't exist"
                 fi
+                SendZfsSnapshot $1 ${prefix}${ntime}--${ttl}${postfx}
             else
                 Warn "'$1' doesn't look like valid argument. Ignoring"
             fi
