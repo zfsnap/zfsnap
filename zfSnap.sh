@@ -14,6 +14,7 @@ readonly VERSION=1.11.1
 ESED='sed -E'
 zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
+test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
 
 # Exit programm with given status code
 Exit() {
@@ -255,7 +256,6 @@ scrub_skip="false"                  # Should I skip processing pools in process 
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
-test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
     case "$1" in
