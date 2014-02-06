@@ -373,7 +373,7 @@ while [ "$1" ]; do
     if [ $1 ]; then
         if SkipPool $1; then
             if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
-                zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}${postfx}"
+                zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
                 if IsFalse $dry_run; then
                     if $zfs_snapshot > /dev/stderr; then
                         IsTrue $verbose && echo "$zfs_snapshot ... DONE"
