@@ -168,7 +168,7 @@ OPTIONS:
                  You can indicate the key to be used, quotes are important: 
                  -bhost "-i <path to ssh key> <user>@<domain>" 
   -bpool pool  = remote pool receiving the dataset 
-  -bz          = send to remote using gzip2 (both source and dest shall have gzip2 installed)
+  -bz          = send to remote using gzip (both source and dest shall have gzip installed)
 
 LINKS:
   wiki:             https://github.com/graudeejs/zfSnap/wiki
