@@ -11,9 +11,13 @@
 
 readonly VERSION=1.11.1
 
+# commands
 ESED='sed -E'
 zfs_cmd='/sbin/zfs'
 zpool_cmd='/sbin/zpool'
+
+# global variables
+readonly ttl_pattern="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
 test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
 
 # Exit programm with given status code
@@ -131,6 +135,11 @@ Date2Timestamp() {
         date --date "$date_normal" '+%s'
         ;;
     esac
+}
+
+# Check validity of TTL
+ValidTTL() {
+    printf "$1" | grep -E "^${ttl_pattern}$" > /dev/null
 }
 
 Help() {
@@ -327,9 +336,6 @@ else
     readonly tfrmt='%Y-%m-%d_%H.%M.00'
 fi
 
-readonly htime_pattern='([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s]?)?'
-
-
 IsTrue $dry_run && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
 while [ "$1" ]; do
@@ -346,6 +352,7 @@ while [ "$1" ]; do
         '-a')
             ttl="$2"
             echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL $ttl`
+            ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
             shift 2
             ;;
         '-p')
@@ -400,14 +407,14 @@ prefixes=`echo "$prefixes" | sed -e 's/^\|//'`
 if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
 
     if IsFalse $zpool28fix; then
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$" | sed -e 's#/.*@#@#'`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${ttl_pattern}$" | sed -e 's#/.*@#@#'`
     else
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${htime_pattern}$"`
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
     fi
 
     current_time=`date +%s`
     for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
-        create_time=$(Date2Timestamp `echo "$i" | $ESED -e "s/--${htime_pattern}$//; s/^(${prefixes})?//"`)
+        create_time=$(Date2Timestamp `echo "$i" | $ESED -e "s/--${ttl_pattern}$//; s/^(${prefixes})?//"`)
         if IsTrue $delete_snapshots; then
             stay_time=$(TTL2Seconds `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
             [ $current_time -gt $(($create_time + $stay_time)) ] \
@@ -429,14 +436,14 @@ fi
 
 # delete all snap
 if [ "$delete_specific_fs_snapshots" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
     for i in $rm_snapshots; do
         RmZfsSnapshot $i
     done
 fi
 
 if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${htime_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
     for i in $rm_snapshots; do
         RmZfsSnapshot -r $i
     done
