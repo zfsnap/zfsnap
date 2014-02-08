@@ -401,7 +401,7 @@ while [ "$1" ]; do
     fi
 done
 
-prefixes=`echo "$prefixes" | sed -e 's/^\|//'`
+prefixes=`echo "$prefixes" | sed -e 's/^|//'`
 
 # delete snapshots
 if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
