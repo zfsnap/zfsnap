@@ -20,7 +20,7 @@ zpool_cmd='/sbin/zpool'
 readonly ttl_pattern="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
 test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
 
-# Exit programm with given status code
+# Exit program with given status code
 Exit() {
     IsTrue $test_mode || exit $1
 }
@@ -68,7 +68,7 @@ case $OS in
 esac
 
 
-# Returns 1 if argument is "true"
+# Returns 0 if argument is "true"
 IsTrue() {
     case "$1" in
         true)
@@ -83,7 +83,7 @@ IsTrue() {
     esac
 }
 
-# Returns 1 if argument is "false"
+# Returns 0 if argument is "false"
 IsFalse() {
     IsTrue "$1" && return 1 || return 0
 }
@@ -255,12 +255,12 @@ prefixes=""                         # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 zero_seconds="false"                # Should new snapshots always have 00 seconds?
-scrub_pools=""                      # List of pools that are scrubing
+scrub_pools=""                      # List of pools that are scrubbing
 resilver_pools=""                   # List of pools that are resilvering
 pools=""                            # List of pools
 get_pools="false"                   # Should I get list of pools?
 resilver_skip="false"               # Should I skip pools that are resilvering?
-scrub_skip="false"                  # Should I skip pools that are scrubing?
+scrub_skip="false"                  # Should I skip pools that are scrubbing?
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
@@ -434,7 +434,7 @@ if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
     fi
 fi
 
-# delete all snap
+# delete all snapshots
 if [ "$delete_specific_fs_snapshots" != '' ]; then
     rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
     for i in $rm_snapshots; do
