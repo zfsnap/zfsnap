@@ -78,7 +78,7 @@ IsTrue() {
             return 1
             ;;
         *)
-            Fatal "must be TRUE or FALSE"
+            Fatal "must be true or false"
             ;;
     esac
 }
