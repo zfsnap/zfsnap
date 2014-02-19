@@ -101,6 +101,10 @@ Seconds2TTL() {
     xtime=$(($xtime % 2592000))
     [ ${months:-0} -gt 0 ] && months="${months}m" || months=""
 
+    weeks=$(($xtime / 604800))
+    xtime=$(($xtime % 604800))
+    [ ${weeks:-0} -gt 0 ] && weeks="${weeks}w" || weeks=""
+
     days=$(($xtime / 86400))
     xtime=$(($xtime % 86400))
     [ ${days:-0} -gt 0 ] && days="${days}d" || days=""
@@ -115,7 +119,7 @@ Seconds2TTL() {
     seconds=$(($xtime % 60))
     [ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
 
-    echo "${years}${months}${days}${hours}${minutes}${seconds}"
+    echo "${years}${months}${weeks}${days}${hours}${minutes}${seconds}"
 }
 
 # Converts TTL to seconds

@@ -9,9 +9,10 @@ ItEchos "TTL2Seconds '59s'"           "59"
 ItEchos "TTL2Seconds '1M'"            "60"
 ItEchos "TTL2Seconds '1h'"            "3600"
 ItEchos "TTL2Seconds '1d'"            "86400"
+ItEchos "TTL2Seconds '1w'"            "604800"
 ItEchos "TTL2Seconds '1m'"            "2592000"
 ItEchos "TTL2Seconds '12m'"           "31104000"
 ItEchos "TTL2Seconds '1y'"            "31536000"
-ItEchos "TTL2Seconds '2y3m4d5h6M7s'"  "71211967"
+ItEchos "TTL2Seconds '2y3m2w4d5h6M7s'" "72421567"
 
 ExitTests
