@@ -21,5 +21,6 @@ ItReturns "ValidTTL 7y5h"           0   # skip a few modifiers
 ItReturns "ValidTTL 10y24d5s"       0   # use double digits with modifiers
 ItReturns "ValidTTL 4000d"          0   # use a very large number
 ItReturns "ValidTTL 1m"             0   # test the default TTL
+ItReturns "ValidTTL forever"        0   # 'forever' is a valid, special case TTL
 
 ExitTests

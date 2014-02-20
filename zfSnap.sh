@@ -139,7 +139,7 @@ Date2Timestamp() {
 
 # Check validity of TTL
 ValidTTL() {
-    printf "$1" | grep -E "^${ttl_pattern}$" > /dev/null
+    printf "$1" | grep -E "(^${ttl_pattern}$)|(^forever$)" > /dev/null
 }
 
 Help() {
@@ -436,14 +436,14 @@ fi
 
 # delete all snapshots
 if [ "$delete_specific_fs_snapshots" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots" | tr ' ' '|'))@(${prefixes})?${date_pattern}--(${ttl_pattern}|forever)$"`
     for i in $rm_snapshots; do
         RmZfsSnapshot $i
     done
 fi
 
 if [ "$delete_specific_fs_snapshots_recursively" != '' ]; then
-    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+    rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^($(echo "$delete_specific_fs_snapshots_recursively" | tr ' ' '|'))@(${prefixes})?${date_pattern}--(${ttl_pattern}|forever)$"`
     for i in $rm_snapshots; do
         RmZfsSnapshot -r $i
     done
