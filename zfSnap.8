@@ -59,7 +59,10 @@ Return the number of failed actions as the exit code.
 Force delete all snapshots in all pools exceeding
 .Ar age
 .Pq defined in TTL format
-regardless of their TTL expiration.
+regardless of their TTL expiration
+.Po except for snapshots with a TTL of
+.Cm forever
+.Pc .
 .It Fl h
 Print a summary of the command-line options and then exit.
 .It Fl n
@@ -91,7 +94,7 @@ for more information.
 .It Fl D Ar pool/fs
 Delete all zfSnap snapshots of
 .Ar pool/fs
-regardless of their TTL expiration.
+regardless of their TTL.
 .It Fl p Ar prefix
 Use
 .Ar prefix
@@ -108,7 +111,7 @@ Create non\[hy]recursive snapshots for all ZFS file systems that follow this swi
 The Time\[hy]To\[hy]Live
 .Pq TTL
 contains numbers and modifiers. Valid modifiers are:
-.Bl -tag -width Ds -offset 4n
+.Bl -tag -width 8n -offset 4n
 .It Cm y
 years
 .Pq 365 days
@@ -125,6 +128,14 @@ hours
 minutes
 .It Cm s
 seconds
+.It Cm forever
+a special\[hy]case modifier that will never expire and cannot be used with other TTL modifiers.
+.Op Fl F
+will not delete a snapshot with a TTL of
+.Cm forever
+but
+.Op Fl D
+will.
 .El
 .Pp
 You do not need to use all of the modifiers, but they must be used in the above order
