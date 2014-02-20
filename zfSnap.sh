@@ -320,7 +320,7 @@ while [ "$1" ]; do
                    delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $OPTARG"
                fi
                ;;
-            p) prefix="$OPTARG"; prefixes="$prefixes|$prefix";;
+            p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
             P) prefix="";;
             r) zopt='-r';;
             R) zopt='';;
@@ -355,8 +355,6 @@ while [ "$1" ]; do
         shift
     fi
 done
-
-prefixes=`echo "$prefixes" | sed -e 's/^|//'`
 
 # delete snapshots
 if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
