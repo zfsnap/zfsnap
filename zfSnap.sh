@@ -139,7 +139,7 @@ Date2Timestamp() {
 
 # Check validity of TTL
 ValidTTL() {
-    printf "$1" | grep -E "^${ttl_pattern}$" > /dev/null
+    printf "%s" "$1" | grep -E "^${ttl_pattern}$" > /dev/null
 }
 
 Help() {
@@ -153,6 +153,7 @@ GENERIC OPTIONS:
   -d           = Delete old snapshots
   -e           = Return number of failed actions as exit code.
   -F age       = Force delete all snapshots exceeding age
+  -h           = Print this help and exit.
   -n           = Only show actions that would be performed
   -s           = Don't do anything on pools running resilver
   -S           = Don't do anything on pools running scrub
@@ -237,13 +238,6 @@ SkipPool() {
     return 0
 }
 
-
-
-if IsFalse $test_mode; then
-    [ $# = 0 ] && Help
-    [ "$1" = '-h' -o $1 = "--help" ] && Help
-fi
-
 ttl='1m'                            # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
 delete_snapshots="false"            # Delete old snapshots?
@@ -264,51 +258,28 @@ failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="true"                   # Workaround for zpool v28 zfs destroy -r bug
 
-while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
-    case "$1" in
-    '-d')
-        delete_snapshots="true"
-        shift
-        ;;
+# make sure arguments were provided
+if [ "$#" -eq 0 ] && IsFalse $test_mode; then
+    Help
+fi
 
-    '-v')
-        verbose="true"
-        shift
-        ;;
+# generic, script-level options
+while getopts :deF:hnsSvz opt; do
+    case "$opt" in
+        d) delete_snapshots="true";;
+        e) count_failures="true";;
+        F) force_delete_snapshots_age=`TTL2Seconds "$OPTARG"`;;
+        h) Help;;
+        n) dry_run="true";;
+        s) get_pools="true"; resilver_skip="true";;
+        S) get_pools="true"; scrub_skip="true";;
+        v) verbose="true";;
+        z) zero_seconds="true";;
 
-    '-n')
-        dry_run="true"
-        shift
-        ;;
-
-    '-F')
-        force_delete_snapshots_age=`TTL2Seconds $2`
-        shift 2
-        ;;
-
-    '-z')
-        zero_seconds="true"
-        shift
-        ;;
-
-    '-s')
-        get_pools="true"
-        resilver_skip="true"
-        shift
-        ;;
-
-    '-S')
-        get_pools="true"
-        scrub_skip="true"
-        shift
-        ;;
-
-    '-e')
-        count_failures="true"
-        shift
-        ;;
-
-
+        :) printf "Option -%s requires an argument.\n" "$OPTARG" >&2; Exit 1;;
+       \?) # unknown opt encountered, likely belongs to the next getops group
+           OPTIND=$(($OPTIND - 1)) # roll back one so the next getopts can check it
+           break;;
     esac
 done
 
@@ -333,63 +304,52 @@ fi
 
 IsTrue $dry_run && zfs_list=`$zfs_cmd list -H -o name`
 ntime=`date "+$tfrmt"`
-while [ "$1" ]; do
-    while [ "$1" = '-r' -o "$1" = '-R' -o "$1" = '-a' -o "$1" = '-p' -o "$1" = '-P' -o "$1" = '-D' ]; do
-        case "$1" in
-        '-r')
-            zopt='-r'
-            shift
-            ;;
-        '-R')
-            zopt=''
-            shift
-            ;;
-        '-a')
-            ttl="$2"
-            echo "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL $ttl`
-            ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
-            shift 2
-            ;;
-        '-p')
-            prefix="$2"
-            prefixes="$prefixes|$prefix"
-            shift 2
-            ;;
-        '-P')
-            prefix=""
-            shift
-            ;;
-        '-D')
-            if [ "$zopt" != '-r' ]; then
-                delete_specific_fs_snapshots="$delete_specific_fs_snapshots $2"
-            else
-                delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $2"
-            fi
-            shift 2
-            ;;
 
+# loop over the remaning arguments
+while [ "$1" ]; do
+    # pool-specific options
+    while getopts :a:D:p:PrR opt; do
+        case "$opt" in
+            a) ttl="$OPTARG"
+               printf "%s" "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL "$ttl"`
+               ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
+               ;;
+            D) if [ "$zopt" != '-r' ]; then
+                   delete_specific_fs_snapshots="$delete_specific_fs_snapshots $OPTARG"
+               else
+                   delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $OPTARG"
+               fi
+               ;;
+            p) prefix="$OPTARG"; prefixes="$prefixes|$prefix";;
+            P) prefix="";;
+            r) zopt='-r';;
+            R) zopt='';;
+
+            :) printf "Option -%s requires an argument.\n" "$OPTARG" >&2; Exit 1;;
+           \?) printf "Invalid option: -%s \n" "$OPTARG" >&2
+               printf "Perhaps you're passing a 'generic option' after a 'pool option'.\n" >&2
+               Exit 1;;
         esac
     done
 
+    # discard all arguments processed thus far
+    shift $(($OPTIND - 1))
+
     # create snapshots
-    if [ $1 ]; then
-        if SkipPool $1; then
-            if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
-                zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
-                if IsFalse $dry_run; then
-                    if $zfs_snapshot > /dev/stderr; then
-                        IsTrue $verbose && echo "$zfs_snapshot ... DONE"
-                    else
-                        IsTrue $verbose && echo "$zfs_snapshot ... FAIL"
-                        IsTrue $count_failures && failures=$(($failures + 1))
-                    fi
+    if [ "$1" ]; then
+        if SkipPool "$1"; then
+            zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
+            if IsFalse $dry_run; then
+                if $zfs_snapshot > /dev/stderr; then
+                    IsTrue $verbose && echo "$zfs_snapshot ... DONE"
                 else
-                    printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
-                        && echo "$zfs_snapshot" \
-                        || Err "Looks like zfs filesystem '$1' doesn't exist"
+                    IsTrue $verbose && echo "$zfs_snapshot ... FAIL"
+                    IsTrue $count_failures && failures=$(($failures + 1))
                 fi
             else
-                Warn "'$1' doesn't look like valid argument. Ignoring"
+                printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
+                    && echo "$zfs_snapshot" \
+                    || Err "Looks like ZFS filesystem '$1' doesn't exist"
             fi
         fi
         shift
