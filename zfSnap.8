@@ -18,9 +18,6 @@
 .Op Fl S
 .Op Fl v
 .Op Fl z
-.Op Fl zpool28fix
-.Oc
-.Oo
 .Op Fl a Ar ttl
 .Op Fl D Ar pool/fs
 .Op Fl p Ar prefix
@@ -46,13 +43,24 @@ Time\[hy]To\[hy]Live
 .Pq TTL
 is the length of time to keep a snapshot before it's ready for deletion.
 .
-.Ss Generic Options
-These options apply to
-.Nm
-as a whole. Declaring them more than once will have no effect.
+.Ss Options
+Options and arguments are operated on as they are read
+.Pq sequentially .
+Keep this in mind while building calls to
+.Nm .
 .Bl -tag -width Ds
+.It Fl a Ar TTL
+Set how long the snapshot should be kept. If not set, the default
+.Ar TTL
+is one month. See
+.Sx TTL SYNTAX
+for more information.
 .It Fl d
 Delete old snapshots.
+.It Fl D Ar pool/fs
+Delete all zfSnap snapshots of
+.Ar pool/fs
+regardless of their TTL expiration.
 .It Fl e
 Return the number of failed actions as the exit code.
 .It Fl F Ar age
@@ -64,34 +72,6 @@ regardless of their TTL expiration.
 Print a summary of the command-line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
-.It Fl s
-Skip pools that are resilvering.
-.It Fl S
-Skip pools that are scrubbing.
-.It Fl v
-Verbose output.
-.It Fl z
-Round snapshot creation time down to 00 seconds.
-.It Fl zpool28fix
-Workaround for zpool v28
-.Ic zfs destroy \-r
-bug.
-.El
-.
-.Ss Options
-These options apply to the snapshots which follow them. These options can be used
-multiple times and can override each other.
-.Bl -tag -width Ds
-.It Fl a Ar TTL
-Set how long the snapshot should be kept. If not set, the default
-.Ar TTL
-is one month. See
-.Sx TTL SYNTAX
-for more information.
-.It Fl D Ar pool/fs
-Delete all zfSnap snapshots of
-.Ar pool/fs
-regardless of their TTL expiration.
 .It Fl p Ar prefix
 Use
 .Ar prefix
@@ -102,6 +82,14 @@ Don't use a prefix for snapshots after this switch.
 Create recursive snapshots of all ZFS file systems that follow this switch.
 .It Fl R
 Create non\[hy]recursive snapshots for all ZFS file systems that follow this switch.
+.It Fl s
+Skip pools that are resilvering.
+.It Fl S
+Skip pools that are scrubbing.
+.It Fl v
+Verbose output.
+.It Fl z
+Round snapshot creation time down to 00 seconds.
 .El
 .
 .Sh TTL SYNTAX
