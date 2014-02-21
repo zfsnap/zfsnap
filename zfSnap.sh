@@ -219,24 +219,14 @@ RmZfsSnapshot() {
     fi
 }
 
-# Returns 1 if zfs operations on given pool should be skipped
+# Returns 1 if ZFS operations on given pool should be skipped
 SkipPool() {
-    if IsTrue $scrub_skip; then
-        for i in $scrub_pools; do
-            if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                IsTrue $verbose && Note "No action will be performed on '$1'. Scrub is running on pool."
-                return 1
-            fi
-        done
-    fi
-    if IsTrue $resilver_skip; then
-        for i in $resilver_pools; do
-            if [ `echo $1 | sed -e 's#/.*$##; s/@.*//'` = $i ]; then
-                IsTrue $verbose && Note "No action will be performed on '$1'. Resilver is running on pool."
-                return 1
-            fi
-        done
-    fi
+    for i in "$skip_pools"; do
+        if [ `printf '%s' "$1" | sed -e 's#/.*$##; s/@.*//'` = "$i" ]; then
+            IsTrue $verbose && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
+            return 1
+        fi
+    done
     return 0
 }
 
@@ -249,12 +239,8 @@ prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
-scrub_pools=""                      # List of pools that are scrubbing
-resilver_pools=""                   # List of pools that are resilvering
 pools=""                            # List of pools
-get_pools="false"                   # Should I get list of pools?
-resilver_skip="false"               # Should I skip pools that are resilvering?
-scrub_skip="false"                  # Should I skip pools that are scrubbing?
+skip_pools=""                       # List of pools to skip
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
 zpool28fix="true"                   # Workaround for zpool v28 zfs destroy -r bug
@@ -272,8 +258,16 @@ while getopts :deF:hnsSvz opt; do
         F) force_delete_snapshots_age=`TTL2Seconds "$OPTARG"`;;
         h) Help;;
         n) dry_run="true";;
-        s) get_pools="true"; resilver_skip="true";;
-        S) get_pools="true"; scrub_skip="true";;
+        s) pools="${pools:-`$zpool_cmd list -H -o name`}"
+           for i in "$pools"; do
+               $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
+           done
+           ;;
+        S) pools="${pools:-`$zpool_cmd list -H -o name`}"
+           for i in "$pools"; do
+               $zpool_cmd status $i | grep -q -e 'scrub in progress' && skip_pools="$skip_pools $i"
+           done
+           ;;
         v) verbose="true";;
         z) time_format='%Y-%m-%d_%H.%M.00';;
 
@@ -283,18 +277,6 @@ while getopts :deF:hnsSvz opt; do
            break;;
     esac
 done
-
-if IsTrue $get_pools; then
-    pools=`$zpool_cmd list -H -o name`
-    for i in $pools; do
-        if IsTrue $resilver_skip; then
-            $zpool_cmd status $i | grep -q -e 'resilver in progress' && resilver_pools="$resilver_pools $i"
-        fi
-        if IsTrue $scrub_skip; then
-            $zpool_cmd status $i | grep -q -e 'scrub in progress' && scrub_pools="$scrub_pools $i"
-        fi
-    done
-fi
 
 # loop over the remaning arguments
 while [ "$1" ]; do
