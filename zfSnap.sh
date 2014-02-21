@@ -149,28 +149,26 @@ Help() {
 ${0##*/} v${VERSION} by Aldis Berjoza
 
 Syntax:
-${0##*/} [ generic options ] [ options ] zpool/filesystem ...
+${0##*/} [ options ] zpool/filesystem ...
 
-GENERIC OPTIONS:
+OPTIONS:
+  -a ttl       = Set how long snapshot should be kept
   -d           = Delete old snapshots
+  -D pool/fs   = Delete all zfSnap snapshots of specific pool/fs (ignore ttl)
   -e           = Return number of failed actions as exit code.
   -F age       = Force delete all snapshots exceeding age
   -h           = Print this help and exit.
   -n           = Only show actions that would be performed
-  -s           = Don't do anything on pools running resilver
-  -S           = Don't do anything on pools running scrub
-  -v           = Verbose output
-  -z           = Force new snapshots to have 00 seconds!
-
-OPTIONS:
-  -a ttl       = Set how long snapshot should be kept
-  -D pool/fs   = Delete all zfSnap snapshots of specific pool/fs (ignore ttl)
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefix for snapshots after this switch
   -r           = Create recursive snapshots for all zfs file systems that
                  follow this switch
   -R           = Create non-recursive snapshots for all zfs file systems that
                  follow this switch
+  -s           = Don't do anything on pools running resilver
+  -S           = Don't do anything on pools running scrub
+  -v           = Verbose output
+  -z           = Force new snapshots to have 00 seconds!
 
 LINKS:
   wiki:             https://github.com/graudeejs/zfSnap/wiki
@@ -250,58 +248,44 @@ if [ "$#" -eq 0 ] && IsFalse $test_mode; then
     Help
 fi
 
-# generic, script-level options
-while getopts :deF:hnsSvz opt; do
-    case "$opt" in
-        d) delete_snapshots="true";;
-        e) count_failures="true";;
-        F) force_delete_snapshots_age=`TTL2Seconds "$OPTARG"`;;
-        h) Help;;
-        n) dry_run="true";;
-        s) pools="${pools:-`$zpool_cmd list -H -o name`}"
-           for i in "$pools"; do
-               $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
-           done
-           ;;
-        S) pools="${pools:-`$zpool_cmd list -H -o name`}"
-           for i in "$pools"; do
-               $zpool_cmd status $i | grep -q -e 'scrub in progress' && skip_pools="$skip_pools $i"
-           done
-           ;;
-        v) verbose="true";;
-        z) time_format='%Y-%m-%d_%H.%M.00';;
-
-        :) printf "Option -%s requires an argument.\n" "$OPTARG" >&2; Exit 1;;
-       \?) # unknown opt encountered, likely belongs to the next getops group
-           OPTIND=$(($OPTIND - 1)) # roll back one so the next getopts can check it
-           break;;
-    esac
-done
-
-# loop over the remaning arguments
+# main loop; get options, process snapshot creation
 while [ "$1" ]; do
-    # pool-specific options
-    while getopts :a:D:p:PrR opt; do
+    while getopts :a:dD:eF:hnp:PrRsSvz opt; do
         case "$opt" in
             a) ttl="$OPTARG"
                printf "%s" "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL "$ttl"`
                ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
                ;;
+            d) delete_snapshots="true";;
             D) if [ "$zopt" != '-r' ]; then
                    delete_specific_fs_snapshots="$delete_specific_fs_snapshots $OPTARG"
                else
                    delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $OPTARG"
                fi
                ;;
+            e) count_failures="true";;
+            F) force_delete_snapshots_age=`TTL2Seconds "$OPTARG"`;;
+            h) Help;;
+            n) dry_run="true";;
             p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
             P) prefix="";;
             r) zopt='-r';;
             R) zopt='';;
+            s) pools="${pools:-`$zpool_cmd list -H -o name`}"
+               for i in "$pools"; do
+                   $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
+               done
+               ;;
+            S) pools="${pools:-`$zpool_cmd list -H -o name`}"
+               for i in "$pools"; do
+                   $zpool_cmd status $i | grep -q -e 'scrub in progress' && skip_pools="$skip_pools $i"
+               done
+               ;;
+            v) verbose="true";;
+            z) time_format='%Y-%m-%d_%H.%M.00';;
 
-            :) printf "Option -%s requires an argument.\n" "$OPTARG" >&2; Exit 1;;
-           \?) printf "Invalid option: -%s \n" "$OPTARG" >&2
-               printf "Perhaps you're passing a 'generic option' after a 'pool option'.\n" >&2
-               Exit 1;;
+            :) Fatal "Option -$OPTARG requires an argument.";;
+           \?) Fatal "Invalid option: -$OPTARG";;
         esac
     done
 
