@@ -18,7 +18,9 @@ zpool_cmd='/sbin/zpool'
 
 # global variables
 readonly ttl_pattern="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
+readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
+time_format='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
 
 # Exit program with given status code
 Exit() {
@@ -247,7 +249,6 @@ prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
-zero_seconds="false"                # Should new snapshots always have 00 seconds?
 scrub_pools=""                      # List of pools that are scrubbing
 resilver_pools=""                   # List of pools that are resilvering
 pools=""                            # List of pools
@@ -274,7 +275,7 @@ while getopts :deF:hnsSvz opt; do
         s) get_pools="true"; resilver_skip="true";;
         S) get_pools="true"; scrub_skip="true";;
         v) verbose="true";;
-        z) zero_seconds="true";;
+        z) time_format='%Y-%m-%d_%H.%M.00';;
 
         :) printf "Option -%s requires an argument.\n" "$OPTARG" >&2; Exit 1;;
        \?) # unknown opt encountered, likely belongs to the next getops group
@@ -294,16 +295,6 @@ if IsTrue $get_pools; then
         fi
     done
 fi
-
-readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
-if IsFalse $zero_seconds; then
-    readonly tfrmt='%Y-%m-%d_%H.%M.%S'
-else
-    readonly tfrmt='%Y-%m-%d_%H.%M.00'
-fi
-
-IsTrue $dry_run && zfs_list=`$zfs_cmd list -H -o name`
-ntime=`date "+$tfrmt"`
 
 # loop over the remaning arguments
 while [ "$1" ]; do
@@ -338,6 +329,9 @@ while [ "$1" ]; do
     # create snapshots
     if [ "$1" ]; then
         if SkipPool "$1"; then
+            ntime="${ntime:-`date "+$time_format"`}"
+            IsTrue $dry_run && zfs_list="${zfs_list:-`$zfs_cmd list -H -o name`}"
+
             zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
             if IsFalse $dry_run; then
                 if $zfs_snapshot > /dev/stderr; then
