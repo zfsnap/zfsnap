@@ -18,7 +18,6 @@
 .Op Fl S
 .Op Fl v
 .Op Fl z
-.Op Fl zpool28fix
 .Oc
 .Oo
 .Op Fl a Ar ttl
@@ -72,10 +71,6 @@ Skip pools that are scrubbing.
 Verbose output.
 .It Fl z
 Round snapshot creation time down to 00 seconds.
-.It Fl zpool28fix
-Workaround for zpool v28
-.Ic zfs destroy \-r
-bug.
 .El
 .
 .Ss Options

@@ -158,7 +158,6 @@ GENERIC OPTIONS:
   -S           = Don't do anything on pools running scrub
   -v           = Verbose output
   -z           = Force new snapshots to have 00 seconds!
-  -zpool28fix  = Workaround for zpool v28 zfs destroy -r bug
 
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept
@@ -263,7 +262,7 @@ resilver_skip="false"               # Should I skip pools that are resilvering?
 scrub_skip="false"                  # Should I skip pools that are scrubbing?
 failures=0                          # Number of failed actions.
 count_failures="false"              # Should I count failed actions?
-zpool28fix="false"                  # Workaround for zpool v28 zfs destroy -r bug
+zpool28fix="true"                   # Workaround for zpool v28 zfs destroy -r bug
 
 while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' -o "$1" = '-s' -o "$1" = '-S' -o "$1" = '-e' -o "$1" = '-zpool28fix' ]; do
     case "$1" in
@@ -309,10 +308,6 @@ while [ "$1" = '-d' -o "$1" = '-v' -o "$1" = '-n' -o "$1" = '-F' -o "$1" = '-z' 
         shift
         ;;
 
-    '-zpool28fix')
-        zpool28fix="true"
-        shift
-        ;;
 
     esac
 done
