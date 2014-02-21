@@ -26,20 +26,20 @@ Exit() {
 }
 
 Note() {
-    echo "NOTE: $*" > /dev/stderr
+    printf '%s\n' "NOTE: $*" > /dev/stderr
 }
 
 Err() {
-    echo "ERROR: $*" > /dev/stderr
+    printf '%s\n' "ERROR: $*" > /dev/stderr
 }
 
 Fatal() {
-    echo "FATAL: $*" > /dev/stderr
+    printf '%s\n' "FATAL: $*" > /dev/stderr
     exit 1
 }
 
 Warn() {
-    echo "WARNING: $*" > /dev/stderr
+    printf '%s\n' "WARNING: $*" > /dev/stderr
 }
 
 
