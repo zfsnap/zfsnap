@@ -2,12 +2,14 @@
 
 exit_with_error=0
 
-cd unit
-for t in `ls`; do
-  sh $t
-  [ $? -ne 0 ] && exit_with_error=1
+for i in unit integration; do
+  cd "$i"
+  for t in `ls`; do
+    sh $t
+    [ $? -ne 0 ] && exit_with_error=1
+  done
+  cd ..
 done
-cd ..
 
 
 echo
