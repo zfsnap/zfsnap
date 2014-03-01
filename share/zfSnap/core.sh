@@ -9,7 +9,7 @@
 # repository:       https://github.com/graudeejs/zfSnap
 # Bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
-readonly VERSION=1.11.1
+readonly VERSION=2.0.0.pre
 
 # COMMANDS
 ESED='sed -E'
