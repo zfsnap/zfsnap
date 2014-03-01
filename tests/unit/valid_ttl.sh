@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . ../spec_helper.sh
-. ../../zfSnap.sh
+. ../../zfSnap_lib.sh
 
 # These are invalid TTLs and should be rejected
 ItReturns "ValidTTL 1d5y"           1   # incorrect order
