@@ -11,11 +11,7 @@ Help() {
 ${0##*/} v${VERSION}
 
 Syntax:
-${0##*/} mode [ options ] zpool/filesystem ...
-
-MODES:
-  destroy      = delete snapshots
-  snapshot     = create snapshots
+${0##*/} destroy [ options ] zpool/filesystem ...
 
 OPTIONS:
   -D           = Delete all zfSnap snapshots of pools specified (ignore ttl)
@@ -24,15 +20,9 @@ OPTIONS:
   -h           = Print this help and exit.
   -n           = Only show actions that would be performed
   -p prefix    = Use prefix for snapshots after this switch
-  -P           = Don't use prefix for snapshots after this switch
-  -r           = Create recursive snapshots for all zfs file systems that
-                 follow this switch
-  -R           = Create non-recursive snapshots for all zfs file systems that
-                 follow this switch
   -s           = Don't do anything on pools running resilver
   -S           = Don't do anything on pools running scrub
   -v           = Verbose output
-  -z           = Force new snapshots to have 00 seconds!
 
 LINKS:
   wiki:             https://github.com/graudeejs/zfSnap/wiki
@@ -58,9 +48,6 @@ while [ "$1" ]; do
             h) Help;;
             n) dry_run="true";;
             p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
-            P) prefix="";;
-            r) zopt='-r';;
-            R) zopt='';;
             s) pools="${pools:-`$zpool_cmd list -H -o name`}"
                for i in "$pools"; do
                    $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
@@ -72,7 +59,6 @@ while [ "$1" ]; do
                done
                ;;
             v) verbose="true";;
-            z) time_format='%Y-%m-%d_%H.%M.00';;
 
             :) Fatal "Option -$OPTARG requires an argument.";;
            \?) Fatal "Invalid option: -$OPTARG";;

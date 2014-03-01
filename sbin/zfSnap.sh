@@ -10,8 +10,8 @@
 # bug tracking:     https://github.com/graudeejs/zfSnap/issues
 
 # import zfSnap's library
-zfSnap_lib_dir=~/git/zfSnap/
-. "$zfSnap_lib_dir"/zfSnap_lib.sh
+ZFSNAP_LIB_DIR="${ZFSNAP_LIB_DIR:-`readlink -f $(dirname $(dirname $0))`/share/zfSnap}"
+. "$ZFSNAP_LIB_DIR/core.sh"
 
 ## FUNCTIONS
 
@@ -20,11 +20,10 @@ Help() {
 ${0##*/} v${VERSION}
 
 Syntax:
-${0##*/} [ options ] <command> [ options ] zpool/filesystem ...
+${0##*/} <command> [ options ] zpool/filesystem ...
 
 COMMANDS:
-  destroy           = destroy snapshots
-  snapshot          = create snapshots
+`find $ZFSNAP_LIB_DIR/commands -type f | sed 's#\.sh$##; s#^.*/##; s#^#  #'`
 
 OPTIONS:
   -h                = Print this help and exit.
@@ -42,19 +41,15 @@ EOF
     Exit 0
 }
 
-# MAIN
-
-# get script command
-case "$1" in
-    'destroy')
-        shift; . ./zfSnap-destroy.sh;;
-    'snapshot')
-        shift; . ./zfSnap-snapshot.sh;;
-    '-h'|'')
-        Help;;
-    *)
-        Fatal "'$1' is not a valid ${0##*/} command.";;
-esac
+if [ "$1" = '' -o "$1" == '-h' ]; then
+    Help
+elif find "$ZFSNAP_LIB_DIR/commands" -type f -name "${1}.sh" > /dev/null; then
+    cmd="$1"
+    shift
+    . "$ZFSNAP_LIB_DIR/commands/${cmd}.sh"
+else
+    Fatal "'$1' is not a valid ${0##*/} command."
+fi
 
 IsTrue $count_failures && Exit $failures
 Exit 0

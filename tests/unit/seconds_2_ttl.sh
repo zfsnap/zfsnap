@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . ../spec_helper.sh
-. ../../zfSnap_lib.sh
+. ../../share/zfSnap/core.sh
 
 ItEchos "Seconds2TTL 0"         ""
 ItEchos "Seconds2TTL 1"         "1s"

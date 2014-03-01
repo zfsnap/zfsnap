@@ -11,11 +11,7 @@ Help() {
 ${0##*/} v${VERSION}
 
 Syntax:
-${0##*/} mode [ options ] zpool/filesystem ...
-
-MODES:
-  destroy      = delete snapshots
-  snapshot     = create snapshots
+${0##*/} snapshot [ options ] zpool/filesystem ...
 
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept

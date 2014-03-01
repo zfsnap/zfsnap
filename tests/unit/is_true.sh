@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . ../spec_helper.sh
-. ../../zfSnap_lib.sh
+. ../../share/zfSnap/core.sh
 
 ItReturns "IsTrue 'true'"  0
 ItReturns "IsTrue 'false'" 1
