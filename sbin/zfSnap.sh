@@ -20,7 +20,7 @@ Help() {
 ${0##*/} v${VERSION}
 
 Syntax:
-${0##*/} <command> [ options ] zpool/filesystem ...
+${0##*/} [ options ] | <command> [ options ] zpool/filesystem ...
 
 COMMANDS:
 `find $ZFSNAP_LIB_DIR/commands -type f -name '*.sh' ! -name '.*' -printf "  %f\n" | sed 's#\.sh$##;'`
