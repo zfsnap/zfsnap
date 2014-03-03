@@ -102,17 +102,7 @@ PopulateSkipPools() {
 
 # Removes zfs snapshot
 RmZfsSnapshot() {
-    if IsTrue $zpool28fix && [ "$1" = '-r' ]; then
-        # get rid of '-r' parameter
-        RmZfsSnapshot $2
-        return
-    fi
-
-    if [ "$1" = '-r' ]; then
-        SkipPool $2 || return 1
-    else
-        SkipPool $1 || return 1
-    fi
+    SkipPool $1 || return 1
 
     zfs_destroy="$zfs_cmd destroy $*"
 
