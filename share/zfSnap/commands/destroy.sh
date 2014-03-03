@@ -48,16 +48,8 @@ while [ "$1" ]; do
             h) Help;;
             n) dry_run="true";;
             p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
-            s) pools="${pools:-`$zpool_cmd list -H -o name`}"
-               for i in "$pools"; do
-                   $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
-               done
-               ;;
-            S) pools="${pools:-`$zpool_cmd list -H -o name`}"
-               for i in "$pools"; do
-                   $zpool_cmd status $i | grep -q -e 'scrub in progress' && skip_pools="$skip_pools $i"
-               done
-               ;;
+            s) PopulateSkipPools 'resilver';;
+            S) PopulateSkipPools 'scrub';;
             v) verbose="true";;
 
             :) Fatal "Option -$OPTARG requires an argument.";;

@@ -89,6 +89,16 @@ IsTrue() {
     esac
 }
 
+# Populates the $skip_pools global variable; does not return anything
+PopulateSkipPools() {
+    [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
+    pools="${pools:-`$zpool_cmd list -H -o name`}"
+
+    for i in "$pools"; do
+        $zpool_cmd status $i | grep -q -e "$1 in progress" && skip_pools="$skip_pools $i"
+    done
+}
+
 # Removes zfs snapshot
 RmZfsSnapshot() {
     if IsTrue $zpool28fix && [ "$1" = '-r' ]; then

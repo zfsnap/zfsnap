@@ -54,16 +54,8 @@ while [ "$1" ]; do
             P) prefix="";;
             r) zopt='-r';;
             R) zopt='';;
-            s) pools="${pools:-`$zpool_cmd list -H -o name`}"
-               for i in "$pools"; do
-                   $zpool_cmd status $i | grep -q -e 'resilver in progress' && skip_pools="$skip_pools $i"
-               done
-               ;;
-            S) pools="${pools:-`$zpool_cmd list -H -o name`}"
-               for i in "$pools"; do
-                   $zpool_cmd status $i | grep -q -e 'scrub in progress' && skip_pools="$skip_pools $i"
-               done
-               ;;
+            s) PopulateSkipPools 'resilver';;
+            S) PopulateSkipPools 'scrub';;
             v) verbose="true";;
             z) time_format='%Y-%m-%d_%H.%M.00';;
 
