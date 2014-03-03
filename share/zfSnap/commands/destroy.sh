@@ -86,7 +86,7 @@ while [ "$1" ]; do
                       rm_snapshots="$rm_snapshots $i"
                     fi
                 else
-                    stay_time=$(TTL2Seconds `echo $snapshot_name | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
+                    stay_time=$(TTL2Seconds ${snapshot_name##*--})
                     if [ $current_time -gt $(($create_time + $stay_time)) ]; then
                         rm_snapshots="$rm_snapshots $i"
                     fi
