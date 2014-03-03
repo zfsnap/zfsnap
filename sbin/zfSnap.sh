@@ -26,7 +26,8 @@ COMMANDS:
 `find $ZFSNAP_LIB_DIR/commands -type f | sed 's#\.sh$##; s#^.*/##; s#^#  #'`
 
 OPTIONS:
-  -h                = Print this help and exit.
+  -h, --help        = Print this help and exit.
+  -V, --version     = Print the version number and exit
 
 MORE HELP:
   All commands accept the -h option. Use that for more information.
@@ -41,15 +42,21 @@ EOF
     Exit 0
 }
 
-if [ "$1" = '' -o "$1" == '-h' ]; then
-    Help
-elif find "$ZFSNAP_LIB_DIR/commands" -type f -name "${1}.sh" > /dev/null; then
-    cmd="$1"
-    shift
-    . "$ZFSNAP_LIB_DIR/commands/${cmd}.sh"
-else
-    Fatal "'$1' is not a valid ${0##*/} command."
-fi
+case "$1" in
+    '-h'|'--help'|'')
+        Help;;
+    '-V'|'--version')
+        printf "%s v%s\n" "${0##*/}" "${VERSION}"; Exit 0;;
+    *)
+        cmd="$1"
+        if [ -f "$ZFSNAP_LIB_DIR/commands/${cmd}.sh" ]; then
+            shift
+            . "$ZFSNAP_LIB_DIR/commands/${cmd}.sh"
+        else
+            Fatal "'$cmd' is not a valid ${0##*/} command."
+        fi
+        ;;
+esac
 
 IsTrue $count_failures && Exit $failures
 Exit 0
