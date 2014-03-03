@@ -24,6 +24,7 @@ verbose="false"                     # Verbose output?
 dry_run="false"                     # Dry run?
 prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
+recursive='false'                   # Operate on child pools??
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 pools=""                            # List of pools
