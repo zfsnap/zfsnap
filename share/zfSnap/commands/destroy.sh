@@ -66,10 +66,12 @@ while [ "$1" ]; do
 
     # delete snapshots
     if [ "$1" ]; then
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
+
         if IsTrue $recursive; then
-            zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1(.*)?@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1(.*)?@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
         else
-            zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
         fi
 
         if IsTrue $delete_all_snapshots; then
