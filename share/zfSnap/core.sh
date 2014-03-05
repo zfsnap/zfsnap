@@ -74,6 +74,16 @@ IsFalse() {
     IsTrue "$1" && return 1 || return 0
 }
 
+# Returns 0 if it looks like a snapshot
+IsSnapshot() {
+    case "$1" in
+        [!@]*@*[!@])
+            return 0;;
+        *)
+            return 1;;
+    esac
+}
+
 # Returns 0 if argument is "true"
 IsTrue() {
     case "$1" in
@@ -106,7 +116,7 @@ RmZfsSnapshot() {
     zfs_destroy="$zfs_cmd destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
-    if echo $* | grep -q -e '@'; then
+    if IsSnapshot "$1"; then
         if IsFalse $dry_run; then
             if $zfs_destroy > /dev/stderr; then
                 IsTrue $verbose && echo "$zfs_destroy  ... DONE"
