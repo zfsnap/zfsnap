@@ -30,11 +30,87 @@ Time\[hy]To\[hy]Live
 .Pq TTL
 is the length of time to keep a snapshot before it's ready for deletion.
 .
-.Ss Options
-Options and arguments are operated on as they are read
-.Pq sequentially .
-Keep this in mind while building calls to
+.Ss Top-level Options
+The majority of functionality is implemented at the
+.Ar <command>
+layer. However, a few options can be passed to
+.Nm
+directly.
+.Bl -tag -width Ds
+.It Fl h
+Print a summary of
+.Nm Ap s
+command-line options and then exit.
+.It Fl V
+Print the version number and exit.
+.El
+.
+.Sh Commands
+Most
+.Nm
+actions are performed by using a
+.Ar <command> .
+All options and arguments passed to a
+.Ar <command>
+are operated on as they are read
+.Pq i.e. sequentially .
+This provides the flexibility needed for complex scenarios, but also has the
+capacity to bite you if you're not paying attention. Remember,
+.Fl n
+.Pq dry-run
+is provided for a reason.
+.Pp
+Only one
+.Ar <command>
+can be passed per invocation of
 .Nm .
+.
+.Ss destroy
+By default,
+.Nm Cm destroy
+will only delete snapshots whose TTLs have expired. However, options
+are provided to override that behaviour with more aggressive approaches.
+.Bl -tag -width Ds
+.It Fl D
+Delete all zfSnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
+systems that follow this switch.
+.It Fl e
+Return the number of failed actions as the exit code.
+.It Fl F Ar age
+Force delete all snapshots in all pools exceeding
+.Ar age
+.Pq defined in TTL format
+regardless of their TTL expiration. See
+.Sx TTL SYNTAX
+for more information.
+.It Fl h
+Print a summary of
+.Cm destroy Ap s
+command-line options and then exit.
+.It Fl n
+Dry\[hy]run. Perform a trial run with no actions actually performed.
+.It Fl p Ar prefix
+Use
+.Ar prefix
+for snapshots after this switch.
+.It Fl P
+Don't use a prefix for snapshots after this switch.
+.It Fl r
+Operate recursively for snapshots on all ZFS file systems that follow this switch.
+.It Fl R
+Do not operate recursively for snapshots on all ZFS file systems that follow this switch.
+.It Fl s
+Skip pools that are resilvering.
+.It Fl S
+Skip pools that are scrubbing.
+.It Fl v
+Verbose output.
+.El
+.
+.Ss snapshot
+The purpose of
+.Nm Cm snapshot
+is simple: to create snapshots.
 .Bl -tag -width Ds
 .It Fl a Ar TTL
 Set how long the snapshot should be kept. If not set, the default
@@ -42,21 +118,12 @@ Set how long the snapshot should be kept. If not set, the default
 is one month. See
 .Sx TTL SYNTAX
 for more information.
-.It Fl d
-Delete old snapshots.
-.It Fl D Ar pool/fs
-Delete all zfSnap snapshots of
-.Ar pool/fs
-regardless of their TTL expiration.
 .It Fl e
 Return the number of failed actions as the exit code.
-.It Fl F Ar age
-Force delete all snapshots in all pools exceeding
-.Ar age
-.Pq defined in TTL format
-regardless of their TTL expiration.
 .It Fl h
-Print a summary of the command-line options and then exit.
+Print a summary of
+.Cm snapshot Ap s
+command-line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix
@@ -137,16 +204,16 @@ for other exit options.
 was designed to work with cron. Thus, some of these examples will include cron
 markup.
 .Pp
-Hourly recursive snapshots of an entire pool kept for 5 days.
+Every hour, create recursive snapshots of an entire pool and keep for 5 days.
 .Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
-5         *     *    *      *    root  zfSnap \-a 5d \-r zpool
+5         *     *    *      *    root  /sbin/zfSnap snapshot \-a 5d \-r zpool
 .Ed
 .Pp
-Snapshots of different datasets in different zpools and kept for 2 weeks.
+Create snapshots of different datasets in different zpools and keep for 2 weeks.
 .Pp
-.Dl zfSnap \-a 2w zpool2/git zpool2/jails \-r zpool2/jails/main zpool1/var
+.Dl zfSnap snapshot \-a 2w zpool2/git zpool2/jails \-r zpool2/jails/main zpool1/var
 .Pp
 Note that
 .Op Fl a ,
@@ -169,17 +236,15 @@ zpool/usr recursively and hold it for 3 months
 zpool/root non\[hy]recursively and hold it for 3 months.
 .El
 .Pp
-.Dl zfSnap \-a 1y \-r zpool/var \-a 6M zpool/home \-a 3m zpool/usr \-R zpool/root
+.Dl zfSnap snapshot \-a 1y \-r zpool/var \-a 6M zpool/home \-a 3m zpool/usr \-R zpool/root
 .Pp
 Deleting ZFS snapshots is much slower than creating them, and it's usually not
-a problem if snapshots live a few hours longer. Thus, it is usually better to
-delete old snapshots once a day rather than add
-.Op Fl d
-to every cron entry.
+a problem if snapshots live a few hours longer. Thus, it is usually best to
+delete old snapshots once a day.
 .Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
-0         1     *    *      *    root  zfSnap \-d
+0         1     *    *      *    root  /sbin/zfSnap destroy \-r zpool
 .Ed
 .
 .Sh SEE ALSO
