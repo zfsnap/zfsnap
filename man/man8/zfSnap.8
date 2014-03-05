@@ -23,7 +23,7 @@ main advantages are its portability and that all information needed for
 snapshot management is kept in the snapshot name itself.
 .Pp
 ZFS snapshot names are in the format of Timestamp\-\-TimeToLive
-.Pq e.g. zpool/var@2010\-08\-03_02.06.00\-\-1y
+.Pq e.g. zpool/var@2010\-08\-03_02.06.00\-\-1y .
 .Pp
 The Timestamp includes the date and time when the snapshot was created, and
 Time\[hy]To\[hy]Live
@@ -44,6 +44,11 @@ command-line options and then exit.
 .It Fl V
 Print the version number and exit.
 .El
+.Pp
+.Nm
+operates only on snapshots and will
+.Em never
+destroy or create a pool or filesystem.
 .
 .Sh Commands
 Most
@@ -70,6 +75,11 @@ By default,
 .Nm Cm destroy
 will only delete snapshots whose TTLs have expired. However, options
 are provided to override that behaviour with more aggressive approaches.
+.Pp
+Only snapshots created by
+.Nm
+.Pq or, more specifically, snapshots which match the very specific name pattern it employs
+will be considered for deletion.
 .Bl -tag -width Ds
 .It Fl D
 Delete all zfSnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
@@ -135,7 +145,7 @@ Don't use a prefix for snapshots after this switch.
 .It Fl r
 Create recursive snapshots of all ZFS file systems that follow this switch.
 .It Fl R
-Create non\[hy]recursive snapshots for all ZFS file systems that follow this switch.
+Create non\[hy]recursive snapshots for each ZFS file system that follows this switch.
 .It Fl s
 Skip pools that are resilvering.
 .It Fl S
@@ -195,7 +205,7 @@ for seconds is optional
 .
 .Sh EXIT STATUS
 .Nm
-exits 0 on success and and 1 if an error occurs. See
+exits 0 on success and 1 if an error occurs. See
 .Op Fl e
 for other exit options.
 .
