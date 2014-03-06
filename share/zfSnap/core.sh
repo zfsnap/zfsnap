@@ -24,6 +24,7 @@ verbose="false"                     # Verbose output?
 dry_run="false"                     # Dry run?
 prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
+recursive='false'                   # Operate on child pools??
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 pools=""                            # List of pools
@@ -111,17 +112,7 @@ PopulateSkipPools() {
 
 # Removes zfs snapshot
 RmZfsSnapshot() {
-    if IsTrue $zpool28fix && [ "$1" = '-r' ]; then
-        # get rid of '-r' parameter
-        RmZfsSnapshot $2
-        return
-    fi
-
-    if [ "$1" = '-r' ]; then
-        SkipPool $2 || return 1
-    else
-        SkipPool $1 || return 1
-    fi
+    SkipPool $1 || return 1
 
     zfs_destroy="$zfs_cmd destroy $*"
 

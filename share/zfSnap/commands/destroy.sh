@@ -20,6 +20,8 @@ OPTIONS:
   -h           = Print this help and exit.
   -n           = Only show actions that would be performed
   -p prefix    = Use prefix for snapshots after this switch
+  -r           = Operate recursively on all ZFS file systems after this switch.
+  -R           = Do not operate recursively on all ZFS file systems after this switch.
   -s           = Don't do anything on pools running resilver
   -S           = Don't do anything on pools running scrub
   -v           = Verbose output
@@ -35,8 +37,8 @@ EOF
 
 # MAIN
 ###########
-delete_snapshots="true"
-delete_all_snapshots="false"        # List of specific snapshots to delete
+delete_all_snapshots="false"        # Should all snapshots be deleted, regardless of TTL
+rm_snapshots=''                     # List of specific snapshots to delete
 
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
@@ -48,6 +50,8 @@ while [ "$1" ]; do
             h) Help;;
             n) dry_run="true";;
             p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
+            r) recursive='true';;
+            R) recursive='false';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
             v) verbose="true";;
@@ -62,49 +66,41 @@ while [ "$1" ]; do
 
     # delete snapshots
     if [ "$1" ]; then
-        if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
+        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
 
-            if IsFalse $zpool28fix; then
-                zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${ttl_pattern}$" | sed -e 's#/.*@#@#'`
-            else
-                zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^.*@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
-            fi
+        if IsTrue $recursive; then
+            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1(.*)?@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+        else
+            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+        fi
 
+        if IsTrue $delete_all_snapshots; then
+            rm_snapshots=$zfs_snapshots
+        else
             current_time=`date +%s`
-            for i in `echo $zfs_snapshots | xargs printf "%s\n" | $ESED -e "s/^.*@//" | sort -u`; do
-                create_time=$(Date2Timestamp `echo "$i" | $ESED -e "s/--${ttl_pattern}$//; s/^(${prefixes})?//"`)
-                if IsTrue $delete_snapshots; then
-                    stay_time=$(TTL2Seconds `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
-                    [ $current_time -gt $(($create_time + $stay_time)) ] \
-                        && rm_snapshot_pattern="$rm_snapshot_pattern $i"
-                fi
+            # TODO, both create_time and stay_time could be cached
+            for i in $zfs_snapshots; do
+                snapshot_name=${i#*@}
+                create_time=$(Date2Timestamp `echo "$snapshot_name" | $ESED -e "s/--${ttl_pattern}$//; s/^(${prefixes})?//"`)
+
                 if [ "$force_delete_snapshots_age" -ne -1 ]; then
-                    [ $current_time -gt $(($create_time + $force_delete_snapshots_age)) ] \
-                        && rm_snapshot_pattern="$rm_snapshot_pattern $i"
+                    if [ $current_time -gt $(($create_time + $force_delete_snapshots_age)) ]; then
+                      rm_snapshots="$rm_snapshots $i"
+                    fi
+                else
+                    stay_time=$(TTL2Seconds ${snapshot_name##*--})
+                    if [ $current_time -gt $(($create_time + $stay_time)) ]; then
+                        rm_snapshots="$rm_snapshots $i"
+                    fi
                 fi
             done
-
-            if [ "$rm_snapshot_pattern" != '' ]; then
-                rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
-                for i in $rm_snapshots; do
-                    RmZfsSnapshot -r $i
-                done
-            fi
         fi
 
-        # delete all snapshots
-        if IsTrue $delete_all_snapshots; then
-            if [ "$zopt" != '-r' ]; then
-                rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
-                for i in $rm_snapshots; do
-                    RmZfsSnapshot $i
-                done
-            else
-                rm_snapshots=`$zfs_cmd list -H -o name -t snapshot | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
-                for i in $rm_snapshots; do
-                    RmZfsSnapshot -r $i
-                done
-            fi
-        fi
+        for i in $rm_snapshots; do
+            RmZfsSnapshot "$i"
+        done
+        rm_snapshots=''
+
+        shift
     fi
 done
