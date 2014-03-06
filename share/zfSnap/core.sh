@@ -24,6 +24,7 @@ verbose="false"                     # Verbose output?
 dry_run="false"                     # Dry run?
 prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
+recursive='false'                   # Operate on child pools??
 delete_specific_fs_snapshots=""     # List of specific snapshots to delete
 delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
 pools=""                            # List of pools
@@ -89,19 +90,19 @@ IsTrue() {
     esac
 }
 
+# Populates the $skip_pools global variable; does not return anything
+PopulateSkipPools() {
+    [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
+    pools="${pools:-`$zpool_cmd list -H -o name`}"
+
+    for i in "$pools"; do
+        $zpool_cmd status $i | grep -q -e "$1 in progress" && skip_pools="$skip_pools $i"
+    done
+}
+
 # Removes zfs snapshot
 RmZfsSnapshot() {
-    if IsTrue $zpool28fix && [ "$1" = '-r' ]; then
-        # get rid of '-r' parameter
-        RmZfsSnapshot $2
-        return
-    fi
-
-    if [ "$1" = '-r' ]; then
-        SkipPool $2 || return 1
-    else
-        SkipPool $1 || return 1
-    fi
+    SkipPool $1 || return 1
 
     zfs_destroy="$zfs_cmd destroy $*"
 
