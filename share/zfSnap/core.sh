@@ -158,9 +158,11 @@ Seconds2TTL() {
 }
 
 # Returns 1 if ZFS operations on given pool should be skipped
+# This function's name implies the opposite of what it does. It
+# should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {
-    for i in "$skip_pools"; do
-        if [ `printf '%s' "$1" | sed -e 's#/.*$##; s/@.*//'` = "$i" ]; then
+    for i in $skip_pools; do
+        if [ "${1%%[/@]*}" = "$i" ]; then
             IsTrue $verbose && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
