@@ -23,7 +23,7 @@ Syntax:
 ${0##*/} [ options ] | <command> [ options ] zpool/filesystem ...
 
 COMMANDS:
-`find $ZFSNAP_LIB_DIR/commands -type f | sed 's#\.sh$##; s#^.*/##; s#^#  #'`
+`find $ZFSNAP_LIB_DIR/commands -type f -name '*.sh' ! -name '.*' -printf "  %f\n" | sed 's#\.sh$##;'`
 
 OPTIONS:
   -h, --help        = Print this help and exit.
