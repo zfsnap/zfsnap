@@ -183,8 +183,22 @@ SkipPool() {
 
 # Converts TTL to seconds
 TTL2Seconds() {
-    # convert human readable time to seconds
-    echo "$1" | sed -e 's/y/*31536000+/g; s/m/*2592000+/g; s/w/*604800+/g; s/d/*86400+/g; s/h/*3600+/g; s/M/*60+/g; s/s//g; s/\+$//' | bc -l
+    ttl="$1"
+    seconds=0
+    while [ "$ttl" ]; do
+        case "$ttl" in
+            *y*) seconds=$(($seconds + (${ttl%%y*} * 31536000))); ttl=${ttl##*y} ;;
+            *m*) seconds=$(($seconds + (${ttl%%m*} * 2592000))); ttl=${ttl##*m} ;;
+            *w*) seconds=$(($seconds + (${ttl%%w*} * 604800))); ttl=${ttl##*w} ;;
+            *d*) seconds=$(($seconds + (${ttl%%d*} * 86400))); ttl=${ttl##*d} ;;
+            *h*) seconds=$(($seconds + (${ttl%%h*} * 3600))); ttl=${ttl##*h} ;;
+            *M*) seconds=$(($seconds + (${ttl%%M*} * 60))); ttl=${ttl##*M} ;;
+             *s) seconds=$(($seconds + ${ttl%%s*})); ttl=${ttl##*s} ;;
+              *) Fatal "TTL2Seconds could not convert '$1'!" ;;
+        esac
+    done
+
+    printf "$seconds"
 }
 
 # Check validity of TTL
