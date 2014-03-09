@@ -82,7 +82,8 @@ while [ "$1" ]; do
             # TODO, create_time could be cached
             for I in $ZFS_SNAPSHOTS; do
                 SNAPSHOT_NAME=${I#*@}
-                CREATE_TIME=$(Date2Timestamp `echo "$SNAPSHOT_NAME" | $ESED -e "s/--${TTL_PATTERN}$//; s/^(${PREFIXES})?//"`)
+                CREATE_DATE=`TrimToDate "$SNAPSHOT_NAME"` && [ "$CREATE_DATE" ] || continue
+                CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
 
                 if [ "$FORCE_DELETE_SNAPSHOTS_AGE" -ne -1 ]; then
                     if [ $CURRENT_TIME -gt $(($CREATE_TIME + $FORCE_DELETE_SNAPSHOTS_AGE)) ]; then

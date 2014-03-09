@@ -180,6 +180,20 @@ SkipPool() {
     return 0
 }
 
+# Return the date (anything that matches the "date pattern")
+# If no "date pattern" is found, an empty string will be returned.
+TrimToDate() {
+    snapshot_name="$1"
+
+    pre_date="${snapshot_name%$DATE_PATTERN*}"
+    post_date="${snapshot_name##*$DATE_PATTERN}"
+
+    snapshot_date="${snapshot_name##$pre_date}"
+    snapshot_date="${snapshot_date%%$post_date}"
+
+    [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
+}
+
 # Converts TTL to seconds
 TTL2Seconds() {
     ttl="$1"
