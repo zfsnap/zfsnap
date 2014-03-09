@@ -194,6 +194,16 @@ TrimToDate() {
     [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
 }
 
+# Return the file system name (everything before the '@')
+# ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
+# If no valid file system is found, an empty string will be returned.
+TrimToFileSystem() {
+    snapshot="$1"
+    file_system="${snapshot%%@*}"
+
+    [ "$snapshot" != "$file_system" ] && printf "$file_system" || printf ''
+}
+
 # Return the prefix in a snapshot name (anything prior to the "snapshot date")
 # If no valid "snapshot date" or prefix is found, an empty string will be returned.
 TrimToPrefix() {
