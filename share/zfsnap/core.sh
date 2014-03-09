@@ -243,7 +243,20 @@ TTL2Seconds() {
     printf "$seconds"
 }
 
-# Returns 0 if the TTL is valid; Returns 1 if the TTL is invalid
+# Check validity of a prefix
+ValidPrefix() {
+    snapshot_prefix="$1"
+
+    [ -z "$PREFIXES" ] && [ -z "$snapshot_prefix" ] && return 0
+
+    for i in $PREFIXES; do
+        [ "$snapshot_prefix" = "$i" ] && return 0
+    done
+
+    return 1
+}
+
+# Check validity of TTL
 ValidTTL() {
     ttl="$1"
 

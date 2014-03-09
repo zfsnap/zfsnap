@@ -50,7 +50,7 @@ while [ "$1" ]; do
             F) FORCE_DELETE_SNAPSHOTS_AGE=`TTL2Seconds "$OPTARG"`;;
             h) Help;;
             n) DRY_RUN="true";;
-            p) PREFIXES="${PREFIXES:+$PREFIXES|}$OPTARG";;
+            p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
             P) PREFIX=''; PREFIXES='';;
             r) RECURSIVE='true';;
             R) RECURSIVE='false';;
