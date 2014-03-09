@@ -194,6 +194,15 @@ TrimToDate() {
     [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
 }
 
+# Return the TTL (anything after the last '--')
+# If no valid TTL is found, an empty string will be returned.
+TrimToTTL() {
+    snapshot="$1"
+    ttl="${snapshot##*--}"
+
+    [ "$snapshot" != "$ttl" ] && printf "$ttl" || printf ''
+}
+
 # Converts TTL to seconds
 TTL2Seconds() {
     ttl="$1"

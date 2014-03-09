@@ -70,17 +70,20 @@ while [ "$1" ]; do
     if [ "$1" ]; then
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
 
-        if IsTrue $RECURSIVE; then
-            ZFS_SNAPSHOTS=`printf "$ZFS_SNAPSHOTS" | grep -E -e "^$1(/.*)?@(${PREFIXES})?${DATE_PATTERN}--${TTL_PATTERN}$"`
-        else
-            ZFS_SNAPSHOTS=`printf "$ZFS_SNAPSHOTS" | grep -E -e "^$1@(${PREFIXES})?${DATE_PATTERN}--${TTL_PATTERN}$"`
-        fi
+        IsTrue $RECURSIVE && NAME_PATTERN=$1* || NAME_PATTERN=="$1"
+
+        for SNAPSHOT in $ZFS_SNAPSHOTS; do
+            [ -z ${SNAPSHOT%%$NAME_PATTERN@$PREFIXES$DATE_PATTERN--*} ] || continue
+            ValidTTL `TrimToTTL "$SNAPSHOT"` || continue
+
+            ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
+        done
 
         if IsTrue $DELETE_ALL_SNAPSHOTS; then
-            RM_SNAPSHOTS="$ZFS_SNAPSHOTS"
+            RM_SNAPSHOTS="$ZFSNAP_SNAPSHOTS"
         else
             # TODO, create_time could be cached
-            for I in $ZFS_SNAPSHOTS; do
+            for I in $ZFSNAP_SNAPSHOTS; do
                 SNAPSHOT_NAME=${I#*@}
                 CREATE_DATE=`TrimToDate "$SNAPSHOT_NAME"` && [ "$CREATE_DATE" ] || continue
                 CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
@@ -90,7 +93,8 @@ while [ "$1" ]; do
                         RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
                 else
-                    STAY_TIME=$(TTL2Seconds ${SNAPSHOT_NAME##*--})
+                    TTL=`TrimToTTL "$SNAPSHOT_NAME"` && ValidTTL "$TTL" || continue
+                    STAY_TIME=`TTL2Seconds "$TTL"`
                     if [ $CURRENT_TIME -gt $(($CREATE_TIME + $STAY_TIME)) ]; then
                         RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
