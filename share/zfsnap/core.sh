@@ -172,7 +172,7 @@ Seconds2TTL() {
 # should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {
     for i in $SKIP_POOLS; do
-        if [ "${1%%[/@]*}" = "$i" ]; then
+        if [ `TrimToPool "$1"` = "$i" ]; then
             IsTrue $VERBOSE && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
@@ -202,6 +202,12 @@ TrimToFileSystem() {
     file_system="${snapshot%%@*}"
 
     [ "$snapshot" != "$file_system" ] && printf "$file_system" || printf ''
+}
+
+# Return the pool name (anything before the first '/' or '@')
+# If no '/' or '@' is found, the submitted string will be returned.
+TrimToPool() {
+    printf "${1%%[/@]*}"
 }
 
 # Return the prefix in a snapshot name (anything prior to the "snapshot date")
