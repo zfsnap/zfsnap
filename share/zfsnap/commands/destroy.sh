@@ -70,13 +70,9 @@ while [ "$1" ]; do
     if [ "$1" ]; then
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
 
-        IsTrue $RECURSIVE && NAME_PATTERN=$1* || NAME_PATTERN=="$1"
-
         for SNAPSHOT in $ZFS_SNAPSHOTS; do
-            [ -z ${SNAPSHOT%%$NAME_PATTERN@$PREFIXES$DATE_PATTERN--*} ] || continue
-            ValidTTL `TrimToTTL "$SNAPSHOT"` || continue
-
-            ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
+            IsTrue $RECURSIVE || [ `TrimToFileSystem "$SNAPSHOT"` = "$1" ] || continue
+            ValidSnapshotName `TrimToSnapshotName "$SNAPSHOT"` && ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT" || continue
         done
 
         if IsTrue $DELETE_ALL_SNAPSHOTS; then

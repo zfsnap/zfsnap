@@ -266,6 +266,20 @@ ValidPrefix() {
     return 1
 }
 
+# Returns 0 if it's a snapshot name that matches zfsnap's name pattern
+# This also filters for any prefixes in effect
+ValidSnapshotName() {
+    IsSnapshot "$1" && return 1
+    snapshot_name="$1"
+
+    snapshot_prefix=`TrimToPrefix "$snapshot_name"` && ValidPrefix "$snapshot_prefix" || return 1
+    snapshot_date=`TrimToDate "$snapshot_name"` && [ "$snapshot_date" ] || return 1
+    snapshot_ttl=`TrimToTTL "$snapshot_name"` && ValidTTL "$snapshot_ttl" || return 1
+    rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
+
+    [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
+}
+
 # Check validity of TTL
 ValidTTL() {
     ttl="$1"
