@@ -194,6 +194,16 @@ TrimToDate() {
     [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
 }
 
+# Return the prefix in a snapshot name (anything prior to the "snapshot date")
+# If no valid "snapshot date" or prefix is found, an empty string will be returned.
+TrimToPrefix() {
+    snapshot_name="$1"
+    snapshot_date=`TrimToDate "$snapshot_name"`
+    snapshot_prefix="${snapshot_name%%$snapshot_date*}"
+
+    [ "$snapshot_name" != "$snapshot_prefix" ] && printf "$snapshot_prefix" || printf ''
+}
+
 # Return the snapshot name (everything after the '@')
 # ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
 # If no valid snapshot name is found, an empty string will be returned
