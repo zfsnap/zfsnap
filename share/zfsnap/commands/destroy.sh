@@ -25,6 +25,7 @@ OPTIONS:
   -h           = Print this help and exit.
   -n           = Only show actions that would be performed
   -p prefix    = Use prefix for snapshots after this switch
+  -P           = Don't use prefixes for snapshots after this switch
   -r           = Operate recursively on all ZFS file systems after this switch.
   -R           = Do not operate recursively on all ZFS file systems after this switch.
   -s           = Don't do anything on pools running resilver
@@ -50,6 +51,7 @@ while [ "$1" ]; do
             h) Help;;
             n) DRY_RUN="true";;
             p) PREFIXES="${PREFIXES:+$PREFIXES|}$OPTARG";;
+            P) PREFIX=''; PREFIXES='';;
             r) RECURSIVE='true';;
             R) RECURSIVE='false';;
             s) PopulateSkipPools 'resilver';;
