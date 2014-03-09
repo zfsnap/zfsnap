@@ -194,6 +194,16 @@ TrimToDate() {
     [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
 }
 
+# Return the snapshot name (everything after the '@')
+# ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
+# If no valid snapshot name is found, an empty string will be returned
+TrimToSnapshotName() {
+    snapshot="$1"
+    snapshot_name="${snapshot##*@}"
+
+    [ "$snapshot" != "$snapshot_name" ] && printf "$snapshot_name" || printf ''
+}
+
 # Return the TTL (anything after the last '--')
 # If no valid TTL is found, an empty string will be returned.
 TrimToTTL() {

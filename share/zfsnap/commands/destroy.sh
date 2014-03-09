@@ -84,7 +84,7 @@ while [ "$1" ]; do
         else
             # TODO, create_time could be cached
             for I in $ZFSNAP_SNAPSHOTS; do
-                SNAPSHOT_NAME=${I#*@}
+                SNAPSHOT_NAME=`TrimToSnapshotName "$I"`
                 CREATE_DATE=`TrimToDate "$SNAPSHOT_NAME"` && [ "$CREATE_DATE" ] || continue
                 CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
 
