@@ -78,7 +78,7 @@ while [ "$1" ]; do
             rm_snapshots=$zfs_snapshots
         else
             current_time=`date +%s`
-            # TODO, both create_time and stay_time could be cached
+            # TODO, create_time could be cached
             for i in $zfs_snapshots; do
                 snapshot_name=${i#*@}
                 create_time=$(Date2Timestamp `echo "$snapshot_name" | $ESED -e "s/--${ttl_pattern}$//; s/^(${prefixes})?//"`)
