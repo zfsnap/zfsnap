@@ -5,6 +5,8 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return.
 
+PREFIX=""                           # Default prefix
+
 # FUNCTIONS
 Help() {
     cat << EOF
@@ -41,23 +43,22 @@ EOF
 # MAIN
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
-    while getopts :a:ehnp:PrRsSvz opt; do
-        case "$opt" in
-            a) ttl="$OPTARG"
-               [ "$ttl" -gt 0 ] 2> /dev/null && ttl=`Seconds2TTL "$ttl"`
-               ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
+    while getopts :a:ehnp:PrRsSvz OPT; do
+        case "$OPT" in
+            a) TTL="$OPTARG"
+               [ "$TTL" -gt 0 ] 2> /dev/null && TTL=`Seconds2TTL "$TTL"`
+               ValidTTL "$TTL" || Fatal "Invalid TTL: $TTL"
                ;;
-            e) count_failures="true";;
             h) Help;;
-            n) dry_run="true";;
-            p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
-            P) prefix="";;
-            r) zopt='-r';;
-            R) zopt='';;
+            n) DRY_RUN="true";;
+            p) PREFIX="$OPTARG";;
+            P) PREFIX="";;
+            r) ZOPT='-r';;
+            R) ZOPT='';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-            v) verbose="true";;
-            z) time_format='%Y-%m-%d_%H.%M.00';;
+            v) VERBOSE="true";;
+            z) TIME_FORMAT='%Y-%m-%d_%H.%M.00';;
 
             :) Fatal "Option -$OPTARG requires an argument.";;
            \?) Fatal "Invalid option: -$OPTARG";;
@@ -70,20 +71,19 @@ while [ "$1" ]; do
     # create snapshots
     if [ "$1" ]; then
         if SkipPool "$1"; then
-            ntime="${ntime:-`date "+$time_format"`}"
-            IsTrue $dry_run && zfs_list="${zfs_list:-`$zfs_cmd list -H -o name`}"
+            NTIME="${NTIME:-`date "+$TIME_FORMAT"`}"
+            IsTrue $DRY_RUN && ZFS_LIST="${ZFS_LIST:-`$ZFS_CMD list -H -o name`}"
 
-            zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
-            if IsFalse $dry_run; then
-                if $zfs_snapshot > /dev/stderr; then
-                    IsTrue $verbose && echo "$zfs_snapshot ... DONE"
+            ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${NTIME}--${TTL}"
+            if IsFalse $DRY_RUN; then
+                if $ZFS_SNAPSHOT > /dev/stderr; then
+                    IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... DONE"
                 else
-                    IsTrue $verbose && echo "$zfs_snapshot ... FAIL"
-                    IsTrue $count_failures && failures=$(($failures + 1))
+                    IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... FAIL"
                 fi
             else
-                printf "%s\n" $zfs_list | grep -m 1 -q -E -e "^$1$" \
-                    && echo "$zfs_snapshot" \
+                printf '%s\n' $ZFS_LIST | grep -m 1 -q -E -e "^$1$" \
+                    && echo "$ZFS_SNAPSHOT" \
                     || Err "Looks like ZFS filesystem '$1' doesn't exist"
             fi
         fi

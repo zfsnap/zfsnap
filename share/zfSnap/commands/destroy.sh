@@ -5,6 +5,13 @@
 # can do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return.
 
+DELETE_ALL_SNAPSHOTS="false"        # Should all snapshots be deleted, regardless of TTL
+RM_SNAPSHOTS=''                     # List of specific snapshots to delete
+FORCE_DELETE_SNAPSHOTS_AGE=-1       # Delete snapshots older than x seconds. -1 means NO
+RECURSIVE="false"
+PREFIXES=""                         # List of prefixes
+CURRENT_TIME=`date +%s`
+
 # FUNCTIONS
 Help() {
     cat << EOF
@@ -36,25 +43,20 @@ EOF
 }
 
 # MAIN
-###########
-delete_all_snapshots="false"        # Should all snapshots be deleted, regardless of TTL
-rm_snapshots=''                     # List of specific snapshots to delete
-
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
-    while getopts :DeF:hnp:PrRsSvz opt; do
-        case "$opt" in
-            D) delete_all_snapshots="true";;
-            e) count_failures="true";;
-            F) force_delete_snapshots_age=`TTL2Seconds "$OPTARG"`;;
+    while getopts :DeF:hnp:PrRsSvz OPT; do
+        case "$OPT" in
+            D) DELETE_ALL_SNAPSHOTS="true";;
+            F) FORCE_DELETE_SNAPSHOTS_AGE=`TTL2Seconds "$OPTARG"`;;
             h) Help;;
-            n) dry_run="true";;
-            p) prefix="$OPTARG"; prefixes="${prefixes:+$prefixes|}$prefix";;
-            r) recursive='true';;
-            R) recursive='false';;
+            n) DRY_RUN="true";;
+            p) PREFIXES="${PREFIXES:+$PREFIXES|}$OPTARG";;
+            r) RECURSIVE='true';;
+            R) RECURSIVE='false';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-            v) verbose="true";;
+            v) VERBOSE="true";;
 
             :) Fatal "Option -$OPTARG requires an argument.";;
            \?) Fatal "Invalid option: -$OPTARG";;
@@ -66,40 +68,39 @@ while [ "$1" ]; do
 
     # delete snapshots
     if [ "$1" ]; then
-        zfs_snapshots=`$zfs_cmd list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
+        ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
 
-        if IsTrue $recursive; then
-            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1(.*)?@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+        if IsTrue $RECURSIVE; then
+            ZFS_SNAPSHOTS=`printf "$ZFS_SNAPSHOTS" | grep -E -e "^$1(/.*)?@(${PREFIXES})?${DATE_PATTERN}--${TTL_PATTERN}$"`
         else
-            zfs_snapshots=`printf "$zfs_snapshots" | grep -E -e "^$1@(${prefixes})?${date_pattern}--${ttl_pattern}$"`
+            ZFS_SNAPSHOTS=`printf "$ZFS_SNAPSHOTS" | grep -E -e "^$1@(${PREFIXES})?${DATE_PATTERN}--${TTL_PATTERN}$"`
         fi
 
-        if IsTrue $delete_all_snapshots; then
-            rm_snapshots=$zfs_snapshots
+        if IsTrue $DELETE_ALL_SNAPSHOTS; then
+            RM_SNAPSHOTS="$ZFS_SNAPSHOTS"
         else
-            current_time=`date +%s`
             # TODO, create_time could be cached
-            for i in $zfs_snapshots; do
-                snapshot_name=${i#*@}
-                create_time=$(Date2Timestamp `echo "$snapshot_name" | $ESED -e "s/--${ttl_pattern}$//; s/^(${prefixes})?//"`)
+            for I in $ZFS_SNAPSHOTS; do
+                SNAPSHOT_NAME=${I#*@}
+                CREATE_TIME=$(Date2Timestamp `echo "$SNAPSHOT_NAME" | $ESED -e "s/--${TTL_PATTERN}$//; s/^(${PREFIXES})?//"`)
 
-                if [ "$force_delete_snapshots_age" -ne -1 ]; then
-                    if [ $current_time -gt $(($create_time + $force_delete_snapshots_age)) ]; then
-                      rm_snapshots="$rm_snapshots $i"
+                if [ "$FORCE_DELETE_SNAPSHOTS_AGE" -ne -1 ]; then
+                    if [ $CURRENT_TIME -gt $(($CREATE_TIME + $FORCE_DELETE_SNAPSHOTS_AGE)) ]; then
+                        RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
                 else
-                    stay_time=$(TTL2Seconds ${snapshot_name##*--})
-                    if [ $current_time -gt $(($create_time + $stay_time)) ]; then
-                        rm_snapshots="$rm_snapshots $i"
+                    STAY_TIME=$(TTL2Seconds ${SNAPSHOT_NAME##*--})
+                    if [ $CURRENT_TIME -gt $(($CREATE_TIME + $STAY_TIME)) ]; then
+                        RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
                 fi
             done
         fi
 
-        for i in $rm_snapshots; do
-            RmZfsSnapshot "$i"
+        for I in $RM_SNAPSHOTS; do
+            RmZfsSnapshot "$I"
         done
-        rm_snapshots=''
+        RM_SNAPSHOTS=''
 
         shift
     fi

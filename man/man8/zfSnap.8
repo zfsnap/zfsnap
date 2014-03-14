@@ -84,8 +84,6 @@ will be considered for deletion.
 .It Fl D
 Delete all zfSnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
 systems that follow this switch.
-.It Fl e
-Return the number of failed actions as the exit code.
 .It Fl F Ar age
 Force delete all snapshots in all pools exceeding
 .Ar age
@@ -128,8 +126,6 @@ Set how long the snapshot should be kept. If not set, the default
 is one month. See
 .Sx TTL SYNTAX
 for more information.
-.It Fl e
-Return the number of failed actions as the exit code.
 .It Fl h
 Print a summary of
 .Cm snapshot Ap s
@@ -205,9 +201,7 @@ for seconds is optional
 .
 .Sh EXIT STATUS
 .Nm
-exits 0 on success and 1 if an error occurs. See
-.Op Fl e
-for other exit options.
+exits 0 on success and 1 if an error occurs.
 .
 .Sh EXAMPLES
 .Nm

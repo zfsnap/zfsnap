@@ -46,18 +46,17 @@ case "$1" in
     '-h'|'--help'|'')
         Help;;
     '-V'|'--version')
-        printf "%s v%s\n" "${0##*/}" "${VERSION}"; Exit 0;;
+        printf '%s v%s\n' "${0##*/}" "${VERSION}"; Exit 0;;
     *)
-        cmd="$1"
-        if [ -f "$ZFSNAP_LIB_DIR/commands/${cmd}.sh" ]; then
+        CMD="$1"
+        if [ -f "$ZFSNAP_LIB_DIR/commands/${CMD}.sh" ]; then
             shift
-            . "$ZFSNAP_LIB_DIR/commands/${cmd}.sh"
+            . "$ZFSNAP_LIB_DIR/commands/${CMD}.sh"
         else
-            Fatal "'$cmd' is not a valid ${0##*/} command."
+            Fatal "'$CMD' is not a valid ${0##*/} command."
         fi
         ;;
 esac
 
-IsTrue $count_failures && Exit $failures
 Exit 0
 # vim: set ts=4 sw=4 expandtab:

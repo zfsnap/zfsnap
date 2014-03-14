@@ -13,26 +13,21 @@ readonly VERSION=2.0.0.pre
 
 # COMMANDS
 ESED='sed -E'
-zfs_cmd='/sbin/zfs'
-zpool_cmd='/sbin/zpool'
+ZFS_CMD='/sbin/zfs'
+ZPOOL_CMD='/sbin/zpool'
 
 # VARIABLES
-ttl='1m'                            # default snapshot ttl
-force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
-verbose="false"                     # Verbose output?
-dry_run="false"                     # Dry run?
-prefix=""                           # Default prefix
-prefixes=""                         # List of prefixes
-recursive='false'                   # Operate on child pools?
-pools=""                            # List of pools
-skip_pools=""                       # List of pools to skip
-failures=0                          # Number of failed actions.
-count_failures="false"              # Count the number of failed actions?
+TTL='1m'                            # default snapshot ttl
+VERBOSE="false"                     # Verbose output?
+DRY_RUN="false"                     # Dry run?
+POOLS=""                            # List of pools
+SKIP_POOLS=""                       # List of pools to skip
 
-readonly ttl_pattern="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
-readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
-test_mode="${test_mode:-false}"     # When set to "true", Exit won't really exit
-time_format='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
+readonly OS=`uname`
+readonly TTL_PATTERN="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
+readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
+TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
+TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
 
 ## FUNCTIONS
 
@@ -40,7 +35,7 @@ Err() {
     printf '%s\n' "ERROR: $*" > /dev/stderr
 }
 Exit() {
-    IsTrue $test_mode || exit $1
+    IsTrue $TEST_MODE || exit $1
 }
 Fatal() {
     printf '%s\n' "FATAL: $*" > /dev/stderr
@@ -96,13 +91,13 @@ IsTrue() {
     esac
 }
 
-# Populates the $skip_pools global variable; does not return anything
+# Populates the $SKIP_POOLS global variable; does not return anything
 PopulateSkipPools() {
     [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
-    pools="${pools:-`$zpool_cmd list -H -o name`}"
+    POOLS="${POOLS:-`$ZPOOL_CMD list -H -o name`}"
 
-    for i in $pools; do
-        $zpool_cmd status $i | grep -q -e "$1 in progress" && skip_pools="$skip_pools $i"
+    for i in $POOLS; do
+        $ZPOOL_CMD status $i | grep -q -e "$1 in progress" && SKIP_POOLS="$SKIP_POOLS $i"
     done
 }
 
@@ -110,16 +105,15 @@ PopulateSkipPools() {
 RmZfsSnapshot() {
     SkipPool $1 || return 1
 
-    zfs_destroy="$zfs_cmd destroy $*"
+    zfs_destroy="$ZFS_CMD destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
     if IsSnapshot "$1"; then
-        if IsFalse $dry_run; then
+        if IsFalse $DRY_RUN; then
             if $zfs_destroy > /dev/stderr; then
-                IsTrue $verbose && echo "$zfs_destroy  ... DONE"
+                IsTrue $VERBOSE && echo "$zfs_destroy  ... DONE"
             else
-                IsTrue $verbose && echo "$zfs_destroy  ... FAIL"
-                IsTrue $count_failures && failures=$(($failures + 1))
+                IsTrue $VERBOSE && echo "$zfs_destroy  ... FAIL"
             fi
         else
             echo "$zfs_destroy"
@@ -129,7 +123,6 @@ RmZfsSnapshot() {
         echo "  This is bug, we definitely don't want that." > /dev/stderr
         echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        IsTrue $count_failures && [ $failures -gt 0 ] && Exit $failures
         Exit 1
     fi
 }
@@ -168,9 +161,9 @@ Seconds2TTL() {
 # This function's name implies the opposite of what it does. It
 # should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {
-    for i in $skip_pools; do
+    for i in $SKIP_POOLS; do
         if [ "${1%%[/@]*}" = "$i" ]; then
-            IsTrue $verbose && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
+            IsTrue $VERBOSE && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
     done
@@ -220,7 +213,6 @@ ValidTTL() {
 }
 
 ## MAIN
-readonly OS=`uname`
 case $OS in
     'FreeBSD')
         ;;
@@ -236,8 +228,8 @@ case $OS in
         ESED='sed -r'
         ;;
     'Darwin')
-        zfs_cmd='/usr/sbin/zfs'
-        zpool_cmd='/usr/sbin/zpool'
+        ZFS_CMD='/usr/sbin/zfs'
+        ZPOOL_CMD='/usr/sbin/zpool'
         ;;
     *)
         Fatal "Your OS isn't supported"

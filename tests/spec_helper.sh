@@ -1,4 +1,4 @@
-test_mode="true"
+TEST_MODE="true"
 
 spec_failed=0
 
