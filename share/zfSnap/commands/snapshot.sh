@@ -44,7 +44,7 @@ while [ "$1" ]; do
     while getopts :a:ehnp:PrRsSvz opt; do
         case "$opt" in
             a) ttl="$OPTARG"
-               printf "%s" "$ttl" | grep -q -E -e "^[0-9]+$" && ttl=`Seconds2TTL "$ttl"`
+               [ "$ttl" -gt 0 ] 2> /dev/null && ttl=`Seconds2TTL "$ttl"`
                ValidTTL "$ttl" || Fatal "Invalid TTL: $ttl"
                ;;
             e) count_failures="true";;
