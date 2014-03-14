@@ -19,19 +19,15 @@ zpool_cmd='/sbin/zpool'
 # VARIABLES
 ttl='1m'                            # default snapshot ttl
 force_delete_snapshots_age=-1       # Delete snapshots older than x seconds. -1 means NO
-delete_snapshots="false"            # Delete old snapshots?
 verbose="false"                     # Verbose output?
 dry_run="false"                     # Dry run?
 prefix=""                           # Default prefix
 prefixes=""                         # List of prefixes
-recursive='false'                   # Operate on child pools??
-delete_specific_fs_snapshots=""     # List of specific snapshots to delete
-delete_specific_fs_snapshots_recursively="" # List of specific snapshots to delete recursively
+recursive='false'                   # Operate on child pools?
 pools=""                            # List of pools
 skip_pools=""                       # List of pools to skip
 failures=0                          # Number of failed actions.
-count_failures="false"              # Should I count failed actions?
-zpool28fix="true"                   # Workaround for zpool v28 zfs destroy -r bug
+count_failures="false"              # Count the number of failed actions?
 
 readonly ttl_pattern="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
 readonly date_pattern='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
@@ -105,7 +101,7 @@ PopulateSkipPools() {
     [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
     pools="${pools:-`$zpool_cmd list -H -o name`}"
 
-    for i in "$pools"; do
+    for i in $pools; do
         $zpool_cmd status $i | grep -q -e "$1 in progress" && skip_pools="$skip_pools $i"
     done
 }
