@@ -4,7 +4,7 @@ This branch is very unstable.
 You should use zfSnap from legacy branch instead.
 
 
-
+# About zfSnap
 
 zfSnap is a simple sh script to make rolling zfs snapshots with cron. The main
 advantage of zfSnap is it's written in 100% pure /bin/sh so it doesn't require
