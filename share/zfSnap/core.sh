@@ -201,9 +201,26 @@ TTL2Seconds() {
     printf "$seconds"
 }
 
-# Check validity of TTL
+# Returns 0 if the TTL is valid; Returns 1 if the TTL is invalid
 ValidTTL() {
-    printf "%s" "$1" | grep -E "^${ttl_pattern}$" > /dev/null
+    ttl="$1"
+
+    [ "$ttl" = '' ] && return 1
+
+    while [ "$ttl" ]; do
+        case "$ttl" in
+            *y*) [ ${ttl%y*} -gt 0 2> /dev/null ] && ttl=${ttl##*y} || return 1 ;;
+            *m*) [ ${ttl%m*} -gt 0 2> /dev/null ] && ttl=${ttl##*m} || return 1 ;;
+            *w*) [ ${ttl%w*} -gt 0 2> /dev/null ] && ttl=${ttl##*w} || return 1 ;;
+            *d*) [ ${ttl%d*} -gt 0 2> /dev/null ] && ttl=${ttl##*d} || return 1 ;;
+            *h*) [ ${ttl%h*} -gt 0 2> /dev/null ] && ttl=${ttl##*h} || return 1 ;;
+            *M*) [ ${ttl%M*} -gt 0 2> /dev/null ] && ttl=${ttl##*M} || return 1 ;;
+             *s) [ ${ttl%s*} -gt 0 2> /dev/null ] && ttl=${ttl##*s} || return 1 ;;
+              *) return 1 ;;
+        esac
+    done
+
+    return 0
 }
 
 ## MAIN
