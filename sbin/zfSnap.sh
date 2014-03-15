@@ -24,7 +24,7 @@ Syntax:
 ${0##*/} [ options ] | <command> [ options ] zpool/filesystem ...
 
 COMMANDS:
-`find $ZFSNAP_LIB_DIR/commands -type f | sed 's#\.sh$##; s#^.*/##; s#^#  #'`
+`for C in $ZFSNAP_LIB_DIR/commands/*.sh; do [ -f "$C" ] && C_NAME="${C##*/}" && printf '  %s\n' "${C_NAME%.*}"; done`
 
 OPTIONS:
   -h, --help        = Print this help and exit.
