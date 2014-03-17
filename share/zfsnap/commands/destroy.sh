@@ -47,7 +47,7 @@ while [ "$1" ]; do
     while getopts :DeF:hnp:PrRsSvz OPT; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS="true";;
-            F) FORCE_DELETE_SNAPSHOTS_AGE=`TTL2Seconds "$OPTARG"`;;
+            F) TTL2Seconds "$OPTARG" && FORCE_DELETE_SNAPSHOTS_AGE="$RETVAL";;
             h) Help;;
             n) DRY_RUN="true";;
             p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
@@ -71,8 +71,9 @@ while [ "$1" ]; do
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
 
         for SNAPSHOT in $ZFS_SNAPSHOTS; do
-            IsTrue $RECURSIVE || [ `TrimToFileSystem "$SNAPSHOT"` = "$1" ] || continue
-            ValidSnapshotName `TrimToSnapshotName "$SNAPSHOT"` && ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT" || continue
+            IsTrue $RECURSIVE || TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
+            TrimToSnapshotName "$SNAPSHOT" && ValidSnapshotName "$RETVAL" || continue
+            ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
         done
 
         if IsTrue $DELETE_ALL_SNAPSHOTS; then
@@ -80,8 +81,8 @@ while [ "$1" ]; do
         else
             # TODO, create_time could be cached
             for I in $ZFSNAP_SNAPSHOTS; do
-                SNAPSHOT_NAME=`TrimToSnapshotName "$I"`
-                CREATE_DATE=`TrimToDate "$SNAPSHOT_NAME"` && [ "$CREATE_DATE" ] || continue
+                TrimToSnapshotName "$I" && SNAPSHOT_NAME="$RETVAL"
+                TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" && [ "$CREATE_DATE" ] || continue
                 CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
 
                 if [ "$FORCE_DELETE_SNAPSHOTS_AGE" -ne -1 ]; then
@@ -89,8 +90,10 @@ while [ "$1" ]; do
                         RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
                 else
-                    TTL=`TrimToTTL "$SNAPSHOT_NAME"` && ValidTTL "$TTL" || continue
-                    STAY_TIME=`TTL2Seconds "$TTL"`
+                    TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL"
+                    ValidTTL "$TTL" || continue
+
+                    TTL2Seconds "$TTL" && STAY_TIME="$RETVAL"
                     if [ $CURRENT_TIME -gt $(($CREATE_TIME + $STAY_TIME)) ]; then
                         RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi

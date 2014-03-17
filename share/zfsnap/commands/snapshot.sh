@@ -44,7 +44,7 @@ while [ "$1" ]; do
     while getopts :a:ehnp:PrRsSvz OPT; do
         case "$OPT" in
             a) TTL="$OPTARG"
-               [ "$TTL" -gt 0 ] 2> /dev/null && TTL=`Seconds2TTL "$TTL"`
+               [ "$TTL" -gt 0 ] 2> /dev/null && Seconds2TTL "$TTL" && TTL="$RETVAL"
                ValidTTL "$TTL" || Fatal "Invalid TTL: $TTL"
                ;;
             h) Help;;

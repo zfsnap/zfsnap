@@ -27,6 +27,7 @@ readonly TTL_PATTERN="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M
 readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
+RETVAL=''                           # used by functions so we can avoid spawning subshells
 
 ## FUNCTIONS
 
@@ -164,7 +165,7 @@ Seconds2TTL() {
     seconds=$(($xtime % 60))
     [ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
 
-    echo "${years}${months}${days}${hours}${minutes}${seconds}"
+    RETVAL="${years}${months}${days}${hours}${minutes}${seconds}"
 }
 
 # Returns 1 if ZFS operations on given pool should be skipped
@@ -172,7 +173,8 @@ Seconds2TTL() {
 # should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {
     for i in $SKIP_POOLS; do
-        if [ `TrimToPool "$1"` = "$i" ]; then
+        TrimToPool "$1"
+        if [ "$RETVAL" = "$i" ]; then
             IsTrue $VERBOSE && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
@@ -185,13 +187,16 @@ SkipPool() {
 TrimToDate() {
     snapshot_name="$1"
 
+    # make sure it contains a date
+    [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
+
     pre_date="${snapshot_name%$DATE_PATTERN*}"
     post_date="${snapshot_name##*$DATE_PATTERN}"
 
     snapshot_date="${snapshot_name##$pre_date}"
     snapshot_date="${snapshot_date%%$post_date}"
 
-    [ "$snapshot_name" != "$snapshot_date" ] && printf "$snapshot_date" || printf ''
+    [ "$snapshot_name" != "$snapshot_date" ] && RETVAL="$snapshot_date" || RETVAL=''
 }
 
 # Return the file system name (everything before the '@')
@@ -201,23 +206,23 @@ TrimToFileSystem() {
     snapshot="$1"
     file_system="${snapshot%%@*}"
 
-    [ "$snapshot" != "$file_system" ] && printf "$file_system" || printf ''
+    [ "$snapshot" != "$file_system" ] && RETVAL="$file_system" || RETVAL=''
 }
 
 # Return the pool name (anything before the first '/' or '@')
 # If no '/' or '@' is found, the submitted string will be returned.
 TrimToPool() {
-    printf "${1%%[/@]*}"
+    RETVAL="${1%%[/@]*}"
 }
 
 # Return the prefix in a snapshot name (anything prior to the "snapshot date")
 # If no valid "snapshot date" or prefix is found, an empty string will be returned.
 TrimToPrefix() {
     snapshot_name="$1"
-    snapshot_date=`TrimToDate "$snapshot_name"`
+    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL"
     snapshot_prefix="${snapshot_name%%$snapshot_date*}"
 
-    [ "$snapshot_name" != "$snapshot_prefix" ] && printf "$snapshot_prefix" || printf ''
+    [ "$snapshot_name" != "$snapshot_prefix" ] && RETVAL="$snapshot_prefix" || RETVAL=''
 }
 
 # Return the snapshot name (everything after the '@')
@@ -227,7 +232,7 @@ TrimToSnapshotName() {
     snapshot="$1"
     snapshot_name="${snapshot##*@}"
 
-    [ "$snapshot" != "$snapshot_name" ] && printf "$snapshot_name" || printf ''
+    [ "$snapshot" != "$snapshot_name" ] && RETVAL="$snapshot_name" || RETVAL=''
 }
 
 # Return the TTL (anything after the last '--')
@@ -236,7 +241,7 @@ TrimToTTL() {
     snapshot="$1"
     ttl="${snapshot##*--}"
 
-    [ "$snapshot" != "$ttl" ] && printf "$ttl" || printf ''
+    [ "$snapshot" != "$ttl" ] && RETVAL="$ttl" || RETVAL=''
 }
 
 # Converts TTL to seconds
@@ -256,7 +261,7 @@ TTL2Seconds() {
         esac
     done
 
-    printf "$seconds"
+    RETVAL="$seconds"
 }
 
 # Check validity of a prefix
@@ -278,9 +283,9 @@ ValidSnapshotName() {
     IsSnapshot "$1" && return 1
     snapshot_name="$1"
 
-    snapshot_prefix=`TrimToPrefix "$snapshot_name"` && ValidPrefix "$snapshot_prefix" || return 1
-    snapshot_date=`TrimToDate "$snapshot_name"` && [ "$snapshot_date" ] || return 1
-    snapshot_ttl=`TrimToTTL "$snapshot_name"` && ValidTTL "$snapshot_ttl" || return 1
+    TrimToPrefix "$snapshot_name" && snapshot_prefix="$RETVAL" && ValidPrefix "$snapshot_prefix" || return 1
+    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL" && [ "$snapshot_date" ] || return 1
+    TrimToTTL "$snapshot_name" && snapshot_ttl="$RETVAL" && ValidTTL "$snapshot_ttl" || return 1
     rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
 
     [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
