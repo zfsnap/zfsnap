@@ -24,6 +24,25 @@ ItReturns () {
   fi
 }
 
+ItRetvals () {
+  cmd="$1"
+  expected_retval="$2"
+
+  eval "$cmd"
+  actual_retval="$RETVAL"
+
+  printf "\`%s\` retvals '%s' ... " "$cmd" "$expected_retval"
+  if [ "$expected_retval" = "$actual_retval" ]; then
+    printf "\033[1;32mpassed\033[0m\n"
+  else
+    spec_failed=1
+    printf "\033[1;31mfailed\n"
+    printf "\texpected retval: %s\n" "$expected_retval"
+    printf "\tactual retval: %s\n" "$actual_retval"
+    printf "\033[0m\n"
+  fi
+}
+
 ItEchos () {
   cmd="$1"
   expected_result="$2"
