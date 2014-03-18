@@ -103,6 +103,18 @@ IsTrue() {
     esac
 }
 
+# Returns 0 if pool exists
+PoolExists() {
+    POOLS="${POOLS:-`$ZPOOL_CMD list -H -o name`}"
+
+    local i
+    for i in $POOLS; do
+        [ "$1" = "$i" ] && return 0
+    done
+
+    return 1
+}
+
 # Populates the $SKIP_POOLS global variable; does not return anything
 PopulateSkipPools() {
     [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
