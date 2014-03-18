@@ -71,8 +71,8 @@ while [ "$1" ]; do
     # create snapshots
     if [ "$1" ]; then
         if SkipPool "$1"; then
+            FSExists "$1" || Fatal "'$1' does not exist!"
             NTIME="${NTIME:-`date "+$TIME_FORMAT"`}"
-            IsTrue $DRY_RUN && ZFS_LIST="${ZFS_LIST:-`$ZFS_CMD list -H -o name`}"
 
             ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${NTIME}--${TTL}"
             if IsFalse $DRY_RUN; then
@@ -82,9 +82,7 @@ while [ "$1" ]; do
                     IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... FAIL"
                 fi
             else
-                printf '%s\n' $ZFS_LIST | grep -m 1 -q -E -e "^$1$" \
-                    && echo "$ZFS_SNAPSHOT" \
-                    || Err "Looks like ZFS filesystem '$1' doesn't exist"
+                printf '%s\n' "$ZFS_SNAPSHOT"
             fi
         fi
         shift
