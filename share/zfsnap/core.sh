@@ -55,7 +55,7 @@ Date2Timestamp() {
         date -j -f '%Y-%m-%d_%H.%M.%S' "$1" '+%s'
         ;;
     *)
-        date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
+        local date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
         date --date "$date_normal" '+%s'
         ;;
     esac
@@ -65,6 +65,7 @@ Date2Timestamp() {
 FSExists() {
     FS_LIST="${FS_LIST:-`$ZFS_CMD list -H -o name`}"
 
+    local i
     for i in $FS_LIST; do
         [ "$1" = "$i" ] && return 0
     done
@@ -107,6 +108,7 @@ PopulateSkipPools() {
     [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
     POOLS="${POOLS:-`$ZPOOL_CMD list -H -o name`}"
 
+    local i
     for i in $POOLS; do
         $ZPOOL_CMD status $i | grep -q -e "$1 in progress" && SKIP_POOLS="$SKIP_POOLS $i"
     done
@@ -116,7 +118,7 @@ PopulateSkipPools() {
 RmZfsSnapshot() {
     SkipPool $1 || return 1
 
-    zfs_destroy="$ZFS_CMD destroy $*"
+    local zfs_destroy="$ZFS_CMD destroy $*"
 
     # hardening: make really, really sure we are deleting snapshot
     if IsSnapshot "$1"; then
@@ -141,28 +143,28 @@ RmZfsSnapshot() {
 # Converts seconds to TTL
 Seconds2TTL() {
     # convert seconds to human readable time
-    xtime=$1
+    local xtime=$1
 
-    years=$(($xtime / 31536000))
+    local years=$(($xtime / 31536000))
     xtime=$(($xtime % 31536000))
     [ ${years:-0} -gt 0 ] && years="${years}y" || years=""
 
-    months=$(($xtime / 2592000))
+    local months=$(($xtime / 2592000))
     xtime=$(($xtime % 2592000))
     [ ${months:-0} -gt 0 ] && months="${months}m" || months=""
 
-    days=$(($xtime / 86400))
+    local days=$(($xtime / 86400))
     xtime=$(($xtime % 86400))
     [ ${days:-0} -gt 0 ] && days="${days}d" || days=""
 
-    hours=$(($xtime / 3600))
+    local hours=$(($xtime / 3600))
     xtime=$(($xtime % 3600))
     [ ${hours:-0} -gt 0 ] && hours="${hours}h" || hours=""
 
-    minutes=$(($xtime / 60))
+    local minutes=$(($xtime / 60))
     [ ${minutes:-0} -gt 0 ] && minutes="${minutes}M" || minutes=""
 
-    seconds=$(($xtime % 60))
+    local seconds=$(($xtime % 60))
     [ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
 
     RETVAL="${years}${months}${days}${hours}${minutes}${seconds}"
@@ -172,6 +174,7 @@ Seconds2TTL() {
 # This function's name implies the opposite of what it does. It
 # should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {
+    local i
     for i in $SKIP_POOLS; do
         TrimToPool "$1"
         if [ "$RETVAL" = "$i" ]; then
@@ -185,15 +188,15 @@ SkipPool() {
 # Return the date (anything that matches the "date pattern")
 # If no "date pattern" is found, an empty string will be returned.
 TrimToDate() {
-    snapshot_name="$1"
+    local snapshot_name="$1"
 
     # make sure it contains a date
     [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
 
-    pre_date="${snapshot_name%$DATE_PATTERN*}"
-    post_date="${snapshot_name##*$DATE_PATTERN}"
+    local pre_date="${snapshot_name%$DATE_PATTERN*}"
+    local post_date="${snapshot_name##*$DATE_PATTERN}"
 
-    snapshot_date="${snapshot_name##$pre_date}"
+    local snapshot_date="${snapshot_name##$pre_date}"
     snapshot_date="${snapshot_date%%$post_date}"
 
     if [ -z "${snapshot_date##$DATE_PATTERN}" ]; then
@@ -207,8 +210,8 @@ TrimToDate() {
 # ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
 # If no valid file system is found, an empty string will be returned.
 TrimToFileSystem() {
-    snapshot="$1"
-    file_system="${snapshot%%@*}"
+    local snapshot="$1"
+    local file_system="${snapshot%%@*}"
 
     if FSExists "$file_system"; then
         RETVAL="$file_system" && return 0
@@ -226,9 +229,9 @@ TrimToPool() {
 # Return the prefix in a snapshot name (anything prior to the "snapshot date")
 # If no valid "snapshot date" or prefix is found, an empty string will be returned.
 TrimToPrefix() {
-    snapshot_name="$1"
-    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL"
-    snapshot_prefix="${snapshot_name%%$snapshot_date*}"
+    local snapshot_name="$1"
+    TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL"
+    local snapshot_prefix="${snapshot_name%%$snapshot_date*}"
 
     if ValidPrefix "$snapshot_prefix"; then
         RETVAL="$snapshot_prefix" && return 0
@@ -241,8 +244,8 @@ TrimToPrefix() {
 # ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
 # If no valid snapshot name is found, an empty string will be returned
 TrimToSnapshotName() {
-    snapshot="$1"
-    snapshot_name="${snapshot##*@}"
+    local snapshot="$1"
+    local snapshot_name="${snapshot##*@}"
 
     if ValidSnapshotName "$snapshot_name"; then
         RETVAL="$snapshot_name" && return 0
@@ -254,8 +257,8 @@ TrimToSnapshotName() {
 # Return the TTL (anything after the last '--')
 # If no valid TTL is found, an empty string will be returned.
 TrimToTTL() {
-    snapshot="$1"
-    ttl="${snapshot##*--}"
+    local snapshot="$1"
+    local ttl="${snapshot##*--}"
 
     if ValidTTL "$ttl"; then
         RETVAL="$ttl" && return 0
@@ -266,8 +269,8 @@ TrimToTTL() {
 
 # Converts TTL to seconds
 TTL2Seconds() {
-    ttl="$1"
-    seconds=0
+    local ttl="$1"
+    local seconds=0
     while [ "$ttl" ]; do
         case "$ttl" in
             *y*) seconds=$(($seconds + (${ttl%%y*} * 31536000))); ttl=${ttl##*y} ;;
@@ -286,10 +289,11 @@ TTL2Seconds() {
 
 # Check validity of a prefix
 ValidPrefix() {
-    snapshot_prefix="$1"
+    local snapshot_prefix="$1"
 
     [ -z "$PREFIXES" ] && [ -z "$snapshot_prefix" ] && return 0
 
+    local i
     for i in $PREFIXES; do
         [ "$snapshot_prefix" = "$i" ] && return 0
     done
@@ -301,19 +305,19 @@ ValidPrefix() {
 # This also filters for any prefixes in effect
 ValidSnapshotName() {
     IsSnapshot "$1" && return 1
-    snapshot_name="$1"
+    local snapshot_name="$1"
 
-    TrimToPrefix "$snapshot_name" && snapshot_prefix="$RETVAL" || return 1
-    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL" || return 1
-    TrimToTTL "$snapshot_name" && snapshot_ttl="$RETVAL" || return 1
+    TrimToPrefix "$snapshot_name" && local snapshot_prefix="$RETVAL" || return 1
+    TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL" || return 1
+    TrimToTTL "$snapshot_name" && local snapshot_ttl="$RETVAL" || return 1
 
-    rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
+    local rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
     [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
 }
 
 # Check validity of TTL
 ValidTTL() {
-    ttl="$1"
+    local ttl="$1"
 
     [ "$ttl" = '' ] && return 1
 
