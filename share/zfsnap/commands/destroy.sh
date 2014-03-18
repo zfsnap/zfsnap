@@ -72,7 +72,7 @@ while [ "$1" ]; do
 
         for SNAPSHOT in $ZFS_SNAPSHOTS; do
             IsTrue $RECURSIVE || TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
-            TrimToSnapshotName "$SNAPSHOT" && ValidSnapshotName "$RETVAL" || continue
+            TrimToSnapshotName "$SNAPSHOT" || continue
             ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
         done
 
@@ -81,8 +81,8 @@ while [ "$1" ]; do
         else
             # TODO, create_time could be cached
             for I in $ZFSNAP_SNAPSHOTS; do
-                TrimToSnapshotName "$I" && SNAPSHOT_NAME="$RETVAL"
-                TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" && [ "$CREATE_DATE" ] || continue
+                TrimToSnapshotName "$I" && SNAPSHOT_NAME="$RETVAL" || continue
+                TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" || continue
                 CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
 
                 if [ "$FORCE_DELETE_SNAPSHOTS_AGE" -ne -1 ]; then
@@ -90,8 +90,7 @@ while [ "$1" ]; do
                         RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                     fi
                 else
-                    TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL"
-                    ValidTTL "$TTL" || continue
+                    TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL" || continue
 
                     TTL2Seconds "$TTL" && STAY_TIME="$RETVAL"
                     if [ $CURRENT_TIME -gt $(($CREATE_TIME + $STAY_TIME)) ]; then

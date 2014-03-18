@@ -196,7 +196,11 @@ TrimToDate() {
     snapshot_date="${snapshot_name##$pre_date}"
     snapshot_date="${snapshot_date%%$post_date}"
 
-    [ "$snapshot_name" != "$snapshot_date" ] && RETVAL="$snapshot_date" || RETVAL=''
+    if [ -z "${snapshot_date##$DATE_PATTERN}" ]; then
+        RETVAL="$snapshot_date" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Return the file system name (everything before the '@')
@@ -206,7 +210,11 @@ TrimToFileSystem() {
     snapshot="$1"
     file_system="${snapshot%%@*}"
 
-    [ "$snapshot" != "$file_system" ] && RETVAL="$file_system" || RETVAL=''
+    if FSExists "$file_system"; then
+        RETVAL="$file_system" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Return the pool name (anything before the first '/' or '@')
@@ -222,7 +230,11 @@ TrimToPrefix() {
     TrimToDate "$snapshot_name" && snapshot_date="$RETVAL"
     snapshot_prefix="${snapshot_name%%$snapshot_date*}"
 
-    [ "$snapshot_name" != "$snapshot_prefix" ] && RETVAL="$snapshot_prefix" || RETVAL=''
+    if ValidPrefix "$snapshot_prefix"; then
+        RETVAL="$snapshot_prefix" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Return the snapshot name (everything after the '@')
@@ -232,7 +244,11 @@ TrimToSnapshotName() {
     snapshot="$1"
     snapshot_name="${snapshot##*@}"
 
-    [ "$snapshot" != "$snapshot_name" ] && RETVAL="$snapshot_name" || RETVAL=''
+    if ValidSnapshotName "$snapshot_name"; then
+        RETVAL="$snapshot_name" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Return the TTL (anything after the last '--')
@@ -241,7 +257,11 @@ TrimToTTL() {
     snapshot="$1"
     ttl="${snapshot##*--}"
 
-    [ "$snapshot" != "$ttl" ] && RETVAL="$ttl" || RETVAL=''
+    if ValidTTL "$ttl"; then
+        RETVAL="$ttl" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Converts TTL to seconds
@@ -283,11 +303,11 @@ ValidSnapshotName() {
     IsSnapshot "$1" && return 1
     snapshot_name="$1"
 
-    TrimToPrefix "$snapshot_name" && snapshot_prefix="$RETVAL" && ValidPrefix "$snapshot_prefix" || return 1
-    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL" && [ "$snapshot_date" ] || return 1
-    TrimToTTL "$snapshot_name" && snapshot_ttl="$RETVAL" && ValidTTL "$snapshot_ttl" || return 1
-    rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
+    TrimToPrefix "$snapshot_name" && snapshot_prefix="$RETVAL" || return 1
+    TrimToDate "$snapshot_name" && snapshot_date="$RETVAL" || return 1
+    TrimToTTL "$snapshot_name" && snapshot_ttl="$RETVAL" || return 1
 
+    rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
     [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
 }
 

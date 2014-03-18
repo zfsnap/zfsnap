@@ -6,17 +6,23 @@
 . ../../share/zfsnap/core.sh
 
 # These include a snapshot, and should be trimmed accordingly
+PREFIXES=''
 ItRetvals "TrimToSnapshotName 'zpool@2011-04-05_02.06.00--1y'"                  "2011-04-05_02.06.00--1y"         # pool w/o child w/ snapshot
 ItRetvals "TrimToSnapshotName 'zpool/child@2010-04-05_02.06.00--1m'"            "2010-04-05_02.06.00--1m"         # w/ child w/ snapshot
 ItRetvals "TrimToSnapshotName 'zpool/child/grandchild@2009-06-08_02.06.00--3d'" "2009-06-08_02.06.00--3d"         # w/ grandchild w/ snapshot
+PREFIXES='daily-- hourly-'
 ItRetvals "TrimToSnapshotName 'zpool@hourly-2009-06-08_02.06.00--3d'"           "hourly-2009-06-08_02.06.00--3d"  # w/ prefix in snapshot name
 ItRetvals "TrimToSnapshotName 'zpool@daily--2009-06-08_02.06.00--3d'"           "daily--2009-06-08_02.06.00--3d"  # w/ prefix using TTL delim in snapshot name
+ItRetvals "TrimToSnapshotName 'hourly-2010-04-05_02.06.00--1m'"                 "hourly-2010-04-05_02.06.00--1m"  # snapshot name w/o pool/fs
+PREFIXES=''
+ItRetvals "TrimToSnapshotName '2009-06-08_02.06.00--3d'"                        "2009-06-08_02.06.00--3d"         # snapshot name w/o pool/fs
 
 # These don't contain a snapshot, and should return an empty string
+PREFIXES=''
 ItRetvals "TrimToSnapshotName ''"                                     ""    # empty
 ItRetvals "TrimToSnapshotName 'zpool_child'"                          ""    # special character in poolname
 ItRetvals "TrimToSnapshotName 'zpool/child'"                          ""    # pool w/ child w/o snapshot
 ItRetvals "TrimToSnapshotName 'zpool/child/grandchild'"               ""    # pool w/ grandchild w/o snapshot
-ItRetvals "TrimToSnapshotName '2009-06-08_02.06.00--3d'"              ""    # snapshot w/o pool/fs
+ItRetvals "TrimToSnapshotName 'zpool@daily--2009-06-08_02.06.00--3d'" ""    # w/ invalid prefix
 
 ExitTests
