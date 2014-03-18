@@ -188,8 +188,7 @@ Seconds2TTL() {
 SkipPool() {
     local i
     for i in $SKIP_POOLS; do
-        TrimToPool "$1"
-        if [ "$RETVAL" = "$i" ]; then
+        if TrimToPool "$1" && [ "$RETVAL" = "$i" ]; then
             IsTrue $VERBOSE && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
@@ -233,9 +232,15 @@ TrimToFileSystem() {
 }
 
 # Return the pool name (anything before the first '/' or '@')
-# If no '/' or '@' is found, the submitted string will be returned.
+# If no valid pool is found, an empty string will be returned.
 TrimToPool() {
-    RETVAL="${1%%[/@]*}"
+    local pool_name="${1%%[/@]*}"
+
+    if PoolExists "$pool_name"; then
+        RETVAL="$pool_name" && return 0
+    else
+        RETVAL='' && return 1
+    fi
 }
 
 # Return the prefix in a snapshot name (anything prior to the "snapshot date")

@@ -6,6 +6,7 @@
 . ../../share/zfsnap/core.sh
 
 # These should match, and thus be rejected
+POOLS='kit_pool karr_pool knight_pool'
 SKIP_POOLS=' kit_pool karr_pool knight_pool'
 ItReturns "SkipPool knight_pool/child_fs@2011-04-05_02.06.00--1m"   1   # with child FS
 
@@ -17,6 +18,7 @@ ItReturns "SkipPool kit_pool@2011-09-04_02.06.00--5y"               1   # single
 
 
 # These should not match, and thus be accepted
+POOLS='kit_pool karr_pool knight_pool'
 SKIP_POOLS=' kit_pool karr_pool knight_pool'
 ItReturns "SkipPool michael_pool@child_fs@2011-04-05_02.06.00--1m"  0   # multiple pools & child FS
 
