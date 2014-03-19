@@ -55,8 +55,17 @@ Date2Timestamp() {
         date -j -f '%Y-%m-%d_%H.%M.%S' "$1" '+%s'
         ;;
     *)
-        date_normal="`echo $1 | $ESED -e 's/\./:/g; s/(20[0-9][0-9]-[01][0-9]-[0-3][0-9])_([0-2][0-9]:[0-5][0-9]:[0-5][0-9])/\1 \2/'`"
-        date --date "$date_normal" '+%s'
+        # normalize the date
+        local the_date="$1"
+        while [ -z "${the_date##*[_.]*}" ]; do
+            case "$the_date" in
+                *_*) the_date="${the_date%%_*} ${the_date#*_}" ;;
+                *.*) the_date="${the_date%%.*}:${the_date#*.}" ;;
+                  *) Fatal "Normalizing '$the_date' failed!" ;;
+            esac
+        done
+
+        date --date "$the_date" '+%s'
         ;;
     esac
 }
