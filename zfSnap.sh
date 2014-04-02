@@ -46,7 +46,7 @@ case $OS in
             fatal "GNU bin direcotry not found"
         fi
         ;;
-    'Linux')
+    'Linux'|'GNU/kFreeBSD')
         ESED='sed -r'
         ;;
     'Darwin')
