@@ -221,7 +221,7 @@ case $OS in
         if [ -d "/usr/gnu/bin" ]; then
             export PATH="/usr/gnu/bin:$PATH"
         else
-            Fatal "GNU bin direcotry not found"
+            Fatal "GNU bin directory not found."
         fi
         ;;
     'Linux')
