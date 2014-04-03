@@ -21,6 +21,7 @@ TTL='1m'                            # default snapshot ttl
 VERBOSE="false"                     # Verbose output?
 DRY_RUN="false"                     # Dry run?
 POOLS=""                            # List of pools
+FS_LIST=''                          # List of all ZFS filesystems
 SKIP_POOLS=""                       # List of pools to skip
 
 readonly OS=`uname`
@@ -59,6 +60,17 @@ Date2Timestamp() {
         date --date "$date_normal" '+%s'
         ;;
     esac
+}
+
+# Returns 0 if filesystem exists
+FSExists() {
+    FS_LIST="${FS_LIST:-`$ZFS_CMD list -H -o name`}"
+
+    for i in $FS_LIST; do
+        [ "$1" = "$i" ] && return 0
+    done
+
+    return 1
 }
 
 # Returns 0 if argument is "false"
