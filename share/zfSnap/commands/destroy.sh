@@ -1,9 +1,7 @@
 #!/bin/sh
 
-# "THE BEER-WARE LICENSE":
-# The zfSnap team wrote this file. As long as you retain this notice you
-# can do whatever you want with this stuff. If we meet some day, and you think
-# this stuff is worth it, you can buy me a beer in return.
+# This file is licensed under the BSD-3-Clause license.
+# See the AUTHORS and LICENSE files for more information.
 
 DELETE_ALL_SNAPSHOTS="false"        # Should all snapshots be deleted, regardless of TTL
 RM_SNAPSHOTS=''                     # List of specific snapshots to delete

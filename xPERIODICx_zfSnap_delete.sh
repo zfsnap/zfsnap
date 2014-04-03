@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# This file is licensed under the BSD-3-Clause license.
+# See the AUTHORS and LICENSE files for more information.
+
 # If there is a global system configuration file, suck it in.
 #
 if [ -r /etc/defaults/periodic.conf ]; then
