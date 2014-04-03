@@ -1,3 +1,6 @@
+# This file is licensed under the BSD-3-Clause license.
+# See the AUTHORS and LICENSE files for more information.
+
 TEST_MODE="true"
 
 spec_failed=0
@@ -37,7 +40,6 @@ ItEchos () {
     printf "\033[0m\n"
   fi
 }
-
 
 ExitTests () {
   exit $spec_failed
