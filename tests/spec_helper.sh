@@ -9,15 +9,15 @@ ItReturns () {
   eval "$cmd"
   actual_return="$?"
 
-  echo -n "\`$cmd\` returns $expected_return ... "
+  printf "\`%s\` returns %s ... " "$cmd" "$expected_return"
   if [ $expected_return -eq $actual_return ]; then
-    echo -e "\e[1;32mpassed\e[0m"
+    printf "\033[1;32mpassed\033[0m\n"
   else
     spec_failed=1
-    echo -e "\e[1;31mfailed"
-    echo "  expected return value: $expected_return"
-    echo "    actual return value: $actual_return"
-    echo -e "\e[0m"
+    printf "\033[1;31mfailed\n"
+    printf "\texpected return value: %s\n" "$expected_return"
+    printf "\tactual return value: %s\n" "$actual_return"
+    printf "\033[0m\n"
   fi
 }
 
@@ -26,15 +26,15 @@ ItEchos () {
   expected_result="$2"
   actual_result="`eval "$cmd"`"
 
-  echo -n "\`$cmd\` echos \`$expected_result\` ... "
-  if [ $expected_result = $actual_result ]; then
-    echo -e "\e[1;32mpassed\e[0m"
+  printf "\`%s\` echos '%s' ... " "$cmd" "$expected_result"
+  if [ "$expected_result" = "$actual_result" ]; then
+    printf "\033[1;32mpassed\033[0m\n"
   else
     spec_failed=1
-    echo -e "\e[1;31mfailed"
-    echo "  expected result: $expected_result"
-    echo "    actual result: $actual_result"
-    echo -e "\e[0m"
+    printf "\033[1;31mfailed\n"
+    printf "\texpected result: %s\n" "$expected_result"
+    printf "\tactual result: %s\n" "$actual_result"
+    printf "\033[0m\n"
   fi
 }
 
