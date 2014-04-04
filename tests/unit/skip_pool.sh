@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 # These should match, and thus be rejected
 SKIP_POOLS=' kit_pool karr_pool knight_pool'

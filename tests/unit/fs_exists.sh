@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 # These FSs exist and should be accepted.
 FS_LIST='zpool

@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 ItEchos "TTL2Seconds ''"              "0"
 ItEchos "TTL2Seconds '1s'"            "1"

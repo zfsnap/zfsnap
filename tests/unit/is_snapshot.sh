@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 # These are not snapshots, and should be rejected
 ItReturns "IsSnapshot zpool"                                          1   # a zpool

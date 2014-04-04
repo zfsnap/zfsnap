@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 ItReturns "IsTrue 'true'"  0
 ItReturns "IsTrue 'false'" 1

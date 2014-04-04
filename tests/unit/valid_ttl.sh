@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfSnap/core.sh
+. ../../share/zfsnap/core.sh
 
 # These are invalid TTLs and should be rejected
 ItReturns "ValidTTL 1d5y"           1   # incorrect order

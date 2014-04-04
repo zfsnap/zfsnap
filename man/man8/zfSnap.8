@@ -5,7 +5,7 @@
 .Os \" Current operating system.
 .
 .Sh NAME
-.Nm zfSnap
+.Nm zfsnap
 .Nd create and delete rolling ZFS snapshots
 .
 .Sh SYNOPSIS
@@ -84,7 +84,7 @@ Only snapshots created by
 will be considered for deletion.
 .Bl -tag -width Ds
 .It Fl D
-Delete all zfSnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
+Delete all zfsnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
 systems that follow this switch.
 .It Fl F Ar age
 Force delete all snapshots in all pools exceeding
@@ -214,12 +214,12 @@ Every hour, create recursive snapshots of an entire pool and keep for 5 days.
 .Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
-5         *     *    *      *    root  /sbin/zfSnap snapshot \-a 5d \-r zpool
+5         *     *    *      *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
 .Ed
 .Pp
 Create snapshots of different datasets in different zpools and keep for 2 weeks.
 .Pp
-.Dl zfSnap snapshot \-a 2w zpool2/git zpool2/jails \-r zpool2/jails/main zpool1/var
+.Dl zfsnap snapshot \-a 2w zpool2/git zpool2/jails \-r zpool2/jails/main zpool1/var
 .Pp
 Note that
 .Op Fl a ,
@@ -242,7 +242,7 @@ zpool/usr recursively and hold it for 3 months
 zpool/root non\[hy]recursively and hold it for 3 months.
 .El
 .Pp
-.Dl zfSnap snapshot \-a 1y \-r zpool/var \-a 6M zpool/home \-a 3m zpool/usr \-R zpool/root
+.Dl zfsnap snapshot \-a 1y \-r zpool/var \-a 6M zpool/home \-a 3m zpool/usr \-R zpool/root
 .Pp
 Deleting ZFS snapshots is much slower than creating them, and it's usually not
 a problem if snapshots live a few hours longer. Thus, it is usually best to
@@ -250,7 +250,7 @@ delete old snapshots once a day.
 .Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
-0         1     *    *      *    root  /sbin/zfSnap destroy \-r zpool
+0         1     *    *      *    root  /sbin/zfsnap destroy \-r zpool
 .Ed
 .
 .Sh SEE ALSO

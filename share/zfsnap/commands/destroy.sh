@@ -19,7 +19,7 @@ Syntax:
 ${0##*/} destroy [ options ] zpool/filesystem ...
 
 OPTIONS:
-  -D           = Delete all zfSnap snapshots of pools specified (ignore ttl)
+  -D           = Delete all zfsnap snapshots of pools specified (ignore ttl)
   -e           = Return number of failed actions as exit code.
   -F age       = Force delete all snapshots exceeding age
   -h           = Print this help and exit.

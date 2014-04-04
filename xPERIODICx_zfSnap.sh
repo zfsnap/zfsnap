@@ -11,7 +11,7 @@ if [ -r /etc/defaults/periodic.conf ]; then
 fi
 
 # xPERIODICx_zfsnap_enable			- Enable xPERIODICx snapshots (values: YES | NO)
-# xPERIODICx_zfsnap_flags			- zfSnap generic flags (except -v and -d)
+# xPERIODICx_zfsnap_flags			- zfsnap generic flags (except -v and -d)
 # xPERIODICx_zfsnap_fs				- Space separated zfs filesystems to create non-recursive snapshots
 # xPERIODICx_zfsnap_recursive_fs	- Space separated zfs filesystems to create recursive snapshots
 # xPERIODICx_zfsnap_ttl				- Set Time To Live
@@ -54,7 +54,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
 			;;
 		esac
 
-		xPREFIXx/zfSnap $OPTIONS -a ${xPERIODICx_zfsnap_ttl:-"$default_ttl"} $xPERIODICx_zfsnap_fs -r $xPERIODICx_zfsnap_recursive_fs
+		xPREFIXx/zfsnap $OPTIONS -a ${xPERIODICx_zfsnap_ttl:-"$default_ttl"} $xPERIODICx_zfsnap_fs -r $xPERIODICx_zfsnap_recursive_fs
 		exit $?
 		;;
 
