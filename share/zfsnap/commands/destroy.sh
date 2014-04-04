@@ -46,7 +46,8 @@ while [ "$1" ]; do
     while getopts :DeF:hnp:PrRsSvz OPT; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS="true";;
-            F) TTL2Seconds "$OPTARG" && FORCE_DELETE_SNAPSHOTS_AGE="$RETVAL";;
+            F) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
+               TTL2Seconds "$OPTARG" && FORCE_DELETE_SNAPSHOTS_AGE="$RETVAL";;
             h) Help;;
             n) DRY_RUN="true";;
             p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
