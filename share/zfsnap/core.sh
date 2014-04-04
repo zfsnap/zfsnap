@@ -29,8 +29,7 @@ TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
 RETVAL=''                           # used by functions so we can avoid spawning subshells
 
-## FUNCTIONS
-
+## HELPER FUNCTIONS
 Err() {
     printf '%s\n' "ERROR: $*" > /dev/stderr
 }
@@ -47,6 +46,27 @@ Note() {
 Warn() {
     printf '%s\n' "WARNING: $*" > /dev/stderr
 }
+
+# Returns 0 if argument is "false"
+IsFalse() {
+    IsTrue "$1" && return 1 || return 0
+}
+# Returns 0 if argument is "true"
+IsTrue() {
+    case "$1" in
+        true)
+            return 0
+            ;;
+        false)
+            return 1
+            ;;
+        *)
+            Fatal "must be true or false"
+            ;;
+    esac
+}
+
+## ZFSNAP FUNCTIONS
 
 # Converts datetime to seconds
 Date2Timestamp() {
@@ -73,11 +93,6 @@ FSExists() {
     return 1
 }
 
-# Returns 0 if argument is "false"
-IsFalse() {
-    IsTrue "$1" && return 1 || return 0
-}
-
 # Returns 0 if it looks like a snapshot
 IsSnapshot() {
     case "$1" in
@@ -85,21 +100,6 @@ IsSnapshot() {
             return 0;;
         *)
             return 1;;
-    esac
-}
-
-# Returns 0 if argument is "true"
-IsTrue() {
-    case "$1" in
-        true)
-            return 0
-            ;;
-        false)
-            return 1
-            ;;
-        *)
-            Fatal "must be true or false"
-            ;;
     esac
 }
 
