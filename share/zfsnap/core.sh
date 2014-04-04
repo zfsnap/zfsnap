@@ -200,6 +200,7 @@ SkipPool() {
 # If no "date pattern" is found, an empty string will be returned.
 TrimToDate() {
     local snapshot_name="$1"
+    [ -z "$snapshot_name" ] && RETVAL='' && return 1
 
     # make sure it contains a date
     [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
