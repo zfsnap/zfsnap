@@ -376,6 +376,8 @@ case $OS in
         ;;
     'Linux')
         ;;
+    'GNU/kFreeBSD')
+        ;;
     'Darwin')
         ZFS_CMD='/usr/sbin/zfs'
         ZPOOL_CMD='/usr/sbin/zpool'

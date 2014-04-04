@@ -25,8 +25,8 @@ See https://github.com/zfsnap/zfsnap/wiki for more info
 
 # Will zfsnap run on my system?
 
-Currently zfsnap supports FreeBSD, Solaris, Linux, and OS X. zfsnap is written
-with portability in mind, and should run on your system as long as:
+Currently zfsnap supports FreeBSD, Solaris, Linux, GNU/kFreeBSD, and OS X.
+zfsnap is written with portability in mind, and should run on your system as long as:
 - your Bourne shell supports variables defined with "local"
 - your `date` command supports converting dates (GNU's '--date' flag or BSD's '-j' '-f' flags)
 
