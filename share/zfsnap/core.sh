@@ -196,8 +196,8 @@ SkipPool() {
     return 0
 }
 
-# Return the date (anything that matches the "date pattern")
-# If no "date pattern" is found, an empty string will be returned.
+# Retvals the date (anything that matches the "date pattern")
+# If no "date pattern" is found, it will return 1.
 TrimToDate() {
     local snapshot_name="$1"
     [ -z "$snapshot_name" ] && RETVAL='' && return 1
@@ -218,9 +218,9 @@ TrimToDate() {
     fi
 }
 
-# Return the file system name (everything before the '@')
+# Retvals the file system name (everything before the '@')
 # ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
-# If no valid file system is found, an empty string will be returned.
+# If no valid file system is found, it will return 1.
 TrimToFileSystem() {
     local snapshot="$1"
     local file_system="${snapshot%%@*}"
@@ -232,8 +232,8 @@ TrimToFileSystem() {
     fi
 }
 
-# Return the pool name (anything before the first '/' or '@')
-# If no valid pool is found, an empty string will be returned.
+# Retvals the pool name (anything before the first '/' or '@')
+# If no valid pool is found, it will return 1.
 TrimToPool() {
     local pool_name="${1%%[/@]*}"
 
@@ -244,8 +244,8 @@ TrimToPool() {
     fi
 }
 
-# Return the prefix in a snapshot name (anything prior to the "snapshot date")
-# If no valid "snapshot date" or prefix is found, an empty string will be returned.
+# Retvals the prefix in a snapshot name (anything prior to the "snapshot date")
+# If no valid "snapshot date" or prefix is found, it will return 1.
 TrimToPrefix() {
     local snapshot_name="$1"
     TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL"
@@ -258,9 +258,9 @@ TrimToPrefix() {
     fi
 }
 
-# Return the snapshot name (everything after the '@')
+# Retvals the snapshot name (everything after the '@')
 # ZFS reserves '@' to deliminate snapshots. At max, there will be one per dataset.
-# If no valid snapshot name is found, an empty string will be returned
+# If no valid snapshot name is found, it will return 1.
 TrimToSnapshotName() {
     local snapshot="$1"
     local snapshot_name="${snapshot##*@}"
@@ -272,8 +272,8 @@ TrimToSnapshotName() {
     fi
 }
 
-# Return the TTL (anything after the last '--')
-# If no valid TTL is found, an empty string will be returned.
+# Retvals the TTL (anything after the last '--')
+# If no valid TTL is found, it will return 1.
 TrimToTTL() {
     local snapshot="$1"
     local ttl="${snapshot##*--}"
