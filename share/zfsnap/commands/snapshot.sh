@@ -15,7 +15,6 @@ ${0##*/} snapshot [ options ] zpool/filesystem ...
 
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept
-  -e           = Return number of failed actions as exit code.
   -h           = Print this help and exit.
   -n           = Only show actions that would be performed
   -p prefix    = Use prefix for snapshots after this switch
