@@ -179,7 +179,7 @@ Seconds2TTL() {
     local seconds=$(($xtime % 60))
     [ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
 
-    RETVAL="${years}${months}${days}${hours}${minutes}${seconds}"
+    RETVAL="${years}${months}${days}${hours}${minutes}${seconds}" && return 0
 }
 
 # Returns 1 if ZFS operations on given pool should be skipped
@@ -301,7 +301,7 @@ TTL2Seconds() {
         esac
     done
 
-    RETVAL="$seconds"
+    RETVAL="$seconds" && return 0
 }
 
 # Check validity of a prefix

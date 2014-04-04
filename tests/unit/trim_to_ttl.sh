@@ -6,18 +6,18 @@
 . ../../share/zfsnap/core.sh
 
 # These include a TTL delimiter, and should be trimmed accordingly
-ItRetvals "TrimToTTL 'zpool@2011-04-05_02.06.00--1y'"                "1y"         # pool w/o child w/ snapshot
-ItRetvals "TrimToTTL 'z--pool@2011-04-05_02.06.00--1y4d5s'"          "1y4d5s"     # TTL delim in poolname w/ snapshot
-ItRetvals "TrimToTTL 'z--pool@prefix--2011-04-05_02.06.00--1y4d5s'"  "1y4d5s"     # TTL delim in poolname and prefix w/ snapshot
-ItRetvals "TrimToTTL 'var@1y--2011-04-05_02.06.00--8m5d32M'"         "8m5d32M"    # Prefix is in TTL format with TTL delim
-ItRetvals "TrimToTTL 'zpool/child@2010-04-05_02.06.00--1m'"          "1m"         # w/ child w/ snapshot
-ItRetvals "TrimToTTL 'zpool/child/grandchild@2009-06-08_02.06.00--7y5h'" "7y5h"   # w/ grandchild w/ snapshot
+ItRetvals "TrimToTTL 'zpool@2011-04-05_02.06.00--1y'"                "1y"        0 # pool w/o child w/ snapshot
+ItRetvals "TrimToTTL 'z--pool@2011-04-05_02.06.00--1y4d5s'"          "1y4d5s"    0 # TTL delim in poolname w/ snapshot
+ItRetvals "TrimToTTL 'z--pool@prefix--2011-04-05_02.06.00--1y4d5s'"  "1y4d5s"    0 # TTL delim in poolname and prefix w/ snapshot
+ItRetvals "TrimToTTL 'var@1y--2011-04-05_02.06.00--8m5d32M'"         "8m5d32M"   0 # Prefix is in TTL format with TTL delim
+ItRetvals "TrimToTTL 'zpool/child@2010-04-05_02.06.00--1m'"          "1m"        0 # w/ child w/ snapshot
+ItRetvals "TrimToTTL 'zpool/child/grandchild@2009-06-08_02.06.00--7y5h'" "7y5h"  0 # w/ grandchild w/ snapshot
 
 # These don't contain a TTL delimiter, and should return an empty string
-ItRetvals "TrimToTTL ''"                                             ""           # empty
-ItRetvals "TrimToTTL 'z--pool'"                                      ""           # "pool" is not a valid TTL
-ItRetvals "TrimToTTL 'zpool_child'"                                  ""           # special character in poolname
-ItRetvals "TrimToTTL 'zpool/child'"                                  ""           # w/ child w/o snapshot
-ItRetvals "TrimToTTL 'zpool/child/grandchild'"                       ""           # w/ grandchild w/o snapshot
+ItRetvals "TrimToTTL ''"                                             ""          1 # empty
+ItRetvals "TrimToTTL 'z--pool'"                                      ""          1 # "pool" is not a valid TTL
+ItRetvals "TrimToTTL 'zpool_child'"                                  ""          1 # special character in poolname
+ItRetvals "TrimToTTL 'zpool/child'"                                  ""          1 # w/ child w/o snapshot
+ItRetvals "TrimToTTL 'zpool/child/grandchild'"                       ""          1 # w/ grandchild w/o snapshot
 
 ExitTests
