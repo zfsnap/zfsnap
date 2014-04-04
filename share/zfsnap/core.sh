@@ -10,7 +10,6 @@
 readonly VERSION=2.0.0.pre
 
 # COMMANDS
-ESED='sed -E'
 ZFS_CMD='/sbin/zfs'
 ZPOOL_CMD='/sbin/zpool'
 
@@ -369,7 +368,6 @@ case $OS in
     'FreeBSD')
         ;;
     'SunOS')
-        ESED='sed -r'
         if [ -d "/usr/gnu/bin" ]; then
             export PATH="/usr/gnu/bin:$PATH"
         else
@@ -377,7 +375,6 @@ case $OS in
         fi
         ;;
     'Linux')
-        ESED='sed -r'
         ;;
     'Darwin')
         ZFS_CMD='/usr/sbin/zfs'
