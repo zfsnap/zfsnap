@@ -130,7 +130,8 @@ PopulateSkipPools() {
 
     local i
     for i in $POOLS; do
-        $ZPOOL_CMD status $i | grep -q -e "$1 in progress" && SKIP_POOLS="$SKIP_POOLS $i"
+        ZSTATUS=`"$ZPOOL_CMD" status "$i"`
+        [ -z "${ZSTATUS##*$1 in progress*}" ] && SKIP_POOLS="$SKIP_POOLS $i"
     done
 }
 
