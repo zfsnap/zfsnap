@@ -32,9 +32,9 @@ OPTIONS:
   -v           = Verbose output
 
 LINKS:
-  wiki:             https://github.com/graudeejs/zfSnap/wiki
-  repository:       https://github.com/graudeejs/zfSnap
-  bug tracking:     https://github.com/graudeejs/zfSnap/issues
+  wiki:             https://github.com/zfsnap/zfsnap/wiki
+  repository:       https://github.com/zfsnap/zfsnap
+  bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
 EOF
     Exit 0

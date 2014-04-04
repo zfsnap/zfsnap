@@ -18,4 +18,4 @@ TimeToLive (TTL) is the amount of time for the snapshot to stay alive before
 it's ready for deletion.
 
 
-See https://github.com/graudeejs/zfSnap/wiki for more info
+See https://github.com/zfsnap/zfsnap/wiki for more info

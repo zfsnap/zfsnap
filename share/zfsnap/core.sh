@@ -3,9 +3,9 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 #
-# wiki:             https://github.com/graudeejs/zfSnap/wiki
-# repository:       https://github.com/graudeejs/zfSnap
-# Bug tracking:     https://github.com/graudeejs/zfSnap/issues
+# wiki:             https://github.com/zfsnap/zfsnap/wiki
+# repository:       https://github.com/zfsnap/zfsnap
+# Bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
 readonly VERSION=2.0.0.pre
 
@@ -131,7 +131,7 @@ RmZfsSnapshot() {
     else
         echo "FATAL: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
         echo "  This is bug, we definitely don't want that." > /dev/stderr
-        echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
+        echo "  Please report it to https://github.com/zfsnap/zfsnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
         Exit 1
     fi
