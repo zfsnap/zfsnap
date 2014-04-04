@@ -68,6 +68,7 @@ while [ "$1" ]; do
     # delete snapshots
     if [ "$1" ]; then
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
+        ! SkipPool "$1" && shift && continue
 
         for SNAPSHOT in $ZFS_SNAPSHOTS; do
             if IsFalse $RECURSIVE; then
