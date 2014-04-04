@@ -67,21 +67,22 @@ while [ "$1" ]; do
 
     # create snapshots
     if [ "$1" ]; then
-        if SkipPool "$1"; then
-            FSExists "$1" || Fatal "'$1' does not exist!"
-            NTIME="${NTIME:-`date "+$TIME_FORMAT"`}"
+        FSExists "$1" || Fatal "'$1' does not exist!"
+        ! SkipPool "$1" && shift && continue
 
-            ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${NTIME}--${TTL}"
-            if IsFalse $DRY_RUN; then
-                if $ZFS_SNAPSHOT > /dev/stderr; then
-                    IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... DONE"
-                else
-                    IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... FAIL"
-                fi
+        NTIME="${NTIME:-`date "+$TIME_FORMAT"`}"
+
+        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${NTIME}--${TTL}"
+        if IsFalse $DRY_RUN; then
+            if $ZFS_SNAPSHOT > /dev/stderr; then
+                IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... DONE"
             else
-                printf '%s\n' "$ZFS_SNAPSHOT"
+                IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... FAIL"
             fi
+        else
+            printf '%s\n' "$ZFS_SNAPSHOT"
         fi
+
         shift
     fi
 done
