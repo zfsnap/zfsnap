@@ -22,7 +22,6 @@ FS_LIST=''                          # List of all ZFS filesystems
 SKIP_POOLS=""                       # List of pools to skip
 
 readonly OS=`uname`
-readonly TTL_PATTERN="([0-9]+y)?([0-9]+m)?([0-9]+w)?([0-9]+d)?([0-9]+h)?([0-9]+M)?([0-9]+[s])?"
 readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
