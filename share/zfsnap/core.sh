@@ -234,36 +234,6 @@ RmZfsSnapshot() {
     fi
 }
 
-# Converts seconds to TTL
-Seconds2TTL() {
-    # convert seconds to human readable time
-    local xtime=$1
-
-    local years=$(($xtime / 31536000))
-    xtime=$(($xtime % 31536000))
-    [ ${years:-0} -gt 0 ] && years="${years}y" || years=""
-
-    local months=$(($xtime / 2592000))
-    xtime=$(($xtime % 2592000))
-    [ ${months:-0} -gt 0 ] && months="${months}m" || months=""
-
-    local days=$(($xtime / 86400))
-    xtime=$(($xtime % 86400))
-    [ ${days:-0} -gt 0 ] && days="${days}d" || days=""
-
-    local hours=$(($xtime / 3600))
-    xtime=$(($xtime % 3600))
-    [ ${hours:-0} -gt 0 ] && hours="${hours}h" || hours=""
-
-    local minutes=$(($xtime / 60))
-    [ ${minutes:-0} -gt 0 ] && minutes="${minutes}M" || minutes=""
-
-    local seconds=$(($xtime % 60))
-    [ ${seconds:-0} -gt 0 ] && seconds="${seconds}s" || seconds=""
-
-    RETVAL="${years}${months}${days}${hours}${minutes}${seconds}" && return 0
-}
-
 # Returns 1 if ZFS operations on given pool should be skipped
 # This function's name implies the opposite of what it does. It
 # should be renamed, but I can't come up with anything intuitive and short.
