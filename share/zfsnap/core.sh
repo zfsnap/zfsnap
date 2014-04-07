@@ -24,7 +24,7 @@ SKIP_POOLS=""                       # List of pools to skip
 readonly OS=`uname`
 readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
-TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation
+TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation and comparison
 RETVAL=''                           # used by functions so we can avoid spawning subshells
 
 ## HELPER FUNCTIONS
@@ -65,28 +65,6 @@ IsTrue() {
 }
 
 ## ZFSNAP FUNCTIONS
-
-# Converts datetime to seconds
-Date2Timestamp() {
-    case $OS in
-    'FreeBSD' | 'Darwin' )
-        date -j -f '%Y-%m-%d_%H.%M.%S' "$1" '+%s'
-        ;;
-    *)
-        # normalize the date
-        local the_date="$1"
-        while [ -z "${the_date##*[_.]*}" ]; do
-            case "$the_date" in
-                *_*) the_date="${the_date%%_*} ${the_date#*_}" ;;
-                *.*) the_date="${the_date%%.*}:${the_date#*.}" ;;
-                  *) Fatal "Normalizing '$the_date' failed!" ;;
-            esac
-        done
-
-        date --date "$the_date" '+%s'
-        ;;
-    esac
-}
 
 # Adds a TTL to a date
 DatePlusTTL() {
@@ -389,26 +367,6 @@ TrimToTTL() {
     fi
 }
 
-# Converts TTL to seconds
-TTL2Seconds() {
-    local ttl="$1"
-    local seconds=0
-    while [ "$ttl" ]; do
-        case "$ttl" in
-            *y*) seconds=$(($seconds + (${ttl%%y*} * 31536000))); ttl=${ttl##*y} ;;
-            *m*) seconds=$(($seconds + (${ttl%%m*} * 2592000))); ttl=${ttl##*m} ;;
-            *w*) seconds=$(($seconds + (${ttl%%w*} * 604800))); ttl=${ttl##*w} ;;
-            *d*) seconds=$(($seconds + (${ttl%%d*} * 86400))); ttl=${ttl##*d} ;;
-            *h*) seconds=$(($seconds + (${ttl%%h*} * 3600))); ttl=${ttl##*h} ;;
-            *M*) seconds=$(($seconds + (${ttl%%M*} * 60))); ttl=${ttl##*M} ;;
-             *s) seconds=$(($seconds + ${ttl%%s*})); ttl=${ttl##*s} ;;
-              *) Fatal "TTL2Seconds could not convert '$1'!" ;;
-        esac
-    done
-
-    RETVAL="$seconds" && return 0
-}
-
 # Check validity of a prefix
 ValidPrefix() {
     local snapshot_prefix="$1"
@@ -464,11 +422,6 @@ case $OS in
     'FreeBSD')
         ;;
     'SunOS')
-        if [ -d "/usr/gnu/bin" ]; then
-            export PATH="/usr/gnu/bin:$PATH"
-        else
-            Fatal "GNU bin directory not found."
-        fi
         ;;
     'Linux')
         ;;

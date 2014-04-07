@@ -5,10 +5,10 @@
 
 DELETE_ALL_SNAPSHOTS="false"        # Should all snapshots be deleted, regardless of TTL
 RM_SNAPSHOTS=''                     # List of specific snapshots to delete
-FORCE_DELETE_SNAPSHOTS_AGE=-1       # Delete snapshots older than x seconds. -1 means NO
+FORCE_DELETE_BY_AGE='false'         # Ignore TTL expiration and delete if older than "AGE" (in TTL format).
+FORCE_AGE_TTL=''                    # Used to store "age" TTL if FORCE_DELETE_BY_AGE is set.
 RECURSIVE="false"
 PREFIXES=""                         # List of prefixes
-CURRENT_TIME=`date +%s`
 
 # FUNCTIONS
 Help() {
@@ -47,7 +47,9 @@ while [ "$1" ]; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS="true";;
             F) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
-               TTL2Seconds "$OPTARG" && FORCE_DELETE_SNAPSHOTS_AGE="$RETVAL";;
+               FORCE_AGE_TTL="$OPTARG"
+               FORCE_DELETE_BY_AGE="true"
+               ;;
             h) Help;;
             n) DRY_RUN="true";;
             p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
@@ -75,30 +77,27 @@ while [ "$1" ]; do
             if IsFalse $RECURSIVE; then
                 TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
             fi
-            TrimToSnapshotName "$SNAPSHOT" || continue
+            TrimToSnapshotName "$SNAPSHOT" || continue # checks if snapshot is valid
             ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
         done
 
         if IsTrue $DELETE_ALL_SNAPSHOTS; then
             RM_SNAPSHOTS="$ZFSNAP_SNAPSHOTS"
         else
-            # TODO, create_time could be cached
             for I in $ZFSNAP_SNAPSHOTS; do
                 TrimToSnapshotName "$I" && SNAPSHOT_NAME="$RETVAL" || continue
                 TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" || continue
-                CREATE_TIME=`Date2Timestamp "$CREATE_DATE"`
 
-                if [ "$FORCE_DELETE_SNAPSHOTS_AGE" -ne -1 ]; then
-                    if [ $CURRENT_TIME -gt $(($CREATE_TIME + $FORCE_DELETE_SNAPSHOTS_AGE)) ]; then
-                        RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
-                    fi
+                if IsTrue "$FORCE_DELETE_BY_AGE"; then
+                    DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE="$RETVAL" || continue
                 else
                     TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL" || continue
+                    DatePlusTTL "$CREATE_DATE" "$TTL" && EXPIRATION_DATE="$RETVAL" || continue
+                fi
 
-                    TTL2Seconds "$TTL" && STAY_TIME="$RETVAL"
-                    if [ $CURRENT_TIME -gt $(($CREATE_TIME + $STAY_TIME)) ]; then
-                        RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
-                    fi
+                CURRENT_DATE="${CURRENT_DATE:-`date "+$TIME_FORMAT"`}"
+                if GreaterDate "$CURRENT_DATE" "$EXPIRATION_DATE"; then
+                    RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
                 fi
             done
         fi

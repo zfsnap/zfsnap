@@ -161,10 +161,10 @@ contains numbers and modifiers. Valid modifiers are:
 .Bl -tag -width Ds -offset 4n
 .It Cm y
 years
-.Pq 365 days
+.Pq calendar
 .It Cm m
 months
-.Pq 30 days
+.Pq calendar
 .It Cm w
 weeks
 .It Cm d
@@ -184,21 +184,30 @@ The default TTL is
 .Cm 1m
 .Pq one month .
 .
+.Ss TTL Math
+When a TTL is added to a date, addition is first done to each field independently,
+then month overflows are carried into years, and then all overflows are carried
+normally from right to left.
+
+For example, with a date of 2009\-02\-27 and a TTL of 1m3d, the expiration date
+is 2009\-03\-30 rather than 2009\-04\-02.
+
+As a corner case, adding 1m (one month) to the date 2009\-10\-31 will result
+in an expiration date of 2009\-12\-01 rather than 2009\-11\-30. Because there
+are only 30 days in November, one month after October 31st is ambigious. The TTL
+math chooses the more conservative result.
+.
 .Ss TTL Examples
 .Bl -tag -width 8n
 .It Cm 1y6m5d2h
 One year, six months, five days, and two hours
-.It Cm 2m
-Two months
-.It Cm 216000s
-Two hundred and sixteen thousand seconds
-.Pq ~2 months
-.It Cm 216000
-Two hundred and sixteen thousand seconds
-.Po the
-.Cm s
-for seconds is optional
-.Pc
+.It Cm 18m
+Eighteen months
+.It Cm 90M
+Ninety minutes
+.It Cm 86400s
+Eighty-six thousand and four hundred seconds
+.Pq 1 day
 .El
 .
 .Sh EXIT STATUS

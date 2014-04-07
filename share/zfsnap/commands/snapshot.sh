@@ -70,9 +70,9 @@ while [ "$1" ]; do
         FSExists "$1" || Fatal "'$1' does not exist!"
         ! SkipPool "$1" && shift && continue
 
-        NTIME="${NTIME:-`date "+$TIME_FORMAT"`}"
+        CURRENT_DATE="${CURRENT_DATE:-`date "+$TIME_FORMAT"`}"
 
-        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${NTIME}--${TTL}"
+        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${CURRENT_DATE}--${TTL}"
         if IsFalse $DRY_RUN; then
             if $ZFS_SNAPSHOT > /dev/stderr; then
                 IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... DONE"

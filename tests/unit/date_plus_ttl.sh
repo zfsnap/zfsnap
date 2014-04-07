@@ -36,12 +36,17 @@ ItRetvals "DatePlusTTL '2011-01-04_03.00.00' '4y'"         "2015-01-04_03.00.00"
 ItRetvals "DatePlusTTL '2015-01-04_03.00.00' '1460d'"      "2019-01-03_03.00.00"    0  # 4 years in days
 ItRetvals "DatePlusTTL '2007-01-04_03.00.00' '126144000s'" "2011-01-03_03.00.00"    0  # 4 years in seconds
 
-# Test range edges
-ItRetvals "DatePlusTTL '2014-09-03_22.58.52' '3m4w1h1M7s'" "2014-12-31_23.59.59"   0  # Don't roll over
-ItRetvals "DatePlusTTL '2015-11-20_06.00.59' '60119M'"     "2015-12-31_23.59.59"   0  # Roll, to a limit
-ItRetvals "DatePlusTTL '2015-11-20_06.00.59' '60119M1s'"   "2016-01-01_00.00.00"   0  # Roll over the limit
-ItRetvals "DatePlusTTL '2007-01-02_00.00.00' '126143999s'" "2010-12-31_23.59.59"   0  # 1 short of 4 years in seconds through a leap year
+# Man page examples
+ItRetvals "DatePlusTTL '2009-02-27_00.00.00' '1m3d'"       "2009-03-30_00.00.00"    0  #
+ItRetvals "DatePlusTTL '2009-10-31_00.00.00' '1m'"         "2009-12-01_00.00.00"    0  # October is longer than November
 
-ItRetvals "DatePlusTTL '2007-01-02_00.00.00' 'fake'"       ""                      1  # Invalid TTL. Shouldn't happen, but worth testing.
+# Test range edges
+ItRetvals "DatePlusTTL '2014-09-03_22.58.52' '3m4w1h1M7s'" "2014-12-31_23.59.59"    0  # Don't roll over
+ItRetvals "DatePlusTTL '2015-11-20_06.00.59' '60119M'"     "2015-12-31_23.59.59"    0  # Roll, to a limit
+ItRetvals "DatePlusTTL '2015-11-20_06.00.59' '60119M1s'"   "2016-01-01_00.00.00"    0  # Roll over the limit
+ItRetvals "DatePlusTTL '2007-01-02_00.00.00' '126143999s'" "2010-12-31_23.59.59"    0  # 1 short of 4 years in seconds through a leap year
+
+# Invalid TTL
+ItRetvals "DatePlusTTL '2007-01-02_00.00.00' 'fake'"       ""                       1  # Shouldn't happen, but worth testing.
 
 ExitTests
