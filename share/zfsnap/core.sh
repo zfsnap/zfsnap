@@ -100,6 +100,18 @@ FSExists() {
     return 1
 }
 
+# Returns 0 if supplied year is a leap year
+IsLeapYear() {
+    local year="$1"
+    [ "$year" ] || return 1
+
+    [ $(( $year % 400 )) -eq 0 ] && return 0
+    [ $(( $year % 100 )) -eq 0 ] && return 1
+    [ $(( $year % 4 )) -eq 0 ] && return 0
+
+    return 1
+}
+
 # Returns 0 if it looks like a snapshot
 IsSnapshot() {
     case "$1" in
