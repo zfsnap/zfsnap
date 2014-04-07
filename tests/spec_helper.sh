@@ -19,7 +19,7 @@ ItReturns () {
     spec_failed=1
     printf "\033[1;31mfailed\n"
     printf "\texpected return value: %s\n" "$expected_return"
-    printf "\tactual return value: %s\n" "$actual_return"
+    printf "\tactual return value:   %s\n" "$actual_return"
     printf "\033[0m\n"
   fi
 }
@@ -40,9 +40,9 @@ ItRetvals () {
     spec_failed=1
     printf "\033[1;31mfailed\n"
     printf "\texpected retval: %s\n" "$expected_retval"
-    printf "\tactual retval: %s\n" "$actual_retval"
+    printf "\tactual retval:   %s\n" "$actual_retval"
     printf "\texpected return value: %s\n" "$expected_return"
-    printf "\tactual return value: %s\n" "$actual_return"
+    printf "\tactual return value:   %s\n" "$actual_return"
     printf "\033[0m\n"
   fi
 }
@@ -59,7 +59,7 @@ ItEchos () {
     spec_failed=1
     printf "\033[1;31mfailed\n"
     printf "\texpected result: %s\n" "$expected_result"
-    printf "\tactual result: %s\n" "$actual_result"
+    printf "\tactual result:   %s\n" "$actual_result"
     printf "\033[0m\n"
   fi
 }
