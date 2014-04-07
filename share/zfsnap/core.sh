@@ -88,6 +88,26 @@ Date2Timestamp() {
     esac
 }
 
+# Accepts two /valid/ zfsnap dates
+# Returns 0 if date1 is greater or equal
+# Returns 1 if date2 is greater
+GreaterDate() {
+    local date1="$1"
+    local date2="$2"
+
+    while [ "$date1" ]; do
+        [ ${date1%%[-_.]*} -gt ${date2%%[-_.]*} ] && return 0
+        [ ${date1%%[-_.]*} -eq ${date2%%[-_.]*} ] || return 1
+
+        # if no seperators left (seconds), bail
+        [ -z ${date1%%*[-_.]*} ] || break
+
+        date1="${date1#*[-_.]}" && date2="${date2#*[-_.]}"
+    done
+
+    return 0
+}
+
 # Returns 0 if filesystem exists
 FSExists() {
     FS_LIST="${FS_LIST:-`$ZFS_CMD list -H -o name`}"
