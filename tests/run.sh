@@ -5,19 +5,18 @@
 exit_with_error=0
 
 for i in unit integration; do
-  cd "$i"
-  for t in `ls`; do
-    sh $t
-    [ $? -ne 0 ] && exit_with_error=1
-  done
-  cd ..
+    cd "$i"
+    for t in `ls`; do
+        sh $t
+        [ $? -ne 0 ] && exit_with_error=1
+    done
+    cd ..
 done
 
 
-echo
 if [ $exit_with_error -eq 0 ]; then
-  echo "All tests passed"
+    printf "\n\033[1;32m%s\033[0m\n" "All tests passed."
 else
-  echo "Some tests failed" > /dev/stderr
-  exit 1
+    printf "\n\033[1;31m%s\033[0m\n" "Some tests failed." > /dev/stderr
+    exit 1
 fi
