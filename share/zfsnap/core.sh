@@ -14,7 +14,7 @@ ZFS_CMD='/sbin/zfs'
 ZPOOL_CMD='/sbin/zpool'
 
 # VARIABLES
-TTL='1m'                            # default snapshot ttl
+TTL='1m'                            # default snapshot TTL
 VERBOSE="false"                     # Verbose output?
 DRY_RUN="false"                     # Dry run?
 POOLS=""                            # List of pools
@@ -24,7 +24,7 @@ SKIP_POOLS=""                       # List of pools to skip
 readonly OS=`uname`
 readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
 TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
-TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # format for snapshot creation and comparison
+TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # date/time format for snapshot creation and comparison
 RETVAL=''                           # used by functions so we can avoid spawning subshells
 
 ## HELPER FUNCTIONS
@@ -141,7 +141,7 @@ GreaterDate() {
         [ ${date1%%[-_.]*} -gt ${date2%%[-_.]*} ] && return 0
         [ ${date1%%[-_.]*} -eq ${date2%%[-_.]*} ] || return 1
 
-        # if no seperators left (seconds), bail
+        # if no separators left (seconds), bail
         [ -z ${date1%%*[-_.]*} ] || break
 
         date1="${date1#*[-_.]}" && date2="${date2#*[-_.]}"
@@ -208,7 +208,7 @@ PopulateSkipPools() {
     done
 }
 
-# Removes zfs snapshot
+# Removes ZFS snapshot
 RmZfsSnapshot() {
     SkipPool $1 || return 1
 
@@ -234,7 +234,7 @@ RmZfsSnapshot() {
     fi
 }
 
-# Returns 1 if ZFS operations on given pool should be skipped
+# Returns 1 if ZFS operations on given pool should be skipped.
 # This function's name implies the opposite of what it does. It
 # should be renamed, but I can't come up with anything intuitive and short.
 SkipPool() {

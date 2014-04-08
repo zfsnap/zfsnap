@@ -40,8 +40,7 @@ EOF
     Exit 0
 }
 
-# MAIN
-# main loop; get options, process snapshot creation
+# main loop; get options, process snapshot expiration/deletion
 while [ "$1" ]; do
     while getopts :DeF:hnp:PrRsSvz OPT; do
         case "$OPT" in
@@ -69,7 +68,7 @@ while [ "$1" ]; do
     # discard all arguments processed thus far
     shift $(($OPTIND - 1))
 
-    # delete snapshots
+    # operate on pool/fs supplied
     if [ "$1" ]; then
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` > /dev/stderr || Fatal "'$1' does not exist!"
         ! SkipPool "$1" && shift && continue
@@ -79,7 +78,7 @@ while [ "$1" ]; do
                 TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
             fi
 
-            # Gets and validates snapshot name
+            # gets and validates snapshot name
             TrimToSnapshotName "$SNAPSHOT" && SNAPSHOT_NAME="$RETVAL" || continue
 
             if IsTrue $DELETE_ALL_SNAPSHOTS; then

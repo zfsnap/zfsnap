@@ -37,7 +37,6 @@ EOF
     Exit 0
 }
 
-# MAIN
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
     while getopts :a:ehnp:PrRsSvz OPT; do
