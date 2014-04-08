@@ -25,6 +25,8 @@ ItReturns "ValidTTL 1y5"            1   # modifiers used, but last digit has mis
 ItReturns "ValidTTL 3600"           1   # (implied) seconds only is not a TTL
 ItReturns "ValidTTL 1dforever"      1   # cannot combine 'forever' with other modifiers
 ItReturns "ValidTTL forever4w"      1   # cannot combine 'forever' with other modifiers
+ItReturns "ValidTTL 0w"             1   # must be greater than zero
+ItReturns "ValidTTL 009d"           1   # padded with zeros is not acceptable
 ItReturns "ValidTTL"                1   # empty is not a TTL
 
 ExitTests

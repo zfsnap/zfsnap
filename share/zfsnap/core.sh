@@ -373,6 +373,7 @@ ValidTTL() {
     [ "$ttl" = 'forever' ] && return 0
 
     while [ "$ttl" ]; do
+        [ -z ${ttl##0*} ] && return 1 # leading zeros not accepted
         case "$ttl" in
             *y*) [ ${ttl%y*} -gt 0 2> /dev/null ] && ttl=${ttl##*y} || return 1 ;;
             *m*) [ ${ttl%m*} -gt 0 2> /dev/null ] && ttl=${ttl##*m} || return 1 ;;

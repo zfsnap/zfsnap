@@ -188,6 +188,14 @@ will delete snapshots with a TTL of
 You do not need to use all of the modifiers, but they must be used in the above order
 .Pq i.e. sequentially .
 .Pp
+TTL numbers must be greater than zero and cannot have leading zeros
+.Po e.g. Both
+.Cm 0y
+and
+.Cm 09d
+are invalid
+.Pc .
+.Pp
 The default TTL is
 .Cm 1m
 .Pq one month .
