@@ -403,6 +403,10 @@ case $OS in
         ZPOOL_CMD='/usr/sbin/zpool'
         ;;
     *)
-        Fatal "Your OS isn't supported"
+        Fatal "Your OS isn't supported. However, not all hope is lost." \
+              "zfsnap is very portable, and likely already runs on your system." \
+              "Download the code and tests from https://github.com/zfsnap/zfsnap," \
+              "let us know the results, and --- if all goes well --- we can add" \
+              "your OS to the list of supported systems."
         ;;
 esac
