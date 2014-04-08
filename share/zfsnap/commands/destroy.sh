@@ -77,17 +77,14 @@ while [ "$1" ]; do
             if IsFalse $RECURSIVE; then
                 TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
             fi
-            TrimToSnapshotName "$SNAPSHOT" || continue # checks if snapshot is valid
-            ZFSNAP_SNAPSHOTS="$ZFSNAP_SNAPSHOTS $SNAPSHOT"
-        done
 
-        if IsTrue $DELETE_ALL_SNAPSHOTS; then
-            RM_SNAPSHOTS="$ZFSNAP_SNAPSHOTS"
-        else
-            for I in $ZFSNAP_SNAPSHOTS; do
-                TrimToSnapshotName "$I" && SNAPSHOT_NAME="$RETVAL" || continue
+            # Gets and validates snapshot name
+            TrimToSnapshotName "$SNAPSHOT" && SNAPSHOT_NAME="$RETVAL" || continue
+
+            if IsTrue $DELETE_ALL_SNAPSHOTS; then
+                RM_SNAPSHOTS="$RM_SNAPSHOTS $SNAPSHOT"
+            else
                 TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" || continue
-
                 if IsTrue "$FORCE_DELETE_BY_AGE"; then
                     DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE="$RETVAL" || continue
                 else
@@ -97,10 +94,10 @@ while [ "$1" ]; do
 
                 CURRENT_DATE="${CURRENT_DATE:-`date "+$TIME_FORMAT"`}"
                 if GreaterDate "$CURRENT_DATE" "$EXPIRATION_DATE"; then
-                    RM_SNAPSHOTS="$RM_SNAPSHOTS $I"
+                    RM_SNAPSHOTS="$RM_SNAPSHOTS $SNAPSHOT"
                 fi
-            done
-        fi
+            fi
+        done
 
         for I in $RM_SNAPSHOTS; do
             RmZfsSnapshot "$I"
