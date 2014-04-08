@@ -15,18 +15,18 @@ ${0##*/} snapshot [ options ] zpool/filesystem ...
 
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept
-  -h           = Print this help and exit.
-  -n           = Only show actions that would be performed
+  -h           = Print this help and exit
+  -n           = Dry‐run. Perform a trial run with no actions actually performed
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefix for snapshots after this switch
-  -r           = Create recursive snapshots for all zfs file systems that
+  -r           = Create recursive snapshots for all ZFS file systems that
                  follow this switch
-  -R           = Create non-recursive snapshots for all zfs file systems that
+  -R           = Create non-recursive snapshots for all ZFS file systems that
                  follow this switch
-  -s           = Don't do anything on pools running resilver
-  -S           = Don't do anything on pools running scrub
+  -s           = Skip pools that are resilvering
+  -S           = Skip pools that are scrubbing
   -v           = Verbose output
-  -z           = Force new snapshots to have 00 seconds
+  -z           = Round snapshot creation time down to 00 seconds
 
 LINKS:
   wiki:             https://github.com/zfsnap/zfsnap/wiki

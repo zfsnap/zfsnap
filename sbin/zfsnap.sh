@@ -25,11 +25,11 @@ COMMANDS:
 `for C in $ZFSNAP_LIB_DIR/commands/*.sh; do [ -f "$C" ] && C_NAME="${C##*/}" && printf '  %s\n' "${C_NAME%.*}"; done`
 
 OPTIONS:
-  -h, --help        = Print this help and exit.
+  -h, --help        = Print this help and exit
   -V, --version     = Print the version number and exit
 
 MORE HELP:
-  All commands accept the -h option. Use that for more information.
+  All commands accept the -h option; use it for command-specific help.
   Example: ${0##*/} snapshot -h
 
 LINKS:

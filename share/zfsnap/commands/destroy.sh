@@ -19,16 +19,16 @@ Syntax:
 ${0##*/} destroy [ options ] zpool/filesystem ...
 
 OPTIONS:
-  -D           = Delete all zfsnap snapshots of pools specified (ignore ttl)
-  -F age       = Force delete all snapshots exceeding age
-  -h           = Print this help and exit.
-  -n           = Only show actions that would be performed
+  -D           = Delete *all* zfsnap snapshots of pools specified
+  -F age       = Force delete all snapshots exceeding age (rather than TTL expiration)
+  -h           = Print this help and exit
+  -n           = Dry‐run. Perform a trial run with no actions actually performed
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefixes for snapshots after this switch
-  -r           = Operate recursively on all ZFS file systems after this switch.
-  -R           = Do not operate recursively on all ZFS file systems after this switch.
-  -s           = Don't do anything on pools running resilver
-  -S           = Don't do anything on pools running scrub
+  -r           = Operate recursively on all ZFS file systems after this switch
+  -R           = Do not operate recursively on all ZFS file systems after this switch
+  -s           = Skip pools that are resilvering
+  -S           = Skip pools that are scrubbing
   -v           = Verbose output
 
 LINKS:
