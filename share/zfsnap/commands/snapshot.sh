@@ -73,9 +73,9 @@ while [ "$1" ]; do
         ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${CURRENT_DATE}--${TTL}"
         if IsFalse $DRY_RUN; then
             if $ZFS_SNAPSHOT > /dev/stderr; then
-                IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... DONE"
+                IsTrue $VERBOSE && printf "%s ... DONE\n" "$ZFS_SNAPSHOT"
             else
-                IsTrue $VERBOSE && echo "$ZFS_SNAPSHOT ... FAIL"
+                IsTrue $VERBOSE && printf "%s ... FAIL\n" "$ZFS_SNAPSHOT"
             fi
         else
             printf '%s\n' "$ZFS_SNAPSHOT"

@@ -218,19 +218,18 @@ RmZfsSnapshot() {
     if IsSnapshot "$1"; then
         if IsFalse $DRY_RUN; then
             if $zfs_destroy > /dev/stderr; then
-                IsTrue $VERBOSE && echo "$zfs_destroy  ... DONE"
+                IsTrue $VERBOSE && printf "%s ... DONE\n" "$zfs_destroy"
             else
-                IsTrue $VERBOSE && echo "$zfs_destroy  ... FAIL"
+                IsTrue $VERBOSE && printf "%s ... FAIL\n" "$zfs_destroy"
             fi
         else
-            echo "$zfs_destroy"
+            printf "%s\n" "$zfs_destroy"
         fi
     else
-        echo "FATAL: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
-        echo "  This is bug, we definitely don't want that." > /dev/stderr
-        echo "  Please report it to https://github.com/zfsnap/zfsnap/issues" > /dev/stderr
-        echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        Exit 1
+        Fatal "Trying to delete ZFS pool or filesystem? WTF?" \
+              "This is bug, and we definitely don't want that." \
+              "Please report it to https://github.com/zfsnap/zfsnap/issues ." \
+              "Don't panic, as nothing was deleted. :-)"
     fi
 }
 
