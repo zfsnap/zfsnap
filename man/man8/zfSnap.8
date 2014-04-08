@@ -1,4 +1,4 @@
-\" This file is licensed under the BSD-3-Clause license.
+\" This file is licensed under the BSD\[hy]3\[hy]Clause license.
 \" See the AUTHORS and LICENSE files for more information.
 .Dd February 11, 2014
 .Dt ZFSNAP 8
@@ -32,7 +32,7 @@ Time\[hy]To\[hy]Live
 .Pq TTL
 is the length of time to keep a snapshot before it's ready for deletion.
 .
-.Ss Top-level Options
+.Ss Top\[hy]level Options
 The majority of functionality is implemented at the
 .Ar <command>
 layer. However, a few options can be passed to
@@ -42,7 +42,7 @@ directly.
 .It Fl h
 Print a summary of
 .Nm Ap s
-command-line options and then exit.
+command\[hy]line options and then exit.
 .It Fl V
 Print the version number and exit.
 .El
@@ -64,7 +64,7 @@ are operated on as they are read
 This provides the flexibility needed for complex scenarios, but also has the
 capacity to bite you if you're not paying attention. Remember,
 .Fl n
-.Pq dry-run
+.Pq dry\[hy]run
 is provided for a reason.
 .Pp
 Only one
@@ -96,7 +96,7 @@ for more information.
 .It Fl h
 Print a summary of
 .Cm destroy Ap s
-command-line options and then exit.
+command\[hy]line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix
@@ -131,7 +131,7 @@ for more information.
 .It Fl h
 Print a summary of
 .Cm snapshot Ap s
-command-line options and then exit.
+command\[hy]line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix
@@ -176,8 +176,8 @@ minutes
 .It Cm s
 seconds
 .It Cm forever
-a special\[hy]case modifier that will never expire and cannot be used with other TTL modifiers.
-Both
+a special\[hy]case modifier that will never expire and cannot be used with other
+TTL modifiers. Both
 .Op Fl F
 and
 .Op Fl D
@@ -201,17 +201,22 @@ The default TTL is
 .Pq one month .
 .
 .Ss TTL Math
-When a TTL is added to a date, addition is first done to each field independently,
-then month overflows are carried into years, and then all overflows are carried
-normally from right to left.
-
-For example, with a date of 2009\-02\-27 and a TTL of 1m3d, the expiration date
-is 2009\-03\-30 rather than 2009\-04\-02.
-
-As a corner case, adding 1m (one month) to the date 2009\-10\-31 will result
-in an expiration date of 2009\-12\-01 rather than 2009\-11\-30. Because there
-are only 30 days in November, one month after October 31st is ambigious. The TTL
-math chooses the more conservative result.
+When a TTL is added to a date, each field is added independently, then any month
+overflows are carried into years, and then all overflows are carried normally
+from right to left.
+.Pp
+For example, with a date of 2009\-02\-27 and a TTL of
+.Cm 1m3d ,
+the expiration date is 2009\-03\-30 rather than 2009\-04\-02.
+.Pp
+As a corner case, adding a TTL of
+.Cm 1m
+.Pq one month
+to the date 2009\-10\-31 will result in an expiration date of 2009\-12\-01
+rather than 2009\-11\-30. Because there are only 30 days in November, precisely
+one month after October 31st is ambigious. The TTL math chooses the more conservative
+.Pq later
+result.
 .
 .Ss TTL Examples
 .Bl -tag -width 8n
@@ -222,7 +227,7 @@ Eighteen months
 .It Cm 90M
 Ninety minutes
 .It Cm 86400s
-Eighty-six thousand and four hundred seconds
+Eighty\[hy]six thousand and four hundred seconds
 .Pq 1 day
 .El
 .
@@ -292,7 +297,7 @@ was created by
 .An -nosplit
 .An Aldis Berjoza ,
 .Mt graudeejs@yandex.com ,
-and is now co-maintained with
+and is now co\[hy]maintained with
 .An Alex Waite
 .Mt Alexqw85@gmail.com .
 See the AUTHORS file for more information.
@@ -304,6 +309,6 @@ This reference was written by
 .Sh COPYRIGHT
 .Nm
 is released under the
-.Qq BSD-3-Clause License.
+.Qq BSD\[hy]3\[hy]Clause License.
 See the LICENSE file for more information.
 .
