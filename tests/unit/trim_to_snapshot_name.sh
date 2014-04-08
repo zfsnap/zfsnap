@@ -16,6 +16,7 @@ ItRetvals "TrimToSnapshotName 'zpool@daily--2009-06-08_02.06.00--3d'"           
 ItRetvals "TrimToSnapshotName 'hourly-2010-04-05_02.06.00--1m'"                 "hourly-2010-04-05_02.06.00--1m"  0  # snapshot name w/o pool/fs
 PREFIXES=''
 ItRetvals "TrimToSnapshotName '2009-06-08_02.06.00--3d'"                        "2009-06-08_02.06.00--3d"         0  # snapshot name w/o pool/fs
+ItRetvals "TrimToSnapshotName '2009-06-08_02.06.00--forever'"                   "2009-06-08_02.06.00--forever"    0  # forever TTL
 
 # These don't contain a snapshot, and should return an empty string
 PREFIXES=''

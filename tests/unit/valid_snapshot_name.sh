@@ -28,6 +28,7 @@ PREFIXES='hourly- weekly- monthly-'
 ItReturns "ValidSnapshotName 'hourly-2011-04-05_02.06.00--3w'"       0   # first prefix w/ three prefixes defined
 ItReturns "ValidSnapshotName 'weekly-2011-04-05_02.06.00--6m'"       0   # middle prefix w/ three prefixes defined
 ItReturns "ValidSnapshotName 'monthly-2011-04-05_02.06.00--5M'"      0   # last prefix w/ three prefixes defined
+ItReturns "ValidSnapshotName 'monthly-2011-04-05_02.06.00--forever'" 0   # forever TTL
 
 ###
 # Invalid names

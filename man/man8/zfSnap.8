@@ -158,7 +158,7 @@ Round snapshot creation time down to 00 seconds.
 The Time\[hy]To\[hy]Live
 .Pq TTL
 contains numbers and modifiers. Valid modifiers are:
-.Bl -tag -width Ds -offset 4n
+.Bl -tag -width 8n -offset 4n
 .It Cm y
 years
 .Pq calendar
@@ -175,6 +175,14 @@ hours
 minutes
 .It Cm s
 seconds
+.It Cm forever
+a special\[hy]case modifier that will never expire and cannot be used with other TTL modifiers.
+Both
+.Op Fl F
+and
+.Op Fl D
+will delete snapshots with a TTL of
+.Cm forever .
 .El
 .Pp
 You do not need to use all of the modifiers, but they must be used in the above order

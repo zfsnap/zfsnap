@@ -47,6 +47,7 @@ while [ "$1" ]; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS="true";;
             F) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
+               [ "$OPTARG" = 'forever' ] && Fatal "-F does not accept the 'forever' TTL"
                FORCE_AGE_TTL="$OPTARG"
                FORCE_DELETE_BY_AGE="true"
                ;;
@@ -89,6 +90,7 @@ while [ "$1" ]; do
                     DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE="$RETVAL" || continue
                 else
                     TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL" || continue
+                    [ "$TTL" = 'forever' ] && continue
                     DatePlusTTL "$CREATE_DATE" "$TTL" && EXPIRATION_DATE="$RETVAL" || continue
                 fi
 

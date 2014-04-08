@@ -370,6 +370,7 @@ ValidTTL() {
     local ttl="$1"
 
     [ "$ttl" = '' ] && return 1
+    [ "$ttl" = 'forever' ] && return 0
 
     while [ "$ttl" ]; do
         case "$ttl" in

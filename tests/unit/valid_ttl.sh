@@ -11,6 +11,7 @@ ItReturns "ValidTTL 7y5h"           0   # skip a few modifiers
 ItReturns "ValidTTL 10y24d5s"       0   # use double digits with modifiers
 ItReturns "ValidTTL 4000d"          0   # use a very large number
 ItReturns "ValidTTL 1m"             0   # default TTL
+ItReturns "ValidTTL forever"        0   # special-case TTL
 
 # These are invalid TTLs and should be rejected
 ItReturns "ValidTTL 1d5y"           1   # incorrect order
@@ -22,6 +23,8 @@ ItReturns "ValidTTL 9y4w2d8w"       1   # same modifier defined twice, but seper
 ItReturns "ValidTTL 1ms"            1   # valid modifiers, in order, not seperated by digit
 ItReturns "ValidTTL 1y5"            1   # modifiers used, but last digit has missing modifier
 ItReturns "ValidTTL 3600"           1   # (implied) seconds only is not a TTL
+ItReturns "ValidTTL 1dforever"      1   # cannot combine 'forever' with other modifiers
+ItReturns "ValidTTL forever4w"      1   # cannot combine 'forever' with other modifiers
 ItReturns "ValidTTL"                1   # empty is not a TTL
 
 ExitTests
