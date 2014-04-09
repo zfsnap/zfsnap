@@ -299,9 +299,11 @@ TrimToPool() {
 # If no valid "snapshot date" or prefix is found, it will return 1.
 TrimToPrefix() {
     local snapshot_name="$1"
-    TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL"
-    local snapshot_prefix="${snapshot_name%%$snapshot_date*}"
 
+    # make sure it contains a date
+    [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
+
+    local snapshot_prefix="${snapshot_name%$DATE_PATTERN*}"
     if ValidPrefix "$snapshot_prefix"; then
         RETVAL="$snapshot_prefix" && return 0
     else

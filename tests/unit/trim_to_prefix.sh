@@ -13,6 +13,9 @@ PREFIXES='daily-- hourly-'
 ItRetvals "TrimToPrefix 'hourly-2011-04-05_02.06.00--1y'"        "hourly-"  0 # prefix
 ItRetvals "TrimToPrefix 'daily--2011-04-05_02.06.00--1y'"        "daily--"  0 # prefix using TTL delim
 
+PREFIXES='wtf- 2004-04-05_23.32.00--'
+ItRetvals "TrimToPrefix '2004-04-05_23.32.00--2008-01-05_23.32.00--1y'"  "2004-04-05_23.32.00--"  0  # an idiot/asshole uses a date in the prefix
+
 # These don't contain a date pattern, and should return an empty string
 PREFIXES=''
 ItRetvals "TrimToPrefix 'hourly-2011-04-05_02.06.00--1y'"        ""         1 # invalid prefix
