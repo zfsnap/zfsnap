@@ -10,6 +10,7 @@ ItRetvals "TrimToTTL 'zpool@2011-04-05_02.06.00--1y'"                "1y"       
 ItRetvals "TrimToTTL 'z--pool@2011-04-05_02.06.00--1y4d5s'"          "1y4d5s"    0 # TTL delim in poolname w/ snapshot
 ItRetvals "TrimToTTL 'z--pool@prefix--2011-04-05_02.06.00--1y4d5s'"  "1y4d5s"    0 # TTL delim in poolname and prefix w/ snapshot
 ItRetvals "TrimToTTL 'var@1y--2011-04-05_02.06.00--8m5d32M'"         "8m5d32M"   0 # Prefix is in TTL format with TTL delim
+ItRetvals "TrimToTTL 'var@wtf--1y-2011-04-05_02.06.00--2w8d'"        "2w8d"      0 # Prefix is in TTL format with TTL delim
 ItRetvals "TrimToTTL 'zpool/child@2010-04-05_02.06.00--1m'"          "1m"        0 # w/ child w/ snapshot
 ItRetvals "TrimToTTL 'zpool/child/grandchild@2009-06-08_02.06.00--7y5h'" "7y5h"  0 # w/ grandchild w/ snapshot
 
