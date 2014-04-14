@@ -7,7 +7,7 @@
 # repository:       https://github.com/zfsnap/zfsnap
 # Bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
-readonly VERSION=2.0.0.pre
+readonly VERSION=2.0.0.beta1
 
 # COMMANDS
 ZFS_CMD='/sbin/zfs'
