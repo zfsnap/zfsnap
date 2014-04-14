@@ -1,7 +1,12 @@
 # WARNING
 
-Master is currently very unstable.
-You should use zfSnap from legacy branch instead.
+This branch contains the new 2.0.0 code-base which is now in beta. While
+2.0.0 is a big improvement, it has not yet been as widely tested on production
+systems as the zfSnap 1.x line.
+
+Testing is most welcome, but use at your own risk.
+
+Please use the "legacy" branch for the older, more battle-tested version of zfSnap.
 
 # About zfsnap
 
@@ -9,7 +14,7 @@ zfsnap makes rolling ZFS snapshots easy and — with cron — automatic.
 
 The main advantages of zfsnap are its portability, simplicity, and performance.
 It is written purely in /bin/sh and does not require any additional software —
-other than typical *nix utilies.
+other than core *nix utilies.
 
 zfsnap stores all the information it needs about a snapshot directly in its name;
 no database or special ZFS properties are needed. The information is stored in
