@@ -22,7 +22,7 @@ FS_LIST=''                          # List of all ZFS filesystems
 SKIP_POOLS=""                       # List of pools to skip
 
 readonly OS=`uname`
-readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9]\.[0-5][0-9]\.[0-5][0-9]'
+readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9].[0-5][0-9].[0-5][0-9]'
 TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # date/time format for snapshot creation and comparison
 RETVAL=''                           # used by functions so we can avoid spawning subshells
