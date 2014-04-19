@@ -17,7 +17,9 @@ ItRetvals "TrimToDate 'zpool@2004-04-05_23.32.00--2008-01-05_23.32.00--1y'"  "20
 # These do not include a date matching the "date pattern", and should return an empty string
 ItRetvals "TrimToDate '201-04-05_23.32.00--1y'"               ""  1                     # year has 3 characters
 ItRetvals "TrimToDate '2001-34-05_23.32.00--1y'"              ""  1                     # month is invalid
+ItRetvals "TrimToDate '2001-04-05_23x32y00--2w'"              ""  1                     # make sure dots in pattern are literal
 ItRetvals "TrimToDate '2014.03.05.0924'"                      ""  1                     # wrong date format
+ItRetvals "TrimToDate '1899-10-12_10.00.00'"                  ""  1                     # 1800's are not supported
 
 ItRetvals "TrimToDate ''"                                     ""  1                     # empty
 ItRetvals "TrimToDate 'zpool_child'"                          ""  1                     # special character in poolname
