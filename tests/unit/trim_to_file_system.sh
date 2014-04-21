@@ -11,18 +11,18 @@ z--pool
 zpool/child
 zpool/child/grandchild
 data/archive'
-ItRetvals "TrimToFileSystem 'zpool'"                                "zpool"                  0  # pool
-ItRetvals "TrimToFileSystem 'data/archive'"                         "data/archive"           0  # pool w/ child
-ItRetvals "TrimToFileSystem 'zpool/child/grandchild'"               "zpool/child/grandchild" 0  # pool w/ grandchild
-ItRetvals "TrimToFileSystem 'zpool@2011-04-05_02.06.00--1y'"        "zpool"                  0  # pool  w/ snapshot
-ItRetvals "TrimToFileSystem 'z--pool@2011-04-05_02.06.00--1y'"      "z--pool"                0  # ttl delim in poolname w/ snapshot
-ItRetvals "TrimToFileSystem 'zpool/child@2010-04-05_02.06.00--1m'"  "zpool/child"            0  # w/ child w/ snapshot
-ItRetvals "TrimToFileSystem 'zpool/child/grandchild@2009-06-08_02.06.00--3d'" "zpool/child/grandchild"  0  # w/ grandchild w/ snapshot
+ItsRetvalIs "TrimToFileSystem 'zpool'"                                "zpool"                  0  # pool
+ItsRetvalIs "TrimToFileSystem 'data/archive'"                         "data/archive"           0  # pool w/ child
+ItsRetvalIs "TrimToFileSystem 'zpool/child/grandchild'"               "zpool/child/grandchild" 0  # pool w/ grandchild
+ItsRetvalIs "TrimToFileSystem 'zpool@2011-04-05_02.06.00--1y'"        "zpool"                  0  # pool  w/ snapshot
+ItsRetvalIs "TrimToFileSystem 'z--pool@2011-04-05_02.06.00--1y'"      "z--pool"                0  # ttl delim in poolname w/ snapshot
+ItsRetvalIs "TrimToFileSystem 'zpool/child@2010-04-05_02.06.00--1m'"  "zpool/child"            0  # w/ child w/ snapshot
+ItsRetvalIs "TrimToFileSystem 'zpool/child/grandchild@2009-06-08_02.06.00--3d'" "zpool/child/grandchild"  0  # w/ grandchild w/ snapshot
 
 # These don't contain a snapshot, an should return and empty string
-ItRetvals "TrimToFileSystem ''"                                     ""  1          # empty
-ItRetvals "TrimToFileSystem 'fake_zpool'"                           ""  1          # non-existant FS
-ItRetvals "TrimToFileSystem 'fake_zpool/child'"                     ""  1          # non-existant FS w/ child w/o snapshot
-ItRetvals "TrimToFileSystem 'fake_zpool/child/grandchild'"          ""  1          # non-existant FS w/ grandchild w/o snapshot
+ItsRetvalIs "TrimToFileSystem ''"                                     ""  1          # empty
+ItsRetvalIs "TrimToFileSystem 'fake_zpool'"                           ""  1          # non-existant FS
+ItsRetvalIs "TrimToFileSystem 'fake_zpool/child'"                     ""  1          # non-existant FS w/ child w/o snapshot
+ItsRetvalIs "TrimToFileSystem 'fake_zpool/child/grandchild'"          ""  1          # non-existant FS w/ grandchild w/o snapshot
 
 ExitTests

@@ -24,7 +24,8 @@ ItReturns () {
   fi
 }
 
-ItRetvals () {
+# Check both the global variable RETVAL and the return of a given function
+ItsRetvalIs() {
   cmd="$1"
   expected_retval="$2"
   expected_return="$3"
