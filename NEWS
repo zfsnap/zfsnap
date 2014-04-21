@@ -19,7 +19,7 @@ zfsnap 2.0.0 - 2014-0?-??
     - POSIX compliant (except for use of "local" variables)
       - /Should/ now run on any *nix that supports ZFS
   Performance:
-    - Ported Key functionality to pure sh, resulting in noticeable speedups
+    - Ported key functionality to pure sh, resulting in noticeable speedups
       - No more `sed`, `grep`, or `find` in code-base
     - Significantly decreased number of subshells spawned
   TTLs:
@@ -29,7 +29,7 @@ zfsnap 2.0.0 - 2014-0?-??
     - Integers supplied to '-a' without a TTL modifier are now considered invalid
       - No longer automatically converted into a TTL
     - New 'forever' TTL that will never expire
-    - Leap years handled properly
+    - Leap years are now handled properly
   Future-proofing:
     - Unix time no longer used internally
       - Supports dates (and expiration dates) past 2038
@@ -40,4 +40,5 @@ zfsnap 2.0.0 - 2014-0?-??
     - Relicensed from Beerware to BSD-3-Clause
   Random:
     - Bash completion
+    - tcsh completion (only command and ZFS fs support; no flags)
     - Many bugs fixed and small features added
