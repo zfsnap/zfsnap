@@ -26,7 +26,14 @@ pool/fs@2014-04-07_05.30.00--6m). Timestamp is the date and time when the
 snapshot was created, and TimeToLive (TTL) is the amount of time the snapshot
 will be kept until it is deleted.
 
-See https://github.com/zfsnap/zfsnap/wiki for more info
+# Need help?
+
+The wiki currently only covers zfSnap 1.x. https://github.com/zfsnap/zfsnap/wiki
+
+For information about zfsnap 2.0, please refer to the manpage.
+
+We have a mailing list (zfsnap@librelist.com) for questions, suggestions, and
+discussion. It can also be found at gmane.comp.sysutils.zfsnap on gmane.
 
 # Will zfsnap run on my system?
 
