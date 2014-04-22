@@ -24,13 +24,12 @@ creates and deletes rolling ZFS snapshots \[em] usually with cron.
 main advantages are its portability and that all information needed for
 snapshot management is kept in the snapshot name itself.
 .Pp
-ZFS snapshot names are in the format of Timestamp\-\-TimeToLive
-.Pq e.g. zpool/var@2010\-08\-03_02.06.00\-\-1y .
+zfsnap snapshots are in the format of pool/fs@[prefix]Timestamp\-\-TimeToLive
+.Pq e.g. zpool/var@monthly\-2010\-08\-03_02.06.00\-\-1y .
 .Pp
-The Timestamp includes the date and time when the snapshot was created, and
-Time\[hy]To\[hy]Live
-.Pq TTL
-is the length of time to keep a snapshot before it's ready for deletion.
+The prefix is optional and is quite useful for filtering; Timestamp is the date
+and time when the snapshot was created; and TimeToLive (TTL) is the amount of
+time the snapshot will be kept until it's ready for deletion.
 .
 .Ss Top\[hy]level Options
 The majority of functionality is implemented at the
@@ -301,14 +300,10 @@ was created by
 .An -nosplit
 .An Aldis Berjoza ,
 .Mt graudeejs@yandex.com ,
-and is now co\[hy]maintained with
+and is co\[hy]maintained with
 .An Alex Waite
 .Mt Alexqw85@gmail.com .
 See the AUTHORS file for more information.
-.Pp
-This reference was written by
-.An Alex Waite ,
-.Mt Alexqw85@gmail.com .
 .
 .Sh COPYRIGHT
 .Nm
