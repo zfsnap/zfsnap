@@ -4,7 +4,6 @@
 # See the AUTHORS and LICENSE files for more information.
 
 # If there is a global system configuration file, suck it in.
-#
 if [ -r /etc/defaults/periodic.conf ]; then
     . /etc/defaults/periodic.conf
     source_periodic_confs
@@ -24,11 +23,7 @@ case "${xPERIODICx_zfsnap_delete_enable-"NO"}" in
             [Yy][Ee][Ss]) OPTIONS="$OPTIONS -v" ;;
         esac
 
-        for prefix in $xPERIODICx_zfsnap_delete_prefixes; do
-            OPTIONS="$OPTIONS -p $prefix"
-        done
-
-        xPREFIXx/zfsnap destroy $OPTIONS -p 'hourly-' -p 'daily-' -p 'weekly-' -p 'monthly-' -p 'reboot-'
+        xPREFIXx/zfsnap destroy $OPTIONS -p "hourly- daily- weekly- monthly- reboot- $xPERIODICx_zfsnap_delete_prefixes"
         exit $?
         ;;
 
