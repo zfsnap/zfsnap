@@ -7,7 +7,7 @@
 # repository:       https://github.com/zfsnap/zfsnap
 # Bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
-readonly VERSION=2.0.0.beta1
+readonly VERSION='2.0.0.beta1'
 
 # COMMANDS
 ZFS_CMD='/sbin/zfs'
@@ -15,15 +15,15 @@ ZPOOL_CMD='/sbin/zpool'
 
 # VARIABLES
 TTL='1m'                            # default snapshot TTL
-VERBOSE="false"                     # Verbose output?
-DRY_RUN="false"                     # Dry run?
-POOLS=""                            # List of pools
+VERBOSE='false'                     # Verbose output?
+DRY_RUN='false'                     # Dry run?
+POOLS=''                            # List of pools
 FS_LIST=''                          # List of all ZFS filesystems
-SKIP_POOLS=""                       # List of pools to skip
+SKIP_POOLS=''                       # List of pools to skip
 
 readonly OS=`uname`
 readonly DATE_PATTERN='20[0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9].[0-5][0-9].[0-5][0-9]'
-TEST_MODE="${TEST_MODE:-false}"     # When set to "true", Exit won't really exit
+TEST_MODE=${TEST_MODE:-false}       # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # date/time format for snapshot creation and comparison
 RETVAL=''                           # used by functions so we can avoid spawning subshells
 
@@ -32,7 +32,7 @@ Err() {
     printf '%s\n' "ERROR: $*" > /dev/stderr
 }
 Exit() {
-    IsTrue $TEST_MODE || exit $1
+    IsTrue "$TEST_MODE" || exit $1
 }
 Fatal() {
     printf '%s\n' "FATAL: $*" > /dev/stderr
@@ -59,7 +59,7 @@ IsTrue() {
             return 1
             ;;
         *)
-            Fatal "must be true or false"
+            Fatal "'$1' must be true or false."
             ;;
     esac
 }
@@ -72,12 +72,12 @@ DatePlusTTL() {
     local ttl="$2"
 
     # break date into components; strip leading zeros
-    local y=${orig_date%%-*} && y=${y#0} && orig_date="${orig_date#*-}"
-    local m=${orig_date%%-*} && m=${m#0} && orig_date="${orig_date#*-}"
-    local d=${orig_date%%_*} && d=${d#0} && orig_date="${orig_date#*_}"
-    local h=${orig_date%%.*} && h=${h#0} && orig_date="${orig_date#*.}"
-    local M=${orig_date%%.*} && M=${M#0} && orig_date="${orig_date#*.}"
-    local s=${orig_date} && s=${s#0}
+    local y="${orig_date%%-*}" && y=${y#0} && orig_date=${orig_date#*-}
+    local m="${orig_date%%-*}" && m=${m#0} && orig_date=${orig_date#*-}
+    local d="${orig_date%%_*}" && d=${d#0} && orig_date=${orig_date#*_}
+    local h="${orig_date%%.*}" && h=${h#0} && orig_date=${orig_date#*.}
+    local M="${orig_date%%.*}" && M=${M#0} && orig_date=${orig_date#*.}
+    local s="${orig_date}" && s=${s#0}
 
     while [ "$ttl" ]; do
         case "$ttl" in
@@ -93,32 +93,32 @@ DatePlusTTL() {
     done
 
     # roll seconds into minutes into hours into days
-    [ ${s} -ge 60 ] && M=$(( ${M} + ( ${s} / 60 ))) && s=$(( ${s} % 60 ))
-    [ ${M} -ge 60 ] && h=$(( ${h} + ( ${M} / 60 ))) && M=$(( ${M} % 60 ))
-    [ ${h} -ge 24 ] && d=$(( ${d} + ( ${h} / 24 ))) && h=$(( ${h} % 24 ))
+    [ $s -ge 60 ] && M=$(($M + ($s / 60))) && s=$(($s % 60))
+    [ $M -ge 60 ] && h=$(($h + ($M / 60))) && M=$(($M % 60))
+    [ $h -ge 24 ] && d=$(($d + ($h / 24))) && h=$(($h % 24))
 
     # days, months, years
     while true; do
         # roll months into years
-        [ ${m} -gt 12 ] && y=$(( ${y} + ( ${m} / 12 ))) && m=$(( ${m} % 12 ))
-        [ ${m} -eq 0 ] && m=1
+        [ $m -gt 12 ] && y=$(($y + ($m / 12))) && m=$(($m % 12))
+        [ $m -eq 0 ] && m=1
 
         # roll days into months
-        local month_lengths="31 28 31 30 31 30 31 31 30 31 30 31"
+        local month_lengths='31 28 31 30 31 30 31 31 30 31 30 31'
         local m_num=0
         local m_length
         for m_length in $month_lengths; do
             m_num=$((${m_num}+1))
 
             # skip if we're not to current month yet
-            [ ${m} -gt ${m_num} ] && continue
+            [ $m -gt $m_num ] && continue
 
             # adjust if february in a leap year
             [ $m_num -eq 2 ] && IsLeapYear "$y" && m_length=29
 
             [ $d -le $m_length ] && break 2
 
-            d=$(( ${d} - ${m_length} )) && m=$((${m}+1))
+            d=$(($d - $m_length)) && m=$(($m + 1))
         done
     done
 
@@ -144,7 +144,7 @@ GreaterDate() {
         # if no separators left (seconds), bail
         [ -z ${date1%%*[-_.]*} ] || break
 
-        date1="${date1#*[-_.]}" && date2="${date2#*[-_.]}"
+        date1=${date1#*[-_.]} && date2=${date2#*[-_.]}
     done
 
     return 0
@@ -152,7 +152,7 @@ GreaterDate() {
 
 # Returns 0 if filesystem exists
 FSExists() {
-    FS_LIST="${FS_LIST:-`$ZFS_CMD list -H -o name`}"
+    FS_LIST=${FS_LIST:-`$ZFS_CMD list -H -o name`}
 
     local i
     for i in $FS_LIST; do
@@ -186,7 +186,7 @@ IsSnapshot() {
 
 # Returns 0 if pool exists
 PoolExists() {
-    POOLS="${POOLS:-`$ZPOOL_CMD list -H -o name`}"
+    POOLS=${POOLS:-`$ZPOOL_CMD list -H -o name`}
 
     local i
     for i in $POOLS; do
@@ -198,8 +198,8 @@ PoolExists() {
 
 # Populates the $SKIP_POOLS global variable; does not return anything
 PopulateSkipPools() {
-    [ "$1" ] || Fatal "PopulateSkipPools requires an argument!"
-    POOLS="${POOLS:-`$ZPOOL_CMD list -H -o name`}"
+    [ "$1" ] || Fatal 'PopulateSkipPools requires an argument!'
+    POOLS=${POOLS:-`$ZPOOL_CMD list -H -o name`}
 
     local i
     for i in $POOLS; do
@@ -210,26 +210,26 @@ PopulateSkipPools() {
 
 # Removes ZFS snapshot
 RmZfsSnapshot() {
-    SkipPool $1 || return 1
+    SkipPool "$1" || return 1
 
     local zfs_destroy="$ZFS_CMD destroy $*"
 
-    # hardening: make really, really sure we are deleting snapshot
+    # hardening: make really, really sure we are deleting a snapshot
     if IsSnapshot "$1"; then
-        if IsFalse $DRY_RUN; then
+        if IsFalse "$DRY_RUN"; then
             if $zfs_destroy > /dev/stderr; then
-                IsTrue $VERBOSE && printf "%s ... DONE\n" "$zfs_destroy"
+                IsTrue $VERBOSE && printf '%s ... DONE\n' "$zfs_destroy"
             else
-                IsTrue $VERBOSE && printf "%s ... FAIL\n" "$zfs_destroy"
+                IsTrue $VERBOSE && printf '%s ... FAIL\n' "$zfs_destroy"
             fi
         else
-            printf "%s\n" "$zfs_destroy"
+            printf '%s\n' "$zfs_destroy"
         fi
     else
-        Fatal "Trying to delete ZFS pool or filesystem? WTF?" \
-              "This is bug, and we definitely don't want that." \
-              "Please report it to https://github.com/zfsnap/zfsnap/issues ." \
-              "Don't panic, as nothing was deleted. :-)"
+        Fatal 'Trying to delete ZFS pool or filesystem? WTF?' \
+              'This is bug, and we definitely do not want that.' \
+              'Please report it to https://github.com/zfsnap/zfsnap/issues' \
+              'Do not panic, as nothing was deleted. :-)'
     fi
 }
 
@@ -260,10 +260,10 @@ TrimToDate() {
     local post_date="${snapshot_name##*$DATE_PATTERN}"
 
     local snapshot_date="${snapshot_name##$pre_date}"
-    snapshot_date="${snapshot_date%%$post_date}"
+    snapshot_date=${snapshot_date%%$post_date}
 
     if [ -z "${snapshot_date##$DATE_PATTERN}" ]; then
-        RETVAL="$snapshot_date" && return 0
+        RETVAL=$snapshot_date && return 0
     else
         RETVAL='' && return 1
     fi
@@ -277,7 +277,7 @@ TrimToFileSystem() {
     local file_system="${snapshot%%@*}"
 
     if FSExists "$file_system"; then
-        RETVAL="$file_system" && return 0
+        RETVAL=$file_system && return 0
     else
         RETVAL='' && return 1
     fi
@@ -289,7 +289,7 @@ TrimToPool() {
     local pool_name="${1%%[/@]*}"
 
     if PoolExists "$pool_name"; then
-        RETVAL="$pool_name" && return 0
+        RETVAL=$pool_name && return 0
     else
         RETVAL='' && return 1
     fi
@@ -305,7 +305,7 @@ TrimToPrefix() {
 
     local snapshot_prefix="${snapshot_name%$DATE_PATTERN*}"
     if ValidPrefix "$snapshot_prefix"; then
-        RETVAL="$snapshot_prefix" && return 0
+        RETVAL=$snapshot_prefix && return 0
     else
         RETVAL='' && return 1
     fi
@@ -319,7 +319,7 @@ TrimToSnapshotName() {
     local snapshot_name="${snapshot##*@}"
 
     if ValidSnapshotName "$snapshot_name"; then
-        RETVAL="$snapshot_name" && return 0
+        RETVAL=$snapshot_name && return 0
     else
         RETVAL='' && return 1
     fi
@@ -332,7 +332,7 @@ TrimToTTL() {
     local ttl="${snapshot##*--}"
 
     if ValidTTL "$ttl"; then
-        RETVAL="$ttl" && return 0
+        RETVAL=$ttl && return 0
     else
         RETVAL='' && return 1
     fi
@@ -374,7 +374,7 @@ ValidTTL() {
     [ "$ttl" = 'forever' ] && return 0
 
     while [ "$ttl" ]; do
-        [ -z ${ttl##0*} ] && return 1 # leading zeros not accepted
+        [ -z "${ttl##0*}" ] && return 1 # leading zeros not accepted
         case "$ttl" in
             *y*) [ ${ttl%y*} -gt 0 2> /dev/null ] && ttl=${ttl##*y} || return 1 ;;
             *m*) [ ${ttl%m*} -gt 0 2> /dev/null ] && ttl=${ttl##*m} || return 1 ;;
@@ -391,7 +391,7 @@ ValidTTL() {
 }
 
 ## MAIN
-case $OS in
+case "$OS" in
     'FreeBSD')
         ;;
     'SunOS')
@@ -405,10 +405,10 @@ case $OS in
         ZPOOL_CMD='/usr/sbin/zpool'
         ;;
     *)
-        Fatal "Your OS isn't supported. However, not all hope is lost." \
-              "zfsnap is very portable, and likely already runs on your system." \
-              "Download the code and tests from https://github.com/zfsnap/zfsnap," \
-              "let us know the results, and --- if all goes well --- we can add" \
-              "your OS to the list of supported systems."
+        Fatal 'Your OS is not supported. However, not all hope is lost.' \
+              'zfsnap is very portable, and likely already runs on your system.' \
+              'Download the code and tests from https://github.com/zfsnap/zfsnap,' \
+              'let us know the results, and---if all goes well---we can add' \
+              'your OS to the list of supported systems.'
         ;;
 esac

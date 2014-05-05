@@ -7,12 +7,11 @@ exit_with_error=0
 for i in unit integration; do
     cd "$i"
     for t in `ls`; do
-        sh $t
+        sh "$t"
         [ $? -ne 0 ] && exit_with_error=1
     done
     cd ..
 done
-
 
 if [ $exit_with_error -eq 0 ]; then
     printf "\n\033[1;32m%s\033[0m\n" "All tests passed."

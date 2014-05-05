@@ -7,25 +7,25 @@
 #
 
 if [[ -w /dev/zfs ]]; then
-    __ZFSNAP="zfsnap"
-    __ZFSNAP_ZFS="zfs"
+    __ZFSNAP='zfsnap'
+    __ZFSNAP_ZFS='zfs'
 else
-    __ZFSNAP="sudo zfsnap"
-    __ZFSNAP_ZFS="sudo zfs"
+    __ZFSNAP='sudo zfsnap'
+    __ZFSNAP_ZFS='sudo zfs'
 fi
 
 # prints top-level zfsnap commands
 __zfsnap_list_commands() {
-    start='false'
+    local start='false'
     $__ZFSNAP -h | \
     while IFS= read line; do
         [ "$line" == 'COMMANDS:' ] && start='true' && continue
 
-        if [ $start == 'true' ]; then
+        if [ "$start" == 'true' ]; then
             [ -z "$line" ] && break
 
-            line="${line#"${line%%[!\ ]*}"}" # trim leading spaces
-            printf '%s\n' "${line}"
+            line=${line#${line%%[!\ ]*}} # trim leading spaces
+            printf '%s\n' "$line"
         fi
     done
 }
@@ -39,19 +39,19 @@ __zfsnap_list_datasets() {
 __zfsnap_list_flags() {
     local cmd="$1"
 
-    case "${cmd}" in
+    case "$cmd" in
         destroy|snapshot|zfsnap)
-            [ ${cmd} == 'zfsnap' ] && cmd=''
+            [ "$cmd" = 'zfsnap' ] && cmd=''
 
             start='false'
             $__ZFSNAP $cmd -h | \
             while IFS= read line; do
-                [ "$line" == 'OPTIONS:' ] && start='true' && continue
+                [ "$line" = 'OPTIONS:' ] && start='true' && continue
 
                 if [ $start == 'true' ]; then
                     [ -z "$line" ] && break
 
-                    line="${line#"${line%%[!\ ]*}"}" # trim leading spaces
+                    line=${line#${line%%[!\ ]*}} # trim leading spaces
                     [ -z "${line##-[a-z]*}" ] && printf '%s\n' "${line:0:2}"
                 fi
             done
@@ -68,16 +68,16 @@ __zfsnap_complete() {
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
     local cmd="${COMP_WORDS[1]}"
 
-    [[ ${prev##*/} == 'zfsnap' ]] && cmd='zfsnap'
+    [ "${prev##*/}" = 'zfsnap' ] && cmd='zfsnap'
 
-    if [[ ${cur:0:1} == '-' ]]; then
+    if [ "${cur:0:1}" = '-' ]; then
         COMPREPLY=($(compgen -W "$(__zfsnap_list_flags ${cmd})" -- "$cur"))
         return 0
     fi
 
-    case "${cmd}" in
+    case "$cmd" in
         destroy|snapshot)
-            case "${prev}" in
+            case "$prev" in
                 # flags which accept arguments or aren't meant to be used on datasets
                 -a|-h|-F|-p|-V)
                     return 1

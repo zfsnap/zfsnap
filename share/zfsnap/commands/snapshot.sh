@@ -3,7 +3,7 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 
-PREFIX=""                           # Default prefix
+PREFIX=''                           # Default prefix
 
 # FUNCTIONS
 Help() {
@@ -42,21 +42,21 @@ while [ "$1" ]; do
     while getopts :a:ehnp:PrRsSvz OPT; do
         case "$OPT" in
             a) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
-               TTL="$OPTARG"
+               TTL=$OPTARG
                ;;
             h) Help;;
-            n) DRY_RUN="true";;
-            p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
+            n) DRY_RUN='true';;
+            p) PREFIX=$OPTARG; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
             P) PREFIX=''; PREFIXES='';;
             r) ZOPT='-r';;
             R) ZOPT='';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-            v) VERBOSE="true";;
+            v) VERBOSE='true';;
             z) TIME_FORMAT='%Y-%m-%d_%H.%M.00';;
 
-            :) Fatal "Option -$OPTARG requires an argument.";;
-           \?) Fatal "Invalid option: -$OPTARG";;
+            :) Fatal "Option -${OPTARG} requires an argument.";;
+           \?) Fatal "Invalid option: -${OPTARG}.";;
         esac
     done
 
@@ -68,14 +68,14 @@ while [ "$1" ]; do
         FSExists "$1" || Fatal "'$1' does not exist!"
         ! SkipPool "$1" && shift && continue
 
-        CURRENT_DATE="${CURRENT_DATE:-`date "+$TIME_FORMAT"`}"
+        CURRENT_DATE=${CURRENT_DATE:-`date "+$TIME_FORMAT"`}
 
-        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT $1@${PREFIX}${CURRENT_DATE}--${TTL}"
-        if IsFalse $DRY_RUN; then
+        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE}--${TTL}"
+        if IsFalse "$DRY_RUN"; then
             if $ZFS_SNAPSHOT > /dev/stderr; then
-                IsTrue $VERBOSE && printf "%s ... DONE\n" "$ZFS_SNAPSHOT"
+                IsTrue $VERBOSE && printf '%s ... DONE\n' "$ZFS_SNAPSHOT"
             else
-                IsTrue $VERBOSE && printf "%s ... FAIL\n" "$ZFS_SNAPSHOT"
+                IsTrue $VERBOSE && printf '%s ... FAIL\n' "$ZFS_SNAPSHOT"
             fi
         else
             printf '%s\n' "$ZFS_SNAPSHOT"

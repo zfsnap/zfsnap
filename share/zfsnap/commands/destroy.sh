@@ -3,12 +3,12 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 
-DELETE_ALL_SNAPSHOTS="false"        # Should all snapshots be deleted, regardless of TTL
+DELETE_ALL_SNAPSHOTS='false'        # Should all snapshots be deleted, regardless of TTL
 RM_SNAPSHOTS=''                     # List of specific snapshots to delete
 FORCE_DELETE_BY_AGE='false'         # Ignore TTL expiration and delete if older than "AGE" (in TTL format).
 FORCE_AGE_TTL=''                    # Used to store "age" TTL if FORCE_DELETE_BY_AGE is set.
-RECURSIVE="false"
-PREFIXES=""                         # List of prefixes
+RECURSIVE='false'
+PREFIXES=''                         # List of prefixes
 
 # FUNCTIONS
 Help() {
@@ -44,24 +44,24 @@ EOF
 while [ "$1" ]; do
     while getopts :DeF:hnp:PrRsSvz OPT; do
         case "$OPT" in
-            D) DELETE_ALL_SNAPSHOTS="true";;
+            D) DELETE_ALL_SNAPSHOTS='true';;
             F) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
-               [ "$OPTARG" = 'forever' ] && Fatal "-F does not accept the 'forever' TTL"
-               FORCE_AGE_TTL="$OPTARG"
-               FORCE_DELETE_BY_AGE="true"
+               [ "$OPTARG" = 'forever' ] && Fatal '-F does not accept the "forever" TTL'
+               FORCE_AGE_TTL=$OPTARG
+               FORCE_DELETE_BY_AGE='true'
                ;;
             h) Help;;
-            n) DRY_RUN="true";;
-            p) PREFIX="$OPTARG"; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
+            n) DRY_RUN='true';;
+            p) PREFIX=$OPTARG; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
             P) PREFIX=''; PREFIXES='';;
             r) RECURSIVE='true';;
             R) RECURSIVE='false';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-            v) VERBOSE="true";;
+            v) VERBOSE='true';;
 
-            :) Fatal "Option -$OPTARG requires an argument.";;
-           \?) Fatal "Invalid option: -$OPTARG";;
+            :) Fatal "Option -${OPTARG} requires an argument.";;
+           \?) Fatal "Invalid option: -${OPTARG}.";;
         esac
     done
 
@@ -74,26 +74,26 @@ while [ "$1" ]; do
         ! SkipPool "$1" && shift && continue
 
         for SNAPSHOT in $ZFS_SNAPSHOTS; do
-            if IsFalse $RECURSIVE; then
+            if IsFalse "$RECURSIVE"; then
                 TrimToFileSystem "$SNAPSHOT" && [ "$RETVAL" = "$1" ] || continue
             fi
 
             # gets and validates snapshot name
-            TrimToSnapshotName "$SNAPSHOT" && SNAPSHOT_NAME="$RETVAL" || continue
+            TrimToSnapshotName "$SNAPSHOT" && SNAPSHOT_NAME=$RETVAL || continue
 
             if IsTrue $DELETE_ALL_SNAPSHOTS; then
                 RM_SNAPSHOTS="$RM_SNAPSHOTS $SNAPSHOT"
             else
-                TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE="$RETVAL" || continue
+                TrimToDate "$SNAPSHOT_NAME" && CREATE_DATE=$RETVAL || continue
                 if IsTrue "$FORCE_DELETE_BY_AGE"; then
-                    DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE="$RETVAL" || continue
+                    DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE=$RETVAL || continue
                 else
-                    TrimToTTL "$SNAPSHOT_NAME" && TTL="$RETVAL" || continue
+                    TrimToTTL "$SNAPSHOT_NAME" && TTL=$RETVAL || continue
                     [ "$TTL" = 'forever' ] && continue
-                    DatePlusTTL "$CREATE_DATE" "$TTL" && EXPIRATION_DATE="$RETVAL" || continue
+                    DatePlusTTL "$CREATE_DATE" "$TTL" && EXPIRATION_DATE=$RETVAL || continue
                 fi
 
-                CURRENT_DATE="${CURRENT_DATE:-`date "+$TIME_FORMAT"`}"
+                CURRENT_DATE=${CURRENT_DATE:-`date "+$TIME_FORMAT"`}
                 if GreaterDate "$CURRENT_DATE" "$EXPIRATION_DATE"; then
                     RM_SNAPSHOTS="$RM_SNAPSHOTS $SNAPSHOT"
                 fi

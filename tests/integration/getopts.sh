@@ -4,7 +4,7 @@
 
 . ../spec_helper.sh
 
-zfsnap="../../sbin/zfsnap.sh"
+zfsnap='../../sbin/zfsnap.sh'
 
 # These are invalid argument scenarios and should be rejected
 # All are preceeded with -n for safety

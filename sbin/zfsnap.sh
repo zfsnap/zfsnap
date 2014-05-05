@@ -9,7 +9,7 @@
 
 # import zfsnap's library
 ABSOLUTE_ZFSNAP=`readlink -f "$0"`
-ZFSNAP_LIB_DIR="${ZFSNAP_LIB_DIR:-${ABSOLUTE_ZFSNAP%/*/zfsnap.sh}/share/zfsnap}"
+ZFSNAP_LIB_DIR=${ZFSNAP_LIB_DIR:-${ABSOLUTE_ZFSNAP%/*/zfsnap.sh}/share/zfsnap}
 . "$ZFSNAP_LIB_DIR/core.sh"
 
 ## FUNCTIONS
@@ -48,9 +48,9 @@ case "$1" in
         printf '%s v%s\n' "${0##*/}" "${VERSION}"; Exit 0;;
     *)
         CMD="$1"
-        if [ -f "$ZFSNAP_LIB_DIR/commands/${CMD}.sh" ]; then
+        if [ -f "${ZFSNAP_LIB_DIR}/commands/${CMD}.sh" ]; then
             shift
-            . "$ZFSNAP_LIB_DIR/commands/${CMD}.sh"
+            . "${ZFSNAP_LIB_DIR}/commands/${CMD}.sh"
         else
             Fatal "'$CMD' is not a valid ${0##*/} command."
         fi
