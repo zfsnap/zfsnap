@@ -81,13 +81,13 @@ DatePlusTTL() {
 
     while [ "$ttl" ]; do
         case "$ttl" in
-            *y*) y=$(( ${ttl%%y*} + ${y} )); ttl=${ttl#*y} ;;
-            *m*) m=$(( ${ttl%%m*} + ${m} )); ttl=${ttl#*m} ;;
-            *w*) d=$(( (${ttl%%w*} * 7) + ${d} )); ttl=${ttl#*w} ;;
-            *d*) d=$(( ${ttl%%d*} + ${d} )); ttl=${ttl#*d} ;;
-            *h*) h=$(( ${ttl%%h*} + ${h} )); ttl=${ttl#*h} ;;
-            *M*) M=$(( ${ttl%%M*} + ${M} )); ttl=${ttl#*M} ;;
-             *s) s=$(( ${ttl%%s*} + ${s} )); ttl=${ttl#*s} ;;
+            *y*) y=$((${ttl%%y*} + $y)); ttl=${ttl#*y} ;;
+            *m*) m=$((${ttl%%m*} + $m)); ttl=${ttl#*m} ;;
+            *w*) d=$(((${ttl%%w*} * 7) + $d)); ttl=${ttl#*w} ;;
+            *d*) d=$((${ttl%%d*} + $d)); ttl=${ttl#*d} ;;
+            *h*) h=$((${ttl%%h*} + $h)); ttl=${ttl#*h} ;;
+            *M*) M=$((${ttl%%M*} + $M)); ttl=${ttl#*M} ;;
+             *s) s=$((${ttl%%s*} + $s)); ttl=${ttl#*s} ;;
               *) Warn "Invalid TTL '$ttl' in DatePlusTTL." && RETVAL='' && return 1 ;;
         esac
     done
@@ -108,7 +108,7 @@ DatePlusTTL() {
         local m_num=0
         local m_length
         for m_length in $month_lengths; do
-            m_num=$((${m_num}+1))
+            m_num=$(($m_num + 1))
 
             # skip if we're not to current month yet
             [ $m -gt $m_num ] && continue
@@ -167,9 +167,9 @@ IsLeapYear() {
     local year="$1"
     [ "$year" ] || return 1
 
-    [ $(( $year % 400 )) -eq 0 ] && return 0
-    [ $(( $year % 100 )) -eq 0 ] && return 1
-    [ $(( $year % 4 )) -eq 0 ] && return 0
+    [ $(($year % 400)) -eq 0 ] && return 0
+    [ $(($year % 100)) -eq 0 ] && return 1
+    [ $(($year % 4)) -eq 0 ] && return 0
 
     return 1
 }
