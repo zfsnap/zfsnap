@@ -8,8 +8,8 @@
 # bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
 # import zfsnap's library
-ABSOLUTE_ZFSNAP=`readlink -f "$0"`
-ZFSNAP_LIB_DIR="${ZFSNAP_LIB_DIR:-${ABSOLUTE_ZFSNAP%/*/zfsnap.sh}/share/zfsnap}"
+ABSOLUTE_ZFSNAP=`dirname $(readlink -f "$0")`
+ZFSNAP_LIB_DIR="${ZFSNAP_LIB_DIR:-${ABSOLUTE_ZFSNAP%/*}/share/zfsnap}"
 . "$ZFSNAP_LIB_DIR/core.sh"
 
 ## FUNCTIONS
