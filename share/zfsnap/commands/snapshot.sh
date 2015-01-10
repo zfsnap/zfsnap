@@ -16,7 +16,7 @@ ${0##*/} snapshot [ options ] zpool/filesystem ...
 OPTIONS:
   -a ttl       = Set how long snapshot should be kept
   -h           = Print this help and exit
-  -n           = Dry‐run. Perform a trial run with no actions actually performed
+  -n           = Dry-run. Perform a trial run with no actions actually performed
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefix for snapshots after this switch
   -r           = Create recursive snapshots for all ZFS file systems that
