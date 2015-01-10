@@ -22,7 +22,7 @@ OPTIONS:
   -D           = Delete *all* zfsnap snapshots of pools specified
   -F age       = Force delete all snapshots exceeding age (rather than TTL expiration)
   -h           = Print this help and exit
-  -n           = Dry‐run. Perform a trial run with no actions actually performed
+  -n           = Dry-run. Perform a trial run with no actions actually performed
   -p prefix    = Use prefix for snapshots after this switch
   -P           = Don't use prefixes for snapshots after this switch
   -r           = Operate recursively on all ZFS file systems after this switch
