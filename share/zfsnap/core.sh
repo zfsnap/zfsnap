@@ -29,20 +29,20 @@ RETVAL=''                           # used by functions so we can avoid spawning
 
 ## HELPER FUNCTIONS
 Err() {
-    printf '%s\n' "ERROR: $*" > /dev/stderr
+    printf '%s\n' "ERROR: $*" >&2
 }
 Exit() {
     IsTrue "$TEST_MODE" || exit $1
 }
 Fatal() {
-    printf '%s\n' "FATAL: $*" > /dev/stderr
+    printf '%s\n' "FATAL: $*" >&2
     exit 1
 }
 Note() {
-    printf '%s\n' "NOTE: $*" > /dev/stderr
+    printf '%s\n' "NOTE: $*" >&2
 }
 Warn() {
-    printf '%s\n' "WARNING: $*" > /dev/stderr
+    printf '%s\n' "WARNING: $*" >&2
 }
 
 # Returns 0 if argument is "false"
@@ -217,7 +217,7 @@ RmZfsSnapshot() {
     # hardening: make really, really sure we are deleting a snapshot
     if IsSnapshot "$1"; then
         if IsFalse "$DRY_RUN"; then
-            if $zfs_destroy > /dev/stderr; then
+            if $zfs_destroy >&2; then
                 IsTrue $VERBOSE && printf '%s ... DONE\n' "$zfs_destroy"
             else
                 IsTrue $VERBOSE && printf '%s ... FAIL\n' "$zfs_destroy"

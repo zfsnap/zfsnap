@@ -16,6 +16,6 @@ done
 if [ $exit_with_error -eq 0 ]; then
     printf "\n\033[1;32m%s\033[0m\n" "All tests passed."
 else
-    printf "\n\033[1;31m%s\033[0m\n" "Some tests failed." > /dev/stderr
+    printf "\n\033[1;31m%s\033[0m\n" "Some tests failed." >&2
     exit 1
 fi
