@@ -28,4 +28,7 @@ ItReturns "GreaterDate 2011-10-10_10.10.10 2011-10-10_10.10.11"   1   # one seco
 ItReturns "GreaterDate 2012-02-28_04.29.00 2012-02-29_04.29.00"   1   # leap day
 ItReturns "GreaterDate 2009-09-10_14.54.58 2010-04-08_12.34.54"   1   # complex-ly less
 
+# Y2038 compatibility
+ItReturns "GreaterDate 2005-12-20_10.29.22 2040-11-04_08.30.24"   1   #
+
 ExitTests

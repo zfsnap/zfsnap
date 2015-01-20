@@ -17,6 +17,9 @@ ItsRetvalIs "DatePlusTTL '2013-11-04_06.06.06' '1y'"         "2014-11-04_06.06.0
 # Test for sh arithmetic treating 0-padded numbers as octal
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.09' '8s'"         "2011-04-05_02.06.17"    0  #
 
+# Y2038 compatibility
+ItsRetvalIs "DatePlusTTL '2015-01-20_10.29.22' '22y25m62s'"  "2039-02-20_10.30.24"    0  #
+
 # Additions with roll-over
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.34' '56s'"        "2011-04-05_02.07.30"    0  #
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.00' '94M'"        "2011-04-05_03.40.00"    0  #
