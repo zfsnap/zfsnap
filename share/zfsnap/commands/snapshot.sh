@@ -72,7 +72,7 @@ while [ "$1" ]; do
 
         ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE}--${TTL}"
         if IsFalse "$DRY_RUN"; then
-            if $ZFS_SNAPSHOT > /dev/stderr; then
+            if $ZFS_SNAPSHOT >&2; then
                 IsTrue $VERBOSE && printf '%s ... DONE\n' "$ZFS_SNAPSHOT"
             else
                 IsTrue $VERBOSE && printf '%s ... FAIL\n' "$ZFS_SNAPSHOT"
