@@ -44,7 +44,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
                 default_ttl='6m'
                 ;;
             *)
-                printf '%s\n' "ERR: Unexpected error" > /dev/stderr
+                printf '%s\n' "ERR: Unexpected error" >&2
                 exit 1
                 ;;
         esac
