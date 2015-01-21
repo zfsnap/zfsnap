@@ -14,6 +14,8 @@ ItReturns "GreaterDate 2013-07-22_08.59.59 2013-07-22_08.58.59"   0   # one minu
 ItReturns "GreaterDate 2011-10-10_10.10.11 2011-10-10_10.10.10"   0   # one second greater
 ItReturns "GreaterDate 2012-02-29_04.29.00 2012-02-28_04.29.00"   0   # leap day
 ItReturns "GreaterDate 2010-04-08_12.34.54 2009-09-10_14.54.58"   0   # complex-ly greater
+ItReturns "GreaterDate 1962-02-14_04.22.22 1959-07-25_09.00.00"   0   # 1900s
+ItReturns "GreaterDate 2001-07-02_21.22.32 1998-09-05_19.44.15"   0   # across millennium
 
 # Same date
 ItReturns "GreaterDate 2015-11-04_08.35.09 2015-11-04_08.35.09"   0   # Same date
@@ -27,6 +29,8 @@ ItReturns "GreaterDate 2013-07-22_08.58.59 2013-07-22_08.59.59"   1   # one minu
 ItReturns "GreaterDate 2011-10-10_10.10.10 2011-10-10_10.10.11"   1   # one second less
 ItReturns "GreaterDate 2012-02-28_04.29.00 2012-02-29_04.29.00"   1   # leap day
 ItReturns "GreaterDate 2009-09-10_14.54.58 2010-04-08_12.34.54"   1   # complex-ly less
+ItReturns "GreaterDate 1969-02-14_04.22.22 1987-07-25_09.00.00"   1   # 1900s
+ItReturns "GreaterDate 1977-04-01_14.54.58 2030-01-04_12.34.54"   1   # across millennium
 
 # Y2038 compatibility
 ItReturns "GreaterDate 2005-12-20_10.29.22 2040-11-04_08.30.24"   1   #

@@ -17,10 +17,12 @@ ItsRetvalIs "DatePlusTTL '2013-11-04_06.06.06' '1y'"         "2014-11-04_06.06.0
 # Test for sh arithmetic treating 0-padded numbers as octal
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.09' '8s'"         "2011-04-05_02.06.17"    0  #
 
-# Y2038 compatibility
+# Beyond 32-bit unix time
+ItsRetvalIs "DatePlusTTL '1962-12-14_16.11.00' '17d7h55M'"   "1963-01-01_00.06.00"    0  #
 ItsRetvalIs "DatePlusTTL '2015-01-20_10.29.22' '22y25m62s'"  "2039-02-20_10.30.24"    0  #
 
 # Additions with roll-over
+ItsRetvalIs "DatePlusTTL '1999-12-31_23.58.22' '99s'"        "2000-01-01_00.00.01"    0  # millennium
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.34' '56s'"        "2011-04-05_02.07.30"    0  #
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.00' '94M'"        "2011-04-05_03.40.00"    0  #
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.00' '43h'"        "2011-04-06_21.06.00"    0  #
@@ -30,6 +32,7 @@ ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.00' '18m'"        "2012-10-05_02.06.0
 ItsRetvalIs "DatePlusTTL '2011-04-05_02.06.00' '15y'"        "2026-04-05_02.06.00"    0  #
 
 # Leap year additions
+ItsRetvalIs "DatePlusTTL '1999-12-31_00.00.00' '61d4M'"      "2000-03-01_00.04.00"    0  # 2000 /is/ a leap year
 ItsRetvalIs "DatePlusTTL '2008-02-27_01.05.00' '2d'"         "2008-02-29_01.05.00"    0  #
 ItsRetvalIs "DatePlusTTL '2012-02-27_01.05.00' '3d'"         "2012-03-01_01.05.00"    0  #
 ItsRetvalIs "DatePlusTTL '2011-02-27_01.05.00' '2d'"         "2011-03-01_01.05.00"    0  #
@@ -44,7 +47,7 @@ ItsRetvalIs "DatePlusTTL '2009-02-27_00.00.00' '1m3d'"       "2009-03-30_00.00.0
 ItsRetvalIs "DatePlusTTL '2009-10-31_00.00.00' '1m'"         "2009-12-01_00.00.00"    0  # October is longer than November
 
 # Test range edges
-ItsRetvalIs "DatePlusTTL '2014-09-03_22.58.52' '3m4w1h1M7s'" "2014-12-31_23.59.59"    0  # Don't roll over
+ItsRetvalIs "DatePlusTTL '1999-05-17_15.55.51' '7m2w8h4M8s'" "1999-12-31_23.59.59"    0  # Don't roll over anywhere
 ItsRetvalIs "DatePlusTTL '2015-11-20_06.00.59' '60119M'"     "2015-12-31_23.59.59"    0  # Roll, to a limit
 ItsRetvalIs "DatePlusTTL '2015-11-20_06.00.59' '60119M1s'"   "2016-01-01_00.00.00"    0  # Roll over the limit
 ItsRetvalIs "DatePlusTTL '2007-01-02_00.00.00' '126143999s'" "2010-12-31_23.59.59"    0  # 1 short of 4 years in seconds through a leap year
