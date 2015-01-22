@@ -3,8 +3,12 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 #
-# bash completion support for zfsnap
+# bash/zsh completion support for zfsnap
 #
+
+if [[ -n ${ZSH_VERSION-} ]]; then
+    autoload -U +X bashcompinit && bashcompinit
+fi
 
 if [[ -w /dev/zfs ]]; then
     __ZFSNAP='zfsnap'
@@ -52,7 +56,7 @@ __zfsnap_list_flags() {
                     [ -z "$line" ] && break
 
                     line=${line#${line%%[!\ ]*}} # trim leading spaces
-                    [ -z "${line##-[a-z]*}" ] && printf '%s\n' "${line:0:2}"
+                    [ -z "${line##-[[:alpha:]]*}" ] && printf '%s\n' "${line:0:2}"
                 fi
             done
             ;;
