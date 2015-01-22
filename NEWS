@@ -1,4 +1,4 @@
-zfsnap 2.0.0 - 2014-0?-??
+zfsnap 2.0.0 - 2015-0?-??
   Version 2 is a major step forward for zfsnap. It aims to be the most usable,
   well-tested, and fastest version of zfsnap yet.
 
@@ -16,12 +16,12 @@ zfsnap 2.0.0 - 2014-0?-??
   Portability:
     - GNU/kFreeBSD now supported
     - Solaris-like systems no longer need GNU Utilities installed
-    - POSIX compliant (except for use of "local" variables)
-      - /Should/ now run on any *nix that supports ZFS
+    - Fully POSIX compliant (except for use of "local" variables)
+      - Should now run on any *nix that supports ZFS
   Performance:
     - Ported key functionality to pure sh, resulting in noticeable speedups
       - No more `sed`, `grep`, or `find` in code-base
-    - Significantly decreased number of subshells spawned
+    - Significantly decreased number of subshells spawned (hundreds -> a few)
   TTLs:
     - 'y' and 'm' are now *calendar* year and month (not 365 days and 30 days respectively)
       - See Manpage for more info
@@ -39,6 +39,6 @@ zfsnap 2.0.0 - 2014-0?-??
   License:
     - Relicensed from Beerware to BSD-3-Clause
   Random:
-    - Bash completion
+    - Bash and zsh completion
     - tcsh completion (only command and ZFS fs support; no flags)
     - Many bugs fixed and small features added
