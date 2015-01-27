@@ -7,11 +7,24 @@
 # repository:       https://github.com/zfsnap/zfsnap
 # bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
+# A best attempt is made here to find where zfsnap is actually located.
+# If you install zfsnap in less common ways this may might not find it.
+# Set ZFSNAP_LIB_DIR to avoid this logic.
+# ZFSNAP_LIB_DIR='/usr/local/weird/dir'
+if [ -z "$ZFSNAP_LIB_DIR" ]; then
+    ZFSNAP_SCRIPT=$0
+    while [ -h "$ZFSNAP_SCRIPT" ]; do
+        LS_OUT=`ls -l "$ZFSNAP_SCRIPT"`
+        ZFSNAP_SCRIPT="${LS_OUT##*->}"
+        ZFSNAP_SCRIPT="${ZFSNAP_SCRIPT#${ZFSNAP_SCRIPT%%[!\ ]*}}" # trim leading spaces
+    done
+
+    [ -z "${ZFSNAP_SCRIPT##*/*}" ] && ZFSNAP_SCRIPT_DIR="${ZFSNAP_SCRIPT%/*}" || ZFSNAP_SCRIPT_DIR='.'
+    ZFSNAP_LIB_DIR="${ZFSNAP_SCRIPT_DIR}/../share/zfsnap"
+fi
+
 # import zfsnap's library
-ABSOLUTE_ZFSNAP=`readlink -f "$0"`
-ABSOLUTE_ZFSNAP_DIR=`dirname "$ABSOLUTE_ZFSNAP"`
-ZFSNAP_LIB_DIR="${ZFSNAP_LIB_DIR:-${ABSOLUTE_ZFSNAP_DIR%/*}/share/zfsnap}"
-. "$ZFSNAP_LIB_DIR/core.sh"
+. "${ZFSNAP_LIB_DIR}/core.sh"
 
 ## FUNCTIONS
 
