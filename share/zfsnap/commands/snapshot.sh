@@ -39,7 +39,7 @@ EOF
 
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
-    while getopts :a:ehnp:PrRsSvz OPT; do
+    while getopts :a:hnp:PrRsSvz OPT; do
         case "$OPT" in
             a) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
                TTL=$OPTARG

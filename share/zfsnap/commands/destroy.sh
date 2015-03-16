@@ -42,7 +42,7 @@ EOF
 
 # main loop; get options, process snapshot expiration/deletion
 while [ "$1" ]; do
-    while getopts :DeF:hnp:PrRsSvz OPT; do
+    while getopts :DF:hnp:PrRsSvz OPT; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS='true';;
             F) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
