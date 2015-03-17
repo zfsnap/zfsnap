@@ -15,7 +15,7 @@ else
     set __ZFSNAP_ZFS="sudo zfs"
 endif
 
-set __zfsnap_list_commands = (snapshot destroy)
+set __zfsnap_list_commands = (snapshot destroy recurseback)
 
 # prints zfs datasets and volumes
 alias __zfsnap_list_datasets '$__ZFSNAP_ZFS list -H -t filesystem,volume -o name'
@@ -23,4 +23,5 @@ alias __zfsnap_list_datasets '$__ZFSNAP_ZFS list -H -t filesystem,volume -o name
 complete zfsnap \
     'p/1/$__zfsnap_list_commands/'\
     'n/destroy/`__zfsnap_list_datasets`/'\
-    'n/snapshot/`__zfsnap_list_datasets`/'
+    'n/snapshot/`__zfsnap_list_datasets`/'\
+    'n/recurseback/`__zfsnap_list_datasets`/'

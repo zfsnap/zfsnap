@@ -39,12 +39,18 @@ __zfsnap_list_datasets() {
     $__ZFSNAP_ZFS list -H -t filesystem,volume -o name
 }
 
+# prints zfs snapshots
+__zfsnap_list_snapshots() {
+    local dataset=${1%@*}
+    $__ZFSNAP_ZFS list -H -t snapshot -o name -d 1 -r $dataset
+}
+
 # prints valid flags of a given command
 __zfsnap_list_flags() {
     local cmd="$1"
 
     case "$cmd" in
-        destroy|snapshot|zfsnap)
+        destroy|snapshot|recurseback|zfsnap)
             [ "$cmd" = 'zfsnap' ] && cmd=''
 
             start='false'
@@ -88,6 +94,23 @@ __zfsnap_complete() {
                     ;;
                 *)
                     COMPREPLY=($(compgen -W "$(__zfsnap_list_datasets)" -- "$cur"))
+                    return 0
+                    ;;
+            esac
+            ;;
+        recurseback)
+            case "$prev" in
+                # flags which accept arguments or aren't meant to be used on datasets
+                -d|-h)
+                    return 1
+                    ;;
+                *)
+                    if [[ ${cur} =~ "@" ]]; then
+                        COMPREPLY=($(compgen -W "$(__zfsnap_list_snapshots ${cur})" -- "$cur"))
+                    else
+                        COMPREPLY=($(compgen -W "$(__zfsnap_list_datasets)" -- "$cur"))
+                    fi
+
                     return 0
                     ;;
             esac
