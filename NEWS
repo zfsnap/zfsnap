@@ -13,14 +13,18 @@ zfsnap 2.0.0 - 2015-0?-??
     - '-e' flag  (return number of errors as return value) was dropped
     - '-zpool28fix' flag was dropped; it is now the default behavior
     - Numerous TTL tweaks (see TTL section)
+  New Functionality:
+    - `zfsnap recurseback`
+      - to recursively rollback snapshots for a datset and its children
   Portability:
     - GNU/kFreeBSD now supported
     - Solaris-like systems no longer need GNU Utilities installed
+    - OS X no longer needs GNU readlink
     - Fully POSIX compliant (except for use of "local" variables)
       - Should now run on any *nix that supports ZFS
   Performance:
     - Ported key functionality to pure sh, resulting in noticeable speedups
-      - No more `sed`, `grep`, or `find` in code-base
+      - No more `sed`, `grep`, `readlink`, `dirname`, or `find` in code-base
     - Significantly decreased number of subshells spawned (hundreds -> a few)
   TTLs:
     - 'y' and 'm' are now *calendar* year and month (not 365 days and 30 days respectively)
@@ -34,8 +38,9 @@ zfsnap 2.0.0 - 2015-0?-??
     - Unix time no longer used internally
       - Supports dates (and expiration dates) past 2038
   Reliability:
-    - Wrote 240+ tests
+    - Wrote 250+ tests
     - Validates user input (like TTLs) and snapshot names better
+    - Cross-OS and cross-shell testing
   License:
     - Relicensed from Beerware to BSD-3-Clause
   Random:
