@@ -66,6 +66,35 @@ IsTrue() {
 
 ## ZFSNAP FUNCTIONS
 
+# Convert bytes to human readable format, down to 1 decimal place
+# Imperfect. Does simple rounding (1.19 = 1.1), but it's good enough for our needs
+# Accepts 1 integer
+# Retvals human readable size: e.g. 3.2G
+BytesToHuman() {
+    local size=$1
+    RETVAL=''
+    # make sure it's an integer
+    [ "$size" -ge 0 2> /dev/null ] || return 1
+
+    # if <1K, return without a unit
+    [ "$size" -lt 1024 ] && RETVAL=${size} && return 0
+
+    local unit=''
+    local decimal=0
+    for unit in K M G T P E; do
+       if [ "$size" -lt 1048576 ]; then
+           decimal=$(((($size % 1024) * 10) / 1024))
+           size=$(($size / 1024))
+           break
+       else
+           size=$((size / 1024))
+       fi
+    done
+
+    [ "$decimal" -gt 0 ] && RETVAL="${size}.${decimal}${unit}" || RETVAL="${size}${unit}"
+    return 0
+}
+
 # Adds a TTL to a date
 DatePlusTTL() {
     local orig_date="$1"
