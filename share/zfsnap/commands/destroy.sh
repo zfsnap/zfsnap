@@ -32,7 +32,7 @@ OPTIONS:
   -v           = Verbose output
 
 LINKS:
-  wiki:             https://github.com/zfsnap/zfsnap/wiki
+  website:          http://www.zfsnap.org
   repository:       https://github.com/zfsnap/zfsnap
   bug tracking:     https://github.com/zfsnap/zfsnap/issues
 

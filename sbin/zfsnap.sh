@@ -3,7 +3,7 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 #
-# wiki:             https://github.com/zfsnap/zfsnap/wiki
+# website:          http://www.zfsnap.org
 # repository:       https://github.com/zfsnap/zfsnap
 # bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
@@ -47,7 +47,7 @@ MORE HELP:
   Example: ${0##*/} snapshot -h
 
 LINKS:
-  wiki:             https://github.com/zfsnap/zfsnap/wiki
+  website:          http://www.zfsnap.org
   repository:       https://github.com/zfsnap/zfsnap
   bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
