@@ -116,6 +116,36 @@ Skip pools that are scrubbing.
 Verbose output.
 .El
 .
+.Ss recurseback
+.Nm Cm recurseback
+is different from `zfs rollback` in that it will rollback for not only the
+specified dataset, but also for all that dataset's children.
+.Bl -tag -width Ds
+.It Fl d Ar depth
+Limit the recursion to
+.Ar depth .
+A
+.Ar depth
+of 1 will rollback only the dataset and its direct children.
+.It Fl f
+Typically used with the
+.Op Fl R
+option to force an unmount of any clone file systems that are to be destroyed.
+.It Fl h
+Print a summary of
+.Cm recurseback Ap s
+command\[hy]line options and then exit.
+.It Fl n
+Dry\[hy]run. Perform a trial run with no actions actually performed.
+.It Fl r
+Destroy any snapshots and bookmarks more recent than the one specified.
+.It Fl R
+Destroy any snapshots and bookmarks more recent than the one specified, as well
+as any clones of those snapshots.
+.It Fl v
+Verbose output.
+.El
+.
 .Ss snapshot
 The purpose of
 .Nm Cm snapshot
