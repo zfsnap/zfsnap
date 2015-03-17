@@ -70,19 +70,32 @@ while [ "$1" ]; do
         SNAPSHOT_NAME=${1##${FS_NAME}@}
 
         ZFS_DATASETS=`$ZFS_CMD list -H -o name $DEPTH -t filesystem,volume -r $FS_NAME` >&2 || Fatal "'$FS_NAME' does not exist!"
-        for DATASET in $ZFS_DATASETS; do
-            ZFS_ROLLBACK="$ZFS_CMD rollback $ROLLBACK_OPT ${DATASET}@${SNAPSHOT_NAME}"
-            if IsTrue "$DRY_RUN"; then
-                printf '%s\n' "$ZFS_ROLLBACK"
-            else
-                if $ZFS_ROLLBACK >&2; then
-                    IsTrue "$VERBOSE" && printf '%s ... DONE\n' "$ZFS_ROLLBACK"
-                else
-                    IsTrue "$VERBOSE" && printf '%s ... FAIL\n' "$ZFS_ROLLBACK"
+
+        if IsTrue "$VERBOSE"; then
+            INTENT='would' && IsFalse "$DRY_RUN" && INTENT='will'
+            for DATASET in $ZFS_DATASETS; do
+                printf '%s rollback to %s@%s\n' "$INTENT" "${DATASET}" "${SNAPSHOT_NAME}"
+            done
+
+            # print estimate of data to be freed
+            BYTES_FREE=0
+            for FREE in `$ZFS_CMD list -Hp $DEPTH -o written@${SNAPSHOT_NAME} -r ${FS_NAME}`; do
+                [ "$FREE" -gt 0 2> /dev/null ] && BYTES_FREE=$(($BYTES_FREE + $FREE))
+            done
+
+            BytesToHuman "$BYTES_FREE" && HUMAN_UNITS=$RETVAL
+            printf '%s recover %s\n' "$INTENT" "$HUMAN_UNITS"
+        fi
+
+        if IsFalse "$DRY_RUN"; then
+            for DATASET in $ZFS_DATASETS; do
+                ZFS_ROLLBACK="$ZFS_CMD rollback $ROLLBACK_OPT ${DATASET}@${SNAPSHOT_NAME}"
+                if ! $ZFS_ROLLBACK >&2; then
+                    printf 'FAIL ... %s\n' "$ZFS_ROLLBACK"
                 fi
-            fi
-        done
-        
+            done
+        fi
+
         ZFS_DATASETS=''
         shift
     fi
