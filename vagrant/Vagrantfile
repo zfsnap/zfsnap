@@ -52,4 +52,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
     vb.customize ["modifyvm", :id, "--cpus", "1"]
   end
+
+  ### Tests
+  # copy the tests
+  config.vm.provision :file, source: '../sbin/',
+                             destination: "/tmp/zfsnap/sbin", run: "always"
+  config.vm.provision :file, source: '../share/',
+                             destination: "/tmp/zfsnap/share", run: "always"
+  config.vm.provision :file, source: '../tests/',
+                             destination: "/tmp/zfsnap/tests", run: "always"
+  config.vm.provision :file, source: '../man/',
+                             destination: "/tmp/zfsnap/man", run: "always"
+
+  # run the tests
+  config.vm.provision "shell", inline: "cd /tmp/zfsnap/tests && ./run.sh", run: "always"
 end
