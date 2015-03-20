@@ -7,7 +7,7 @@ exit_with_error=0
 for i in unit integration; do
     cd "$i"
     for t in `ls`; do
-        sh "$t"
+        "./${t}"
         [ $? -ne 0 ] && exit_with_error=1
     done
     cd ..
