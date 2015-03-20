@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  ### Boxes
+  # Debian Wheezy
+  config.vm.define :wheezy do |wheezy_config|
+    wheezy_config.vm.box = "deb/wheezy-amd64"
+    wheezy_config.vm.host_name = "wheezy"
+  end
+
+  # Fedora 21
+  config.vm.define :fedora do |fedora_config|
+    fedora_config.vm.box = "chef/fedora-21"
+    fedora_config.vm.host_name = "fedora"
+  end
+
+  # FreeBSD 10
+  config.vm.define :freebsd10 do |freebsd10_config|
+    freebsd10_config.vm.box = "chef/freebsd-10.0"
+    freebsd10_config.vm.host_name = "freebsd10"
+  end
+
+  # OmniOS r151012
+  config.vm.define :omnios do |omnios_config|
+    omnios_config.vm.box = "omniti/omnios-r151012"
+    omnios_config.vm.box_url = "http://omnios.omniti.com/media/omnios-r151012.box"
+    omnios_config.vm.host_name = "omnios"
+  end
+
+  # Solaris 11
+  # Solaris 10/06 was the first ZFS, but I have yet to find a vagrant box of it
+  config.vm.define :solaris11 do |solaris11_config|
+    solaris11_config.vm.box = "ruby-concurrency/oracle-solaris-11"
+    solaris11_config.vm.host_name = "solaris11"
+  end
+
+  # OS X Yosemite
+  config.vm.define :osx do |osx_config|
+    osx_config.vm.box = "dryga/yosemite"
+    osx_config.vm.box_url = "http://files.dryga.com/boxes/osx-yosemite-0.2.0.box"
+    osx_config.vm.host_name = "osx"
+  end
+
+  ### Settings
+  # disable default synced folder
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # define VM resources
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+    vb.customize ["modifyvm", :id, "--cpus", "1"]
+  end
+end
