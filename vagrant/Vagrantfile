@@ -63,7 +63,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                              destination: "/tmp/zfsnap/tests", run: "always"
   config.vm.provision :file, source: '../man/',
                              destination: "/tmp/zfsnap/man", run: "always"
+  config.vm.provision :file, source: '../mod_shebang.sh',
+                             destination: "/tmp/zfsnap/mod_shebang.sh", run: "always"
+  config.vm.provision :file, source: './fix_sunos.sh',
+                             destination: "/tmp/zfsnap/fix_sunos.sh", run: "always"
 
   # run the tests
+  config.vm.provision "shell", inline: "cd /tmp/zfsnap/ && ./fix_sunos.sh", run: "always"
   config.vm.provision "shell", inline: "cd /tmp/zfsnap/tests && ./run.sh", run: "always"
 end
