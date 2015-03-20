@@ -3,7 +3,7 @@
 
 TEST_MODE='true'
 
-spec_failed=0
+SPEC_FAILED=0
 
 ItReturns () {
   local cmd="$1"
@@ -13,10 +13,10 @@ ItReturns () {
   local actual_return="$?"
 
   printf '`%s` returns %s ... ' "$cmd" "$expected_return"
-  if [ $expected_return -eq $actual_return ]; then
+  if [ "$expected_return" -eq "$actual_return" ]; then
     printf '\033[1;32mpassed\033[0m\n'
   else
-    spec_failed=1
+    SPEC_FAILED=1
     printf '\033[1;31mfailed\n'
     printf '\texpected return value: %s\n' "$expected_return"
     printf '\tactual return value:   %s\n' "$actual_return"
@@ -35,10 +35,10 @@ ItsRetvalIs() {
   local actual_retval="$RETVAL"
 
   printf '`%s` retvals "%s" and %s ... ' "$cmd" "$expected_retval" "$expected_return"
-  if [ "$expected_retval" = "$actual_retval" ] && [ $expected_return -eq $actual_return ]; then
+  if [ "$expected_retval" = "$actual_retval" ] && [ "$expected_return" -eq "$actual_return" ]; then
     printf '\033[1;32mpassed\033[0m\n'
   else
-    spec_failed=1
+    SPEC_FAILED=1
     printf '\033[1;31mfailed\n'
     printf '\texpected retval: %s\n' "$expected_retval"
     printf '\tactual retval:   %s\n' "$actual_retval"
@@ -57,7 +57,7 @@ ItEchos () {
   if [ "$expected_result" = "$actual_result" ]; then
     printf "\033[1;32mpassed\033[0m\n"
   else
-    spec_failed=1
+    SPEC_FAILED=1
     printf '\033[1;31mfailed\n'
     printf '\texpected result: %s\n' "$expected_result"
     printf '\tactual result:   %s\n' "$actual_result"
@@ -66,5 +66,5 @@ ItEchos () {
 }
 
 ExitTests () {
-  exit $spec_failed
+  exit "$SPEC_FAILED"
 }
