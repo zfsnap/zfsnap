@@ -7,6 +7,9 @@
 # repository:       https://github.com/zfsnap/zfsnap
 # bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
+# Put zsh in POSIX mode
+[ -n "${ZSH_VERSION-}" ] && emulate -R sh
+
 readonly VERSION='2.0.0.beta1'
 
 # COMMANDS
