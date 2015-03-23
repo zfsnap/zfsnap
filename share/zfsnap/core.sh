@@ -167,11 +167,15 @@ GreaterDate() {
     local date2="$2"
 
     while [ "$date1" ]; do
-        [ ${date1%%[-_.]*} -gt ${date2%%[-_.]*} ] && return 0
-        [ ${date1%%[-_.]*} -eq ${date2%%[-_.]*} ] || return 1
+        # get the first field and strip off any leading zeros
+        local field1=${date1%%[-_.]*} && field1=${field1#0}
+        local field2=${date2%%[-_.]*} && field2=${field2#0}
+
+        [ "$field1" -gt "$field2" ] && return 0
+        [ "$field1" -eq "$field2" ] || return 1
 
         # if no separators left (seconds), bail
-        [ -z ${date1%%*[-_.]*} ] || break
+        [ -z "${date1%%*[-_.]*}" ] || break
 
         date1=${date1#*[-_.]} && date2=${date2#*[-_.]}
     done
