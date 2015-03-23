@@ -73,8 +73,7 @@ IsTrue() {
 BytesToHuman() {
     local size=$1
     RETVAL=''
-    # make sure it's an integer
-    [ "$size" -ge 0 2> /dev/null ] || return 1
+    IsInt "$size" || return 1
 
     # if <1K, return without a unit
     [ "$size" -lt 1024 ] && RETVAL=${size} && return 0
@@ -193,6 +192,11 @@ FSExists() {
     done
 
     return 1
+}
+
+# Returns 0 if argument is an integer
+IsInt() {
+    [ -z "${1##*[!0-9]*}" ] && return 1 || return 0
 }
 
 # Returns 0 if supplied year is a leap year
@@ -409,13 +413,13 @@ ValidTTL() {
     while [ "$ttl" ]; do
         [ -z "${ttl##0*}" ] && return 1 # leading zeros not accepted
         case "$ttl" in
-            *y*) [ ${ttl%y*} -gt 0 2> /dev/null ] && ttl=${ttl##*y} || return 1 ;;
-            *m*) [ ${ttl%m*} -gt 0 2> /dev/null ] && ttl=${ttl##*m} || return 1 ;;
-            *w*) [ ${ttl%w*} -gt 0 2> /dev/null ] && ttl=${ttl##*w} || return 1 ;;
-            *d*) [ ${ttl%d*} -gt 0 2> /dev/null ] && ttl=${ttl##*d} || return 1 ;;
-            *h*) [ ${ttl%h*} -gt 0 2> /dev/null ] && ttl=${ttl##*h} || return 1 ;;
-            *M*) [ ${ttl%M*} -gt 0 2> /dev/null ] && ttl=${ttl##*M} || return 1 ;;
-             *s) [ ${ttl%s*} -gt 0 2> /dev/null ] && ttl=${ttl##*s} || return 1 ;;
+            *y*) IsInt "${ttl%y*}" && ttl=${ttl##*y} || return 1 ;;
+            *m*) IsInt "${ttl%m*}" && ttl=${ttl##*m} || return 1 ;;
+            *w*) IsInt "${ttl%w*}" && ttl=${ttl##*w} || return 1 ;;
+            *d*) IsInt "${ttl%d*}" && ttl=${ttl##*d} || return 1 ;;
+            *h*) IsInt "${ttl%h*}" && ttl=${ttl##*h} || return 1 ;;
+            *M*) IsInt "${ttl%M*}" && ttl=${ttl##*M} || return 1 ;;
+             *s) IsInt "${ttl%s*}" && ttl=${ttl##*s} || return 1 ;;
               *) return 1 ;;
         esac
     done
