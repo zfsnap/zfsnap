@@ -54,21 +54,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   ### Tests
-  # copy the tests
-  config.vm.provision :file, source: '../sbin/',
-                             destination: "/tmp/zfsnap/sbin", run: "always"
-  config.vm.provision :file, source: '../share/',
-                             destination: "/tmp/zfsnap/share", run: "always"
-  config.vm.provision :file, source: '../tests/',
-                             destination: "/tmp/zfsnap/tests", run: "always"
-  config.vm.provision :file, source: '../man/',
-                             destination: "/tmp/zfsnap/man", run: "always"
-  config.vm.provision :file, source: '../mod_shebang.sh',
-                             destination: "/tmp/zfsnap/mod_shebang.sh", run: "always"
-  config.vm.provision :file, source: './fix_sunos.sh',
-                             destination: "/tmp/zfsnap/fix_sunos.sh", run: "always"
+  # clean out /tmp/zfsnap
+  config.vm.provision "shell", inline: "[ ! -e /tmp/zfsnap ] || rm -Rf /tmp/zfsnap/", run: "always"
+
+  # copy all files and folders over (except .git)
+  Dir.foreach('../') do |f|
+    next if f == '.' or f == '..' or f == '.git'
+    config.vm.provision :file, source: "../#{f}",
+                               destination: "/tmp/zfsnap/#{f}",
+                               run: "always"
+  end
 
   # run the tests
-  config.vm.provision "shell", inline: "cd /tmp/zfsnap/ && ./fix_sunos.sh", run: "always"
+  config.vm.provision "shell", inline: "cd /tmp/zfsnap/vagrant && ./fix_sunos.sh", run: "always"
   config.vm.provision "shell", inline: "cd /tmp/zfsnap/tests && ./run.sh", run: "always"
 end
