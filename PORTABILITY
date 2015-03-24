@@ -1,0 +1,51 @@
+zfsnap is written assuming a POSIX compliant shell with additional support for
+the keyword `local`, for variable scoping. It also requires a few POSIX
+compliant utilities (uname, head, etc), and 64-bit integers. This makes zfsnap
+very portable, but the dependency on "local" does prevent it from running in a
+few shells. But, it is worth noting that all OSs known to run ZFS do have at
+least one compatible shell available.
+
+Shells known to work:
+- sh (some modern variants. e.g. FreeBSD's sh)
+- ash
+- bash
+- dash
+- ksh88
+- pdksh
+- posh
+- zsh
+
+Shells known to not work:
+- sh (the original AT&T sh)
+  - does not have support for the `local` keyword
+- ksh93
+  - does not have support for the `local` keyword. It /does/ support `typeset`,
+    but typeset does not scope variables locally unless functions are written as
+    "function foo { }" rather than "foo() { }". The former syntax is non-POSIX
+    and causes dash (and I assume other shells too) to choke. Thus, adjusting
+    the function declaration and a simple "alias local=typeset" will not work.
+- mksh
+  - This mostly works, but it does not have support for 64bit integers, which
+    makes some tests fail.
+
+OS Notes:
+Not sure which shell to use?
+
+  Solaris 10:
+    - /bin/ksh (which is ksh88) and /bin/bash will work
+  Solaris 11:
+    - /bin/bash (or ksh88 if installed, though it isn't available by default)
+  Other SunOS (Illumos, OmniOS, etc)
+    - /bin/bash or many others from the package manager
+  *BSD and Linux
+    - dash is quite fast, so if you have a choice, use it
+    - otherwise, take your pick, so many are available via the package manager
+
+mod_shebang.sh can help you change all the scripts to your shell of choice. For
+example:
+
+cd /tmp/zfsnap
+find ./ -type f ! -name 'mod_shebang.sh' \
+  ! -name 'fix_sunos.sh' \
+  ! -name 'sh_tests.sh' \
+  -exec ./mod_shebang.sh -s '#!/bin/bash' {} \;
