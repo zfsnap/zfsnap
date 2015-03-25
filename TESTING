@@ -39,3 +39,13 @@ available in their repos.
   sudo apt-get update; sudo apt-get install -y ash bash dash pdksh posh zsh
   cd /tmp/zfsnap/tests/vagrant
   ./test_shells.sh --all-good
+
+MAN PAGE CLEANLINESS
+
+While most systems ship utilities that can format mdoc, not all actually ship
+the mandoc utility; BSDs and new SunOS systems tend to have it. To run lint
+testing:
+
+  vagrant ssh freebsd10 (if needed)
+  cd /tmp/zfsnap
+  mandoc -Tlint man/man8/zfsnap.8

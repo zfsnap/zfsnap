@@ -47,3 +47,7 @@ choice. For example:
 cd /tmp/zfsnap
 find ./ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
     -exec tools/mod_shebang.sh -s '#!/bin/bash' {} \;
+
+About Mdoc:
+zfsnap's man page is written using mdoc (which is largely based off of roff).
+All target OSs except for Solaris have support for formatting mdoc manpages.
