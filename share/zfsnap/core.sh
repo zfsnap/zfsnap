@@ -10,7 +10,7 @@
 # Put zsh in POSIX mode
 [ -n "${ZSH_VERSION-}" ] && emulate -R sh
 
-readonly VERSION='2.0.0.beta1'
+readonly VERSION='2.0.0.beta2'
 
 # COMMANDS
 ZFS_CMD='/sbin/zfs'
