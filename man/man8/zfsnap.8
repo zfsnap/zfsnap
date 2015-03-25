@@ -270,7 +270,6 @@ was designed to work with cron. Thus, some of these examples will include cron
 markup.
 .Pp
 Every hour, create recursive snapshots of an entire pool and keep for 5 days.
-.Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
 5         *     *    *      *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
@@ -306,7 +305,6 @@ zpool/root non\[hy]recursively and hold it for 3 months.
 Deleting ZFS snapshots is much slower than creating them, and it's usually not
 a problem if snapshots live a few hours longer. Thus, it is usually best to
 delete old snapshots once a day.
-.Pp
 .Bd -literal -offset indent
 # Minute  Hour  Day  Month  Day  Who   Command
 0         1     *    *      *    root  /sbin/zfsnap destroy \-r zpool
