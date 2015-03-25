@@ -1,0 +1,41 @@
+TEST LOCALLY
+
+Runnings tests locally is easy and quite fast; it usually takes less than a
+minute. To kick-off the tests:
+
+  cd zfsnap/tests
+  ./run.sh
+
+TEST ACROSS OSs
+
+To run the above tests across many OSs, you will need Vagrant installed and
+enough hard drive space to handle the VMs. Vagrant will automatically download
+the boxes for you.
+
+  cd zfsnap/tests/vagrant
+  ./test_vagrants.sh --all
+
+The actual copying and executing happens in the VagrantFile, via the
+provisioning which runs each time a box is started. Given there are so many
+boxes, they are not kept running, as together they'd consume quite a bit of RAM.
+
+The --help option will list all options available. A subset of the VMs can be
+selected as well, such as --all-bsd, --all-sunos, etc.
+
+To focus on one particular OS, you can ssh into an already running box:
+
+  vagrant ssh omnios
+
+or you can develop in your host OS, and just reprovision a running box:
+
+  vagrant provision omnios
+
+TEST ACROSS SHELLS
+
+Typically I run this inside of the wheezy box, as Debian has many shells
+available in their repos.
+
+  vagrant ssh wheezy
+  sudo apt-get update; sudo apt-get install -y ash bash dash pdksh posh zsh
+  cd /tmp/zfsnap/tests/vagrant
+  ./test_shells.sh --all-good
