@@ -21,13 +21,13 @@ OPTIONS:
 
 EXAMPLES:
   Single File:
-  mod_shebang.sh -s '#!/bin/bash' wicked_script.sh
+  ${0##*/} -s '#!/bin/bash' wicked_script.sh
 
   All Files in Folder:
-  mod_shebang.sh -s '#!/bin/ksh' folder/*.sh
+  ${0##*/} -s '#!/bin/ksh' folder/*.sh
 
   # All Files Recursively in Folder
-  find folder/ -type f -exec mod_shebang.sh -s '#!/bin/zsh' {} \;
+  find folder/ -type f -exec ${0##*/} -s '#!/bin/zsh' {} \;
 
 EOF
 exit 0
