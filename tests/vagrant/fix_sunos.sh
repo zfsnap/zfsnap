@@ -1,9 +1,9 @@
 #!/bin/sh
 
 if [ `uname` = 'SunOS' ]; then
-    cd /tmp/zfsnap/;
-    find ./ -type f ! -name 'mod_shebang.sh' ! -name 'fix_sunos.sh' \
-      -exec ./mod_shebang.sh -s '#!/bin/bash' {} \;
+    cd /tmp/zfsnap/
+    find ./ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
+        -exec tools/mod_shebang.sh -s '#!/bin/bash' {} \;
     printf "SunOS Fixed\n"
 fi
 

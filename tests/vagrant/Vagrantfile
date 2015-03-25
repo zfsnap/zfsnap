@@ -58,14 +58,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: "[ ! -e /tmp/zfsnap ] || rm -Rf /tmp/zfsnap/", run: "always"
 
   # copy all files and folders over (except .git)
-  Dir.foreach('../') do |f|
+  Dir.foreach('../../') do |f|
     next if f == '.' or f == '..' or f == '.git'
-    config.vm.provision :file, source: "../#{f}",
+    config.vm.provision :file, source: "../../#{f}",
                                destination: "/tmp/zfsnap/#{f}",
                                run: "always"
   end
 
   # run the tests
-  config.vm.provision "shell", inline: "cd /tmp/zfsnap/vagrant && ./fix_sunos.sh", run: "always"
+  config.vm.provision "shell", inline: "cd /tmp/zfsnap/tests/vagrant && ./fix_sunos.sh", run: "always"
   config.vm.provision "shell", inline: "cd /tmp/zfsnap/tests && ./run.sh", run: "always"
 end

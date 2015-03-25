@@ -11,7 +11,7 @@ First, read the PORTABILITY file. Determine if #!/bin/sh will work for you (note
 that /bin/sh usually points to another shell [most commonly bash, dash, or
 ksh93], though not always --- with BSDs and Solaris 10 being notable exceptions).
 If you need to use a different shell than /bin/sh, follow the instructions
-(again, in the PORTABILITY file) to use mod_shebang.sh.
+(again, in the PORTABILITY file) to use tools/mod_shebang.sh.
 
 I also *highly* recommend running the test suite. It takes less than a minute,
 and will help verify the sanity of your particular mix of OS, architecture, and
@@ -20,9 +20,9 @@ shell.
   cd zfsnap/tests
   ./run.sh
 
-Then, move the entire zfsnap folder to /usr/local/src/zfsnap. Technically tests/,
-vagrant/, and mod_shebang.sh are not needed to use zfsnap, but they don't get
-in the way and are quite small. You can remove them if you wish.
+Then, move the entire zfsnap folder to /usr/local/src/zfsnap. Technically tests/
+and tools/ are not needed to use zfsnap, but they don't get in the way and are
+quite small. You can remove them if you wish.
 
 You can add /usr/local/src/zfsnap/sbin to your PATH and
 /usr/local/src/zfsnap/man/ to your MANPATH, or you can add symlinks to the

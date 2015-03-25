@@ -49,23 +49,21 @@ while [ "$1" ]; do
     shift
 done
 
-cd ../tests
+cd ../
 
 for BANG in $SHELLS_TO_TEST; do
     SHE='#!/bin/'
 
     # change the shebangs
-    find ../ -type f ! -name 'mod_shebang.sh' \
-                     ! -name 'fix_sunos.sh' \
-                     ! -name 'test_shells.sh' \
-                     -exec ../mod_shebang.sh -s "${SHE}${BANG}" {} \;
+    find ../ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
+        -exec ../tools/mod_shebang.sh -s "${SHE}${BANG}" {} \;
 
     ./run.sh
     [ "$?" -ne 0 ] && FAILED_SHELLS="${FAILED_SHELLS:+$FAILED_SHELLS }$BANG"
     printf "%s\n\n" "$BANG"
 done
 
-cd ../vagrant
+cd vagrant/
 
 if [ "$FAILED_SHELLS" = '' ]; then
     printf "\n\033[1;32m%s\033[0m\n" "All shells passed the test suite."

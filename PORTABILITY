@@ -41,11 +41,9 @@ Not sure which shell to use?
     - dash is quite fast, so if you have a choice, use it
     - otherwise, take your pick, so many are available via the package manager
 
-mod_shebang.sh can help you change all the scripts to your shell of choice. For
-example:
+tools/mod_shebang.sh can help you change all the scripts to your shell of
+choice. For example:
 
 cd /tmp/zfsnap
-find ./ -type f ! -name 'mod_shebang.sh' \
-  ! -name 'fix_sunos.sh' \
-  ! -name 'sh_tests.sh' \
-  -exec ./mod_shebang.sh -s '#!/bin/bash' {} \;
+find ./ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
+    -exec tools/mod_shebang.sh -s '#!/bin/bash' {} \;
