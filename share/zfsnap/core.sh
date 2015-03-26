@@ -69,32 +69,85 @@ IsTrue() {
 
 ## ZFSNAP FUNCTIONS
 
-# Convert bytes to human readable format, down to 1 decimal place
-# Imperfect. Does simple rounding (1.19 = 1.1), but it's good enough for our needs
+# Convert bytes to human readable format, to a maximum of one decimal place
+#   This approach, while admittedly a bit insane, supports shells which don't
+#   have 64-bit integers (mksh, I'm looking at you). As an added plus, this
+#   approach handles numbers larger than 64-bit signed integers (~16 EiB),
+#   though that's not exactly a terribly likely scenario...
+#
+#   The premise is that floating points are a matter of where the decimal is. By
+#   padding/stripping everything to 9 digits in length (the max safe length for
+#   32-bit), then enough precision is available to get a reasonably accurate
+#   answer. Possible because the answer's max precision is to one decimal place.
+#
+#   This approach is not perfect and occasionally will be off by one in the
+#   right-most digit. This is an acceptable trade-off IMO, as human readable is
+#   already inherently "wrong" by virtue of rounding. If the user wants uber
+#   precision, ZFS can tell them the Bytes directly.
 # Accepts 1 integer
 # Retvals human readable size: e.g. 3.2G
 BytesToHuman() {
-    local size=$1
-    RETVAL=''
-    IsInt "$size" || return 1
+    local num=$1
+    local answer=''
+    local t_dels=0 # number of thousands delimiters
 
-    # if <1K, return without a unit
-    [ "$size" -lt 1024 ] && RETVAL=${size} && return 0
+    # must be an integer
+    ! IsInt "$num" && RETVAL='' && return 1
 
-    local unit=''
-    local decimal=0
-    for unit in K M G T P E; do
-       if [ "$size" -lt 1048576 ]; then
-           decimal=$(((($size % 1024) * 10) / 1024))
-           size=$(($size / 1024))
-           break
-       else
-           size=$((size / 1024))
-       fi
+    # Bytes can skip the abuses which are to follow
+    if [ ${#num} -le 4 ] && [ $num -lt 1024 ]; then
+        answer=$num
+    else
+        local magic=0 # denominator to compensate for base-8 vs base-10 math
+        local valley8v10='false' # in the valley of base-8 vs base-10 (e.g. 1022KiB)
+        t_dels=$(( (${#num} - 1) / 3 ))
+
+        while true; do
+            case $t_dels in
+                # numbers derived by taking the first 6 digits of 1024^${t_dels}
+                1) magic=102400;; 2) magic=104857;; 3) magic=107374;; # 1) KiB 2) MiB 3) GiB
+                4) magic=109951;; 5) magic=112589;; 6) magic=115292;; # 4) TiB 5) PiB 6) EiB
+            esac
+            # check for the awkward valley of base-8 vs base-10 (e.g. 1010MB)
+            IsTrue "$valley8v10" || [ ${magic} -eq 102400 ] && break
+            [ $(( ${#num} % 3 )) -ne 1 ] || [ ${num%${num#??????}} -ge $magic ] && break
+
+            valley8v10='true'
+            t_dels=$(( $t_dels - 1 ))
+        done
+
+        # strip $magic to account for length of $num
+        [ $(( ${#num} % 3 )) -eq 2 ] && magic=${magic%?}
+        [ $(( ${#num} % 3 )) -eq 0 ] && magic=${magic%??}
+
+        # pad/strip to 9 characters - the longest safe length
+        while [ ${#num} -lt 9 ]; do
+            num="${num}0"
+        done
+        num=${num%${num#?????????}}
+
+        # calculate answer; format (if needed) to strip excess and insert decimal
+        local new_num=$(( $num / $magic ))
+        if IsTrue "$valley8v10"; then
+            answer=${new_num}
+        else
+            answer=${new_num%???}
+            if [ ${#answer} -lt 3 ]; then # if we have sufficient-ish precision to use a decimal
+                local last_three=${new_num#${answer}}
+                # add decimal only if it won't be .0
+                [ ${last_three%??} -ne 0 ] && answer="${answer}.${last_three%??}"
+            fi
+        fi
+    fi
+
+    # select appropriate unit
+    local answer_unit
+    for answer_unit in '' K M G T P E; do
+        [ $t_dels -eq 0 ] && break
+        t_dels=$(( $t_dels - 1 ))
     done
 
-    [ "$decimal" -gt 0 ] && RETVAL="${size}.${decimal}${unit}" || RETVAL="${size}${unit}"
-    return 0
+    RETVAL="${answer}${answer_unit}" && return 0
 }
 
 # Adds a TTL to a date
