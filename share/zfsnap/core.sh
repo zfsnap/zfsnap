@@ -55,15 +55,9 @@ IsFalse() {
 # Returns 0 if argument is "true"
 IsTrue() {
     case "$1" in
-        true)
-            return 0
-            ;;
-        false)
-            return 1
-            ;;
-        *)
-            Fatal "'$1' must be true or false."
-            ;;
+        true)  return 0 ;;
+        false) return 1 ;;
+        *)     Fatal "'$1' must be true or false." ;;
     esac
 }
 
