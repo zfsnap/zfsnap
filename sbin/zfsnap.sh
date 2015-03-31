@@ -14,9 +14,8 @@
 if [ -z "$ZFSNAP_LIB_DIR" ]; then
     ZFSNAP_SCRIPT=$0
     while [ -h "$ZFSNAP_SCRIPT" ]; do
-        LS_OUT=`ls -l "$ZFSNAP_SCRIPT"`
-        ZFSNAP_SCRIPT="${LS_OUT##*->}"
-        ZFSNAP_SCRIPT="${ZFSNAP_SCRIPT#${ZFSNAP_SCRIPT%%[!\ ]*}}" # trim leading spaces
+        LS_OUT=`/bin/ls -l "$ZFSNAP_SCRIPT"`
+        ZFSNAP_SCRIPT="${LS_OUT##*-> }"
     done
 
     [ -z "${ZFSNAP_SCRIPT##*/*}" ] && ZFSNAP_SCRIPT_DIR="${ZFSNAP_SCRIPT%/*}" || ZFSNAP_SCRIPT_DIR='.'
