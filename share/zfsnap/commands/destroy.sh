@@ -19,14 +19,18 @@ Syntax:
 ${0##*/} destroy [ options ] zpool/filesystem ...
 
 OPTIONS:
-  -D           = Delete *all* zfsnap snapshots of pools specified
-  -F age       = Force delete all snapshots exceeding age (rather than TTL expiration)
+  -D           = Delete *all* zfsnap snapshots — regardless of their TTL
+                 expiration — on all ZFS file systems that follow this option
+  -F age       = Force delete all snapshots exceeding "age" — regardless
+                 of their TTL expiration — on all ZFS file systems that
+                 follow this option
   -h           = Print this help and exit
   -n           = Dry-run. Perform a trial run with no actions actually performed
-  -p prefix    = Use prefix for snapshots after this switch
-  -P           = Don't use prefixes for snapshots after this switch
-  -r           = Operate recursively on all ZFS file systems after this switch
-  -R           = Do not operate recursively on all ZFS file systems after this switch
+  -p prefix    = Enable filtering to only consider snapshots with "prefix";
+                 it can be specified multiple times to build a list.
+  -P           = Disable filtering for prefixes.
+  -r           = Operate recursively on all ZFS file systems after this option
+  -R           = Do not operate recursively on all ZFS file systems after this option
   -s           = Skip pools that are resilvering
   -S           = Skip pools that are scrubbing
   -v           = Verbose output

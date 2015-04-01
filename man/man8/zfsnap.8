@@ -75,21 +75,22 @@ can be passed per invocation of
 By default,
 .Nm Cm destroy
 will only delete snapshots whose TTLs have expired. However, options
-are provided to override that behaviour with more aggressive approaches.
+are provided to override that behavior with more aggressive approaches.
 .Pp
 Only snapshots created by
 .Nm
-.Pq or, more specifically, snapshots which match the very specific name pattern it employs
-will be considered for deletion.
+.Pq or, more specifically, snapshots which match the very specific name pattern
+it employs will be considered for deletion.
 .Bl -tag -width Ds
 .It Fl D
-Delete all zfsnap snapshots \[em] regardless of their TTL expiration \[em] on all ZFS file
-systems that follow this switch.
+Delete all zfsnap snapshots \[em] regardless of their TTL expiration \[em] on
+all ZFS file systems that follow this option.
 .It Fl F Ar age
-Force delete all snapshots in all pools exceeding
+Force delete all snapshots exceeding
 .Ar age
 .Pq defined in TTL format
-regardless of their TTL expiration. See
+\[em] regardless of their TTL expiration \[em] on all ZFS file systems that
+follow this option. See
 .Sx TTL SYNTAX
 for more information.
 .It Fl h
@@ -99,15 +100,17 @@ command\[hy]line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix
-Use
-.Ar prefix
-for snapshots after this switch.
+Enable filtering to only consider snapshots with
+.Ar prefix ;
+it can be specified multiple times to build a list.
 .It Fl P
-Don't use a prefix for snapshots after this switch.
+Disable filtering for prefixes.
 .It Fl r
-Operate recursively for snapshots on all ZFS file systems that follow this switch.
+Operate recursively for snapshots on all ZFS file systems that follow this
+option.
 .It Fl R
-Do not operate recursively for snapshots on all ZFS file systems that follow this switch.
+Do not operate recursively for snapshots on all ZFS file systems that follow
+this option.
 .It Fl s
 Skip pools that are resilvering.
 .It Fl S
@@ -152,7 +155,7 @@ The purpose of
 is simple: to create snapshots.
 .Bl -tag -width Ds
 .It Fl a Ar TTL
-Set how long the snapshot should be kept. If not set, the default
+How long the snapshots should be kept. If not declared, the default
 .Ar TTL
 is one month. See
 .Sx TTL SYNTAX
@@ -164,15 +167,16 @@ command\[hy]line options and then exit.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix
-Use
-.Ar prefix
-for snapshots after this switch.
+Prefix to apply when naming snapshots for all ZFS file systems that follow this
+option.
 .It Fl P
-Don't use a prefix for snapshots after this switch.
+Don't apply any prefix when naming snapshots for all ZFS file systems that
+follow this option.
 .It Fl r
-Create recursive snapshots of all ZFS file systems that follow this switch.
+Create recursive snapshots of all ZFS file systems that follow this option.
 .It Fl R
-Create non\[hy]recursive snapshots for each ZFS file system that follows this switch.
+Create non\[hy]recursive snapshots for each ZFS file system that follows this
+option.
 .It Fl s
 Skip pools that are resilvering.
 .It Fl S

@@ -14,15 +14,17 @@ Syntax:
 ${0##*/} snapshot [ options ] zpool/filesystem ...
 
 OPTIONS:
-  -a ttl       = Set how long snapshot should be kept
+  -a ttl       = How long the snapshot(s) should be kept (default: 1 month)
   -h           = Print this help and exit
   -n           = Dry-run. Perform a trial run with no actions actually performed
-  -p prefix    = Use prefix for snapshots after this switch
-  -P           = Don't use prefix for snapshots after this switch
+  -p prefix    = Prefix to use when naming snapshots for all ZFS file
+                 systems that follow this option
+  -P           = Don't apply any prefix when naming snapshots for all ZFS
+                 file systems that follow this option
   -r           = Create recursive snapshots for all ZFS file systems that
-                 follow this switch
+                 follow this option
   -R           = Create non-recursive snapshots for all ZFS file systems that
-                 follow this switch
+                 follow this option
   -s           = Skip pools that are resilvering
   -S           = Skip pools that are scrubbing
   -v           = Verbose output
