@@ -40,7 +40,7 @@ EOF
 }
 
 # main loop; get options, process snapshot creation
-while [ "$1" ]; do
+while [ -n "$1" ]; do
     while getopts :d:fhnrRv OPT; do
         case "$OPT" in
             d) DEPTH="-d $OPTARG";;
@@ -63,7 +63,7 @@ while [ "$1" ]; do
     shift $(($OPTIND - 1))
 
     # rollback
-    if [ "$1" ]; then
+    if [ -n "$1" ]; then
         IsSnapshot "$1" || Fatal "You must provide a snapshot to rollback to."
         $ZFS_CMD list -H -t snapshot -o name "$1" > /dev/null || Fatal "'$1' does not exist!"
         TrimToFileSystem "$1" && FS_NAME=$RETVAL

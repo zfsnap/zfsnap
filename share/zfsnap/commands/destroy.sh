@@ -41,7 +41,7 @@ EOF
 }
 
 # main loop; get options, process snapshot expiration/deletion
-while [ "$1" ]; do
+while [ -n "$1" ]; do
     while getopts :DF:hnp:PrRsSvz OPT; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS='true';;
@@ -69,7 +69,7 @@ while [ "$1" ]; do
     shift $(($OPTIND - 1))
 
     # operate on pool/fs supplied
-    if [ "$1" ]; then
+    if [ -n "$1" ]; then
         ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` >&2 || Fatal "'$1' does not exist!"
         ! SkipPool "$1" && shift && continue
 

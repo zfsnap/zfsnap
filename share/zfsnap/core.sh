@@ -157,7 +157,7 @@ DatePlusTTL() {
     local M="${orig_date%%.*}" && M=${M#0} && orig_date=${orig_date#*.}
     local s="${orig_date}" && s=${s#0}
 
-    while [ "$ttl" ]; do
+    while [ -n "$ttl" ]; do
         case "$ttl" in
             *y*) y=$((${ttl%%y*} + $y)); ttl=${ttl#*y} ;;
             *m*) m=$((${ttl%%m*} + $m)); ttl=${ttl#*m} ;;
@@ -166,7 +166,7 @@ DatePlusTTL() {
             *h*) h=$((${ttl%%h*} + $h)); ttl=${ttl#*h} ;;
             *M*) M=$((${ttl%%M*} + $M)); ttl=${ttl#*M} ;;
              *s) s=$((${ttl%%s*} + $s)); ttl=${ttl#*s} ;;
-              *) Warn "Invalid TTL '$ttl' in DatePlusTTL." && RETVAL='' && return 1 ;;
+              *) Warn "Invalid TTL '$ttl' in DatePlusTTL."; RETVAL=''; return 1 ;;
         esac
     done
 
@@ -215,7 +215,7 @@ GreaterDate() {
     local date1="$1"
     local date2="$2"
 
-    while [ "$date1" ]; do
+    while [ -n "$date1" ]; do
         # get the first field and strip off any leading zeros
         local field1=${date1%%[-_.]*} && field1=${field1#0}
         local field2=${date2%%[-_.]*} && field2=${field2#0}
@@ -252,7 +252,7 @@ IsInt() {
 # Returns 0 if supplied year is a leap year
 IsLeapYear() {
     local year="$1"
-    [ "$year" ] || return 1
+    [ -z "$year" ] && return 1
 
     [ $(($year % 400)) -eq 0 ] && return 0
     [ $(($year % 100)) -eq 0 ] && return 1
@@ -285,7 +285,7 @@ PoolExists() {
 
 # Populates the $SKIP_POOLS global variable; does not return anything
 PopulateSkipPools() {
-    [ "$1" ] || Fatal 'PopulateSkipPools requires an argument!'
+    [ -z "$1" ] && Fatal 'PopulateSkipPools requires an argument!'
     POOLS=${POOLS:-`$ZPOOL_CMD list -H -o name`}
 
     local i
@@ -341,7 +341,7 @@ TrimToDate() {
     [ -z "$snapshot_name" ] && RETVAL='' && return 1
 
     # make sure it contains a date
-    [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
+    [ -z "${snapshot_name##*$DATE_PATTERN*}" ] || { RETVAL=''; return 1; }
 
     local pre_date="${snapshot_name%$DATE_PATTERN*}"
     local post_date="${snapshot_name##*$DATE_PATTERN}"
@@ -388,7 +388,7 @@ TrimToPrefix() {
     local snapshot_name="$1"
 
     # make sure it contains a date
-    [ "${snapshot_name##*$DATE_PATTERN*}" ] && RETVAL='' && return 1
+    [ -z "${snapshot_name##*$DATE_PATTERN*}" ] || { RETVAL=''; return 1; }
 
     local snapshot_prefix="${snapshot_name%$DATE_PATTERN*}"
     if ValidPrefix "$snapshot_prefix"; then
@@ -457,10 +457,10 @@ ValidSnapshotName() {
 ValidTTL() {
     local ttl="$1"
 
-    [ "$ttl" = '' ] && return 1
+    [ -z "$ttl" ] && return 1
     [ "$ttl" = 'forever' ] && return 0
 
-    while [ "$ttl" ]; do
+    while [ -n "$ttl" ]; do
         [ -z "${ttl##0*}" ] && return 1 # leading zeros not accepted
         case "$ttl" in
             *y*) IsInt "${ttl%y*}" && ttl=${ttl##*y} || return 1 ;;
