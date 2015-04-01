@@ -10,6 +10,7 @@ have at least one compatible shell available in the base install.
 - bash
 - dash
 - ksh88
+- lksh
 - pdksh
 - posh
 - zsh
