@@ -1,13 +1,12 @@
 zfsnap is written assuming a POSIX compliant shell with additional support for
-the keyword `local`, for variable scoping. It also requires a few POSIX
-compliant utilities (uname, head, etc), and 64-bit integers. This makes zfsnap
-very portable, but the dependency on "local" does prevent it from running in a
-few shells. But, it is worth noting that all OSs known to run ZFS do have at
-least one compatible shell available.
+the keyword `local` for variable scoping. It also requires a few POSIX
+compliant utilities (uname, head, etc) and 64-bit integers. This short list of
+requirements allows zfsnap to remain very portable. All OSs known to run ZFS
+have at least one compatible shell available in the base install.
 
-Shells known to work:
+== Shells Known To Work
 - sh (some modern variants. e.g. FreeBSD's sh)
-- ash
+- ash (including busybox's)
 - bash
 - dash
 - ksh88
@@ -15,7 +14,7 @@ Shells known to work:
 - posh
 - zsh
 
-Shells known to not work:
+== Bourne Shells Known To Not Work
 - sh (the original AT&T sh)
   - does not have support for the `local` keyword
 - ksh93
@@ -25,29 +24,98 @@ Shells known to not work:
     and causes dash (and I assume other shells too) to choke. Thus, adjusting
     the function declaration and a simple "alias local=typeset" will not work.
 - mksh
-  - This mostly works, but it does not have support for 64bit integers, which
-    makes some tests fail.
+  - Works except for 64-bit math. lksh is provided by the mksh project precisely
+    for such scenarios.
 
-OS Notes:
-Not sure which shell to use?
+== Shells Which Will Never Be Supported
+This should go without saying, but given that zfsnap is written using Bourne
+shell syntax, it will never be able to run in non-Bourne shells. This includes
+the C shell family (csh, tcsh) and any "exotic" shells like fish.
+
+== Operating System Notes
+Not sure which shell to use? Chances are good on a modern system that the
+default (/bin/sh) will point to a sane and compatible shell. Try it; it likely
+works.
 
   Solaris 10:
     - /bin/ksh (which is ksh88) and /bin/bash will work
   Solaris 11:
     - /bin/bash (or ksh88 if installed, though it isn't available by default)
   Other SunOS (Illumos, OmniOS, etc)
-    - /bin/bash or many others from the package manager
+    - /bin/bash or many others available via the package manager
   *BSD and Linux
-    - dash is quite fast, so if you have a choice, use it
-    - otherwise, take your pick, so many are available via the package manager
+    - the default /bin/sh nearly always works
+    - dash is quite fast; if you have a choice, use it
+    - otherwise, there are many others available via the package manager
+  OS X
+    - /bin/sh points to bash
 
-tools/mod_shebang.sh can help you change all the scripts to your shell of
+tools/mod_shebang.sh can help you change all zfsnap scripts to your shell of
 choice. For example:
 
-cd /tmp/zfsnap
-find ./ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
-    -exec tools/mod_shebang.sh -s '#!/bin/bash' {} \;
+    cd /tmp/zfsnap
+    find ./ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
+        -exec tools/mod_shebang.sh -s '#!/bin/bash' {} \;
 
-About Mdoc:
+== Man Page
 zfsnap's man page is written using mdoc (which is largely based off of roff).
-All target OSs except for Solaris have support for formatting mdoc manpages.
+All target OSs, with the exception of Solaris, have support to correctly display
+mdoc man pages.
+
+== Just Simply: Why?
+If you're curious about some of the design limitations or decisions, this is a
+brief discussion of some selected points. Otherwise, the mailing list is the
+best place to ask.
+
+=== Why `local`?
+The use of `local` is the least portable aspect of zfsnap. However, programming
+zfsnap with every variable global in scope would be horrifying; the variable
+names would be complex and make the code more difficult to understand. A wide
+range of shells --- old and new --- support local, and the readability and
+elimination of an entire class of bugs is well worth the cost.
+
+=== Why 64-bit?
+This issue is not clear-cut, and zfsnap's dependency on 64-bit math may change.
+
+zfsnap can provide estimates of the amount of data to be deleted, etc. This
+requires math, and exceeding 32-bit integers is trivial (2GB) when operating in
+Bytes.
+
+POSIX states that shell integers must be a signed long. So on 64-bit systems
+it's 64-bit, and on 32-bit systems it's 32-bit. Running ZFS on 32-bit systems is
+possible, but is not common and is arguably ill-advised.
+
+The situation is complicated because overflows are undefined behavior, and thus
+the result is up to the implementation and/or compiler. For this reason
+(according to the lksh man page), mksh breaks from POSIX and limits shell math
+to 32-bit integers on both 32-bit and 64-bit systems. mksh provides lksh
+(Legacy Korn Shell) for POSIX compliant behavior (among other things).
+
+About half of the shells support 64-bit math on 32-bit systems.
+
+awk, bc, and expr are possible alternatives. AFAICT, POSIX doesn't define the
+integer length for any of them, and I have yet to test across them across all
+target systems. Furthermore:
+
+  awk  - likely to be present on all systems. But there are many variants of
+         awk, and I am concerned about syntax portability and 64-bit support.
+  bc   - best suited to the task, but is not ubiquitous. For example,
+         Debian-based systems don't have bc installed by default.
+  expr - quite primitive and unlikely to have 64-bit support. Also, it is
+         limited to integer math.
+
+=== Why Shell?
+Portability is the chief reason but also accessibility for sysadmins. Any
+sysadmin worth his/her salt knows shell. Thus it's easy for others to audit,
+extend, and contribute to the project. Accessibility influences other design
+decisions as well: all needed information is in the snapshot name, thus there's
+no config file to parse or database to query. It keeps things easy to use and
+understand --- and easy to fix if anything should go wrong.
+
+=== Why mdoc?
+roff/groff/troff/lmnop-roff is a pretty ugly language. mdoc inherits that
+unfortunate legacy, but takes a more streamlined approach that focuses on doing
+man pages well rather than attempting to be a full typesetting language. As a
+result, mdoc is (comparatively) easy to write in, is reasonably well supported,
+and can be exported /much/ more easily (and correctly) to other formats such as
+HTML.
