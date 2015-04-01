@@ -46,8 +46,8 @@ while [ "$1" ]; do
                ;;
             h) Help;;
             n) DRY_RUN='true';;
-            p) PREFIX=$OPTARG; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
-            P) PREFIX=''; PREFIXES='';;
+            p) PREFIX=$OPTARG;;
+            P) PREFIX='';;
             r) ZOPT='-r';;
             R) ZOPT='';;
             s) PopulateSkipPools 'resilver';;
