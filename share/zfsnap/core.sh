@@ -81,7 +81,7 @@ IsTrue() {
 # Accepts 1 integer
 # Retvals human readable size: e.g. 3.2G
 BytesToHuman() {
-    local num=$1
+    local num="$1"
     local answer=''
     local t_dels=0 # number of thousands delimiters
 
@@ -291,7 +291,7 @@ PopulateSkipPools() {
     local i
     for i in $POOLS; do
         ZSTATUS=`"$ZPOOL_CMD" status "$i"`
-        [ -z "${ZSTATUS##*$1 in progress*}" ] && SKIP_POOLS="$SKIP_POOLS $i"
+        [ -z "${ZSTATUS##*$1 in progress*}" ] && SKIP_POOLS="${SKIP_POOLS:+$SKIP_POOLS }$i"
     done
 }
 
@@ -305,9 +305,9 @@ RmZfsSnapshot() {
     if IsSnapshot "$1"; then
         if IsFalse "$DRY_RUN"; then
             if $zfs_destroy >&2; then
-                IsTrue $VERBOSE && printf '%s ... DONE\n' "$zfs_destroy"
+                IsTrue "$VERBOSE" && printf '%s ... DONE\n' "$zfs_destroy"
             else
-                IsTrue $VERBOSE && printf '%s ... FAIL\n' "$zfs_destroy"
+                IsTrue "$VERBOSE" && printf '%s ... FAIL\n' "$zfs_destroy"
             fi
         else
             printf '%s\n' "$zfs_destroy"
@@ -327,7 +327,7 @@ SkipPool() {
     local i
     for i in $SKIP_POOLS; do
         if TrimToPool "$1" && [ "$RETVAL" = "$i" ]; then
-            IsTrue $VERBOSE && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
+            IsTrue "$VERBOSE" && Note "No actions will be performed on '$1'. Resilver or Scrub is running on pool."
             return 1
         fi
     done
