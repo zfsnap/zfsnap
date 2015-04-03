@@ -34,7 +34,7 @@ ItsRetvalIs() {
   local actual_return="$?"
   local actual_retval="$RETVAL"
 
-  printf '`%s` retvals "%s" and %s ... ' "$cmd" "$expected_retval" "$expected_return"
+  printf '`%s` sets retval to "%s" and returns %s ... ' "$cmd" "$expected_retval" "$expected_return"
   if [ "$expected_retval" = "$actual_retval" ] && [ "$expected_return" -eq "$actual_return" ]; then
     printf '\033[1;32mpassed\033[0m\n'
   else
