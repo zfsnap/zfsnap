@@ -277,10 +277,8 @@ IsLeapYear() {
 # Returns 0 if it looks like a snapshot
 IsSnapshot() {
     case "$1" in
-        [!@]*@*[!@])
-            return 0;;
-        *)
-            return 1;;
+        [!@]*@*[!@]) return 0;;
+        *) return 1;;
     esac
 }
 
