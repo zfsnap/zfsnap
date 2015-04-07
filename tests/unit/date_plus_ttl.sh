@@ -52,7 +52,8 @@ ItsRetvalIs "DatePlusTTL '2015-11-20_06.00.59' '60119M'"     "2015-12-31_23.59.5
 ItsRetvalIs "DatePlusTTL '2015-11-20_06.00.59' '60119M1s'"   "2016-01-01_00.00.00"    0  # Roll over the limit
 ItsRetvalIs "DatePlusTTL '2007-01-02_00.00.00' '126143999s'" "2010-12-31_23.59.59"    0  # 1 short of 4 years in seconds through a leap year
 
-# Invalid TTL
-ItsRetvalIs "DatePlusTTL '2007-01-02_00.00.00' 'fake'"       ""                       1  # Shouldn't happen, but worth testing.
+# Invalid
+ItsRetvalIs "DatePlusTTL 'murple'              '1m'"         ""                       1  # invalid date
+ItsRetvalIs "DatePlusTTL '2007-01-02_00.00.00' 'fake'"       ""                       1  # invalid TTL
 
 ExitTests
