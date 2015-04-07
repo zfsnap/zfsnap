@@ -28,4 +28,7 @@ ItReturns "IsLeapYear 2013"         1   #
 ItReturns "IsLeapYear 2017"         1   #
 ItReturns "IsLeapYear 2121"         1   # far in the future
 
+# invalid input
+ItReturns "IsLeapYear Chicago"      1   # great band, but not a leap year
+
 ExitTests

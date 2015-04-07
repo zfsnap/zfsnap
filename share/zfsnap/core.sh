@@ -249,10 +249,11 @@ IsInt() {
     [ -z "${1##*[!0-9]*}" ] && return 1 || return 0
 }
 
+# Accepts one integer
 # Returns 0 if supplied year is a leap year
 IsLeapYear() {
     local year="$1"
-    [ -z "$year" ] && return 1
+    IsInt "$year" || return 1
 
     [ $(($year % 400)) -eq 0 ] && return 0
     [ $(($year % 100)) -eq 0 ] && return 1
