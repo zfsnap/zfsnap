@@ -211,9 +211,10 @@ DatePlusTTL() {
 # Accepts two /valid/ zfsnap dates
 # Returns 0 if date1 is greater or equal
 # Returns 1 if date2 is greater
+# returns 2 if input is invalid
 GreaterDate() {
-    local date1="$1"
-    local date2="$2"
+    ValidDate "$1" && local date1="$1" || return 2
+    ValidDate "$2" && local date2="$2" || return 2
 
     while [ -n "$date1" ]; do
         # get the first field and strip off any leading zeros

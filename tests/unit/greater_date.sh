@@ -35,4 +35,9 @@ ItReturns "GreaterDate 1977-04-01_14.54.58 2030-01-04_12.34.54"   1   # across m
 # Y2038 compatibility
 ItReturns "GreaterDate 2005-12-20_10.29.22 2040-11-04_08.30.24"   1   #
 
+# Invalid input
+ItReturns "GreaterDate 1977-04-01 14.54.58 2030-01-04_12.34.54"   2   # space in the date
+ItReturns "GreaterDate murple 2030-01-04_12.34.54"                2   #
+ItReturns "GreaterDate 2030-01-04_12.34.54 lmnop"                 2   #
+
 ExitTests
