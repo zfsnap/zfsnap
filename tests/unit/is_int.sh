@@ -18,5 +18,6 @@ ItReturns "IsInt '2 965'"                     1   # ints with a space
 ItReturns "IsInt '3.14'"                      1   # float isn't an int
 ItReturns "IsInt '3,123'"                     1   # separators aren't cool
 ItReturns "IsInt ''"                          1   # empty string
+ItReturns "IsInt ' '"                         1   # space
 
 ExitTests

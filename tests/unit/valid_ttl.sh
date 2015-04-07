@@ -27,6 +27,7 @@ ItReturns "ValidTTL 1dforever"      1   # cannot combine 'forever' with other mo
 ItReturns "ValidTTL forever4w"      1   # cannot combine 'forever' with other modifiers
 ItReturns "ValidTTL 0w"             1   # must be greater than zero
 ItReturns "ValidTTL 009d"           1   # padded with zeros is not acceptable
+ItReturns "ValidTTL '5w 9d'"        1   # spaces are not ok
 ItReturns "ValidTTL"                1   # empty is not a TTL
 
 ExitTests
