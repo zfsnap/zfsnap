@@ -212,6 +212,9 @@ RmZfsSnapshot() {
         echo "  This is bug, we definitely don't want that." > /dev/stderr
         echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
         echo "  Don't panic, nothing was deleted :)" > /dev/stderr
+        echo "" > /dev/stderr
+        echo "  The error was raised becaus of:" > /dev/stderr
+        echo "  $*" > /dev/stderr
         IsTrue $count_failures && [ $failures -gt 0 ] && Exit $failures
         Exit 1
     fi
