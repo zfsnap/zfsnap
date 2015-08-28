@@ -79,8 +79,8 @@ are provided to override that behavior with more aggressive approaches.
 .Pp
 Only snapshots created by
 .Nm
-.Pq or, more specifically, snapshots which match the very specific name pattern
-it employs will be considered for deletion.
+.Pq or, more specifically, snapshots which match the very specific name pattern it employs
+will be considered for deletion.
 .Bl -tag -width Ds
 .It Fl D
 Delete all zfsnap snapshots \[em] regardless of their TTL expiration \[em] on
@@ -192,30 +192,30 @@ The Time\[hy]To\[hy]Live
 .Pq TTL
 contains numbers and modifiers. Valid modifiers are:
 .Bl -tag -width 8n -offset 4n
-.It Cm y
+.It Ar y
 years
 .Pq calendar
-.It Cm m
+.It Ar m
 months
 .Pq calendar
-.It Cm w
+.It Ar w
 weeks
-.It Cm d
+.It Ar d
 days
-.It Cm h
+.It Ar h
 hours
-.It Cm M
+.It Ar M
 minutes
-.It Cm s
+.It Ar s
 seconds
-.It Cm forever
+.It Ar forever
 a special\[hy]case modifier that will never expire and cannot be used with other
 TTL modifiers. Both
 .Op Fl F
 and
 .Op Fl D
 will delete snapshots with a TTL of
-.Cm forever .
+.Ar forever .
 .El
 .Pp
 You do not need to use all of the modifiers, but they must be used in the above order
@@ -223,14 +223,14 @@ You do not need to use all of the modifiers, but they must be used in the above 
 .Pp
 TTL numbers must be greater than zero and cannot have leading zeros
 .Po e.g. Both
-.Cm 0y
+.Ar 0y
 and
-.Cm 09d
+.Ar 09d
 are invalid
 .Pc .
 .Pp
 The default TTL is
-.Cm 1m
+.Ar 1m
 .Pq one month .
 .
 .Ss TTL Math
@@ -239,27 +239,27 @@ overflows are carried into years, and then all overflows are carried normally
 from right to left.
 .Pp
 For example, with a date of 2009\-02\-27 and a TTL of
-.Cm 1m3d ,
+.Ar 1m3d ,
 the expiration date is 2009\-03\-30 rather than 2009\-04\-02.
 .Pp
 As a corner case, adding a TTL of
-.Cm 1m
+.Ar 1m
 .Pq one month
 to the date 2009\-10\-31 will result in an expiration date of 2009\-12\-01
 rather than 2009\-11\-30. Because there are only 30 days in November, precisely
-one month after October 31st is ambigious. The TTL math chooses the more conservative
+one month after October 31st is ambiguous. The TTL math chooses the more conservative
 .Pq later
 result.
 .
 .Ss TTL Examples
 .Bl -tag -width 8n
-.It Cm 1y6m5d2h
+.It Ar 1y6m5d2h
 One year, six months, five days, and two hours
-.It Cm 18m
+.It Ar 18m
 Eighteen months
-.It Cm 90M
+.It Ar 90M
 Ninety minutes
-.It Cm 86400s
+.It Ar 86400s
 Eighty\[hy]six thousand and four hundred seconds
 .Pq 1 day
 .El
