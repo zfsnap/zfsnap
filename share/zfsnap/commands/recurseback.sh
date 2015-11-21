@@ -41,6 +41,7 @@ EOF
 
 # main loop; get options, process snapshot creation
 while [ -n "$1" ]; do
+	OPTIND=1
     while getopts :d:fhnrRv OPT; do
         case "$OPT" in
             d) DEPTH="-d $OPTARG";;
