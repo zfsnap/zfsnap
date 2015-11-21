@@ -46,6 +46,7 @@ EOF
 
 # main loop; get options, process snapshot expiration/deletion
 while [ -n "$1" ]; do
+    OPTIND=1
     while getopts :DF:hnp:PrRsSvz OPT; do
         case "$OPT" in
             D) DELETE_ALL_SNAPSHOTS='true';;
