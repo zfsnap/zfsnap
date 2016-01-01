@@ -98,11 +98,9 @@ while [ -n "$1" ]; do
 
             # Replace candidate if it is younger than the candidate
             if [ -z "$CANDIDATE_SNAPSHOT" ]; then
-                echo "This is the first candidate found"
                 CANDIDATE_SNAPSHOT="$SNAPSHOT"
                 TrimToDate "$CANDIDATE_SNAPSHOT" && CANDIDATE_DATE=$RETVAL || Fatal "Invalid snap: $SNAPSHOT"
             else
-                echo "Comparing against existing candidate"
                 TrimToDate "$SNAPSHOT" && SNAPDATE=$RETVAL || continue
                 if GreaterDate "$SNAPDATE" "$CANDIDATE_DATE"; then
                     CANDIDATE_SNAPSHOT="$SNAPSHOT"
