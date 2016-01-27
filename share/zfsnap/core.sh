@@ -115,7 +115,7 @@ BytesToHuman() {
     RETVAL="${answer}${unit}" && return 0
 }
 
-# Mathmatically add a TTL to a date
+# Mathematically add a TTL to a date
 #   When a TTL is added to a date, each field is added independently,
 #   any month overflows are carried into years, and then all overflows
 #   are carried normally from right to left (e.g. 2009-02-27 plus 1m3d
@@ -123,7 +123,7 @@ BytesToHuman() {
 #
 #   Corner case: adding 1m to 2009-10-31 will result in 2009-12-01
 #   rather than 2009-11-30. Because there are only 30 days in November,
-#   precisely one month after October 31st is ambigious. This returns
+#   precisely one month after October 31st is ambiguous. This returns
 #   the more conservative (later) option.
 # Accepts a zfsnap date and a TTL
 # Retvals a zfsnap date
