@@ -6,8 +6,8 @@
 # See the PORTABILITY file for more information about why some Bourne shells
 # are tested and not others
 
-SHELLS_GOOD='ash bash dash lksh pdksh posh zsh sh'
-SHELLS_BAD='mksh'
+SHELLS_GOOD='ash bash dash lksh mksh pdksh posh zsh sh'
+SHELLS_BAD=''
 SHELLS_HOPELESS='ksh93' # not used, here to document
 SHELLS_ALL="$SHELLS_GOOD $SHELLS_BAD"
 SHELLS_TO_TEST=''

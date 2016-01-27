@@ -1,8 +1,9 @@
 zfsnap is written assuming a POSIX compliant shell with additional support for
 the keyword `local` for variable scoping. It also requires a few POSIX
-compliant utilities (uname, head, etc) and 64-bit integers. This short list of
-requirements allows zfsnap to remain very portable. All OSs known to run ZFS
-have at least one compatible shell available in the base install.
+compliant utilities (uname, head, etc). This short list of requirements allows
+zfsnap to remain very portable. All OSs known to run ZFS have at least one
+compatible shell available in the base install. It will run on either 32-bit or
+64-bit systems.
 
 == Shells Known To Work
 - sh (some modern variants. e.g. FreeBSD's sh)
@@ -11,6 +12,7 @@ have at least one compatible shell available in the base install.
 - dash
 - ksh88
 - lksh
+- mksh
 - pdksh
 - posh
 - zsh
@@ -24,9 +26,6 @@ have at least one compatible shell available in the base install.
     "function foo { }" rather than "foo() { }". The former syntax is non-POSIX
     and causes dash (and I assume other shells too) to choke. Thus, adjusting
     the function declaration and a simple "alias local=typeset" will not work.
-- mksh
-  - Works except for 64-bit math. lksh is provided by the mksh project precisely
-    for such scenarios.
 
 == Shells Which Will Never Be Supported
 This should go without saying, but given that zfsnap is written using Bourne
@@ -75,16 +74,15 @@ names would be complex and make the code more difficult to understand. A wide
 range of shells --- old and new --- support local, and the readability and
 elimination of an entire class of bugs is well worth the cost.
 
-=== Why 64-bit?
-This issue is not clear-cut, and zfsnap's dependency on 64-bit math may change.
-
-zfsnap can provide estimates of the amount of data to be deleted, etc. This
-requires math, and exceeding 32-bit integers is trivial (2GB) when operating in
-Bytes.
+=== Why limit to 32-bit math?
+zfsnap aims to run everywhere ZFS can, so it is important to support both 32-bit
+and 64-bit platforms. Most of the time, a machine's architecture is irrelevant
+to zfsnap; however, zfsnap does provide estimates of the amount of data to be
+deleted. This requires math, and exceeding 32-bit integers is trivial (2GB)
+when operating in Bytes.
 
 POSIX states that shell integers must be a signed long. So on 64-bit systems
-it's 64-bit, and on 32-bit systems it's 32-bit. Running ZFS on 32-bit systems is
-possible, but is not common and is arguably ill-advised.
+it's 64-bit and on 32-bit systems it's 32-bit.
 
 The situation is complicated because overflows are undefined behavior, and thus
 the result is up to the implementation and/or compiler. For this reason
