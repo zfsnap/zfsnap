@@ -63,85 +63,56 @@ IsTrue() {
 
 ## ZFSNAP FUNCTIONS
 
-# Convert bytes to human readable format, to a maximum of one decimal place
-#   This approach, while admittedly a bit insane, supports shells which don't
-#   have 64-bit integers (mksh, I'm looking at you). As an added plus, this
-#   approach handles numbers larger than 64-bit signed integers (~16 EiB),
-#   though that's not exactly a terribly likely scenario...
+# Convert bytes to human readable format
+#   This approach uses a long division approach in order to avoid problem with
+#   performing arithmetic on numerators larger than the current shell's int
+#   size (many are limited to 32-bit, but even 64-bit is insufficient in some
+#   extreme scenarios).
 #
-#   The premise is that floating points are a matter of where the decimal is. By
-#   padding/stripping everything to 9 digits in length (the max safe length for
-#   32-bit), then enough precision is available to get a reasonably accurate
-#   answer. Possible because the answer's max precision is to one decimal place.
-#
-#   This approach is not perfect and occasionally will be off by one in the
-#   right-most digit. This is an acceptable trade-off IMO, as human readable is
-#   already inherently "wrong" by virtue of rounding. If the user wants uber
-#   precision, ZFS can tell them the Bytes directly.
+#   The previous version of this function would (sometimes) go to one decimal
+#   place. This would be a nice feature, but is left unimplemented for now.
 # Accepts 1 integer
-# Retvals human readable size: e.g. 3.2G
+# Retvals human readable size: e.g. 3G
 BytesToHuman() {
-    local num="$1"
-    local answer=''
-    local t_dels=0 # number of thousands delimiters
+    local bytes="$1"
+    local denom='1024'
+    local answer="$bytes"
+    local count=0
 
     # must be an integer
-    ! IsInt "$num" && RETVAL='' && return 1
+    ! IsInt "$bytes" && RETVAL='' && return 1
 
-    # Bytes can skip the abuses which are to follow
-    if [ ${#num} -le 4 ] && [ $num -lt 1024 ]; then
-        answer=$num
-    else
-        local magic=0 # denominator to compensate for base-8 vs base-10 math
-        local valley8v10='false' # in the valley of base-8 vs base-10 (e.g. 1022KiB)
-        t_dels=$(( (${#num} - 1) / 3 ))
+    while [ ${#answer} -gt 9 ] || [ ${answer:-0} -ge $denom ]; do
+        local numer="$answer"
+        local tmp_answer=''
+        local chunk=''
+        local first=''
 
-        while true; do
-            case $t_dels in
-                # numbers derived by taking the first 6 digits of 1024^${t_dels}
-                1) magic=102400;; 2) magic=104857;; 3) magic=107374;; # 1) KiB 2) MiB 3) GiB
-                4) magic=109951;; 5) magic=112589;; 6) magic=115292;; # 4) TiB 5) PiB 6) EiB
-            esac
-            # check for the awkward valley of base-8 vs base-10 (e.g. 1010MB)
-            IsTrue "$valley8v10" || [ ${magic} -eq 102400 ] && break
-            [ $(( ${#num} % 3 )) -ne 1 ] || [ ${num%${num#??????}} -ge $magic ] && break
+        # as long as there's digits to operate on
+        while [ -n "$numer" ]; do
+            first=${numer%${numer#?}} # get first digit
+            numer=${numer#${first}} # strip off first digit
+            chunk="${chunk}${first}"
 
-            valley8v10='true'
-            t_dels=$(( $t_dels - 1 ))
-        done
-
-        # strip $magic to account for length of $num
-        [ $(( ${#num} % 3 )) -eq 2 ] && magic=${magic%?}
-        [ $(( ${#num} % 3 )) -eq 0 ] && magic=${magic%??}
-
-        # pad/strip to 9 characters - the longest safe length
-        while [ ${#num} -lt 9 ]; do
-            num="${num}0"
-        done
-        num=${num%${num#?????????}}
-
-        # calculate answer; format (if needed) to strip excess and insert decimal
-        local new_num=$(( $num / $magic ))
-        if IsTrue "$valley8v10"; then
-            answer=${new_num}
-        else
-            answer=${new_num%???}
-            if [ ${#answer} -lt 3 ]; then # if we have sufficient-ish precision to use a decimal
-                local last_three=${new_num#${answer}}
-                # add decimal only if it won't be .0
-                [ ${last_three%??} -ne 0 ] && answer="${answer}.${last_three%??}"
+            if [ ${chunk:-0} -ge $denom ]; then
+                tmp_answer="${tmp_answer}$(( $chunk / $denom ))" # append quotient
+                chunk=$(( $chunk % $denom )) # assign remainder
+            else
+                [ -n "$tmp_answer" ] && tmp_answer="${tmp_answer}0" # don't build leading zeros
             fi
-        fi
-    fi
-
-    # select appropriate unit
-    local answer_unit
-    for answer_unit in '' K M G T P E; do
-        [ $t_dels -eq 0 ] && break
-        t_dels=$(( $t_dels - 1 ))
+            [ $chunk -eq 0 ] && chunk='' # protect against leading zeros
+        done
+        answer=$tmp_answer
+        count=$(( $count + 1 ))
     done
 
-    RETVAL="${answer}${answer_unit}" && return 0
+    local unit
+    for unit in '' K M G T P E Z; do
+        [ $count -eq 0 ] && break
+        count=$(( $count - 1 ))
+    done
+
+    RETVAL="${answer}${unit}" && return 0
 }
 
 # Mathmatically add a TTL to a date
