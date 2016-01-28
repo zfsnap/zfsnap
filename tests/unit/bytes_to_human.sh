@@ -16,11 +16,11 @@ ItsRetvalIs "BytesToHuman '1152921504606846976'"   "1E"    0  # 1 Exbibyte
 ItsRetvalIs "BytesToHuman '1180591620717411303424'" "1Z"   0  # 1 Zettabyte
 
 # dividends with remainders
-ItsRetvalIs "BytesToHuman '56145'"                 "54K"   0  # ~54.83 KiB
-ItsRetvalIs "BytesToHuman '7864320'"               "7M"    0  # exactly 7.5 MiB
-ItsRetvalIs "BytesToHuman '7864420'"               "7M"    0  # slightly above 7.5 MiB
-ItsRetvalIs "BytesToHuman '3425236418'"            "3G"    0  # ~3.19 GiB
-ItsRetvalIs "BytesToHuman '76624965339709'"        "69T"   0  # ~69.69 TiB
+ItsRetvalIs "BytesToHuman '56145'"                 "54.8K" 0  # ~54.83 KiB
+ItsRetvalIs "BytesToHuman '7864320'"               "7.5M"  0  # exactly 7.5 MiB
+ItsRetvalIs "BytesToHuman '7864420'"               "7.5M"  0  # slightly above 7.5 MiB
+ItsRetvalIs "BytesToHuman '3425236418'"            "3.1G"  0  # ~3.19 GiB
+ItsRetvalIs "BytesToHuman '76624965339709'"        "69.6T" 0  # ~69.69 TiB
 ItsRetvalIs "BytesToHuman '1046'"                  "1K"    0  # 1.0 should have no decimal
 ItsRetvalIs "BytesToHuman '10580140'"              "10M"   0  # ~10.09
 
