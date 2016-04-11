@@ -75,7 +75,7 @@ while [ -n "$1" ]; do
 
     # operate on pool/fs supplied
     if [ -n "$1" ]; then
-        ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -t snapshot -r $1` >&2 || Fatal "'$1' does not exist!"
+        ZFS_SNAPSHOTS=`$ZFS_CMD list -H -o name -s name -t snapshot -r $1` >&2 || Fatal "'$1' does not exist!"
         ! SkipPool "$1" && shift && continue
 
         for SNAPSHOT in $ZFS_SNAPSHOTS; do

@@ -66,7 +66,7 @@ while [ -n "$1" ]; do
     # rollback
     if [ -n "$1" ]; then
         IsSnapshot "$1" || Fatal "You must provide a snapshot to rollback to."
-        $ZFS_CMD list -H -t snapshot -o name "$1" > /dev/null || Fatal "'$1' does not exist!"
+        $ZFS_CMD list -H -t snapshot -o name -s name "$1" > /dev/null || Fatal "'$1' does not exist!"
         TrimToFileSystem "$1" && FS_NAME=$RETVAL
         SNAPSHOT_NAME=${1##${FS_NAME}@}
 

@@ -42,7 +42,7 @@ __zfsnap_list_datasets() {
 # prints zfs snapshots
 __zfsnap_list_snapshots() {
     local dataset=${1%@*}
-    $__ZFSNAP_ZFS list -H -t snapshot -o name -d 1 -r $dataset
+    $__ZFSNAP_ZFS list -H -t snapshot -o name -s name -d 1 -r $dataset
 }
 
 # prints valid flags of a given command
