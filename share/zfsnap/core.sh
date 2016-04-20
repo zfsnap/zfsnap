@@ -497,8 +497,8 @@ case "$OS" in
     'GNU/kFreeBSD')
         ;;
     'Darwin')
-        ZFS_CMD='/usr/sbin/zfs'
-        ZPOOL_CMD='/usr/sbin/zpool'
+        ZFS_CMD='/usr/local/bin/zfs'
+        ZPOOL_CMD='/usr/local/bin/zpool'
         ;;
     *)
         Fatal 'Your OS is not supported. However, not all hope is lost.' \
