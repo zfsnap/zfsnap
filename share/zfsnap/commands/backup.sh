@@ -43,19 +43,19 @@ while [ -n "$1" ]; do
     OPTIND=1
     while getopts b:d:hi:k:nRsSu:v OPT; do
         case "$OPT" in
-            b) SOURCEFS='$OPTARG';;
-            d) DESTINATIONFS='$OPTARG';;
-            #e) EMAIL='$OPTARG';;#could possibly have utility email results of backup upon completion, would require user to already have setup mail
+            b) SOURCEFS=$OPTARG;;
+            d) DESTINATIONFS=$OPTARG;;
+            #e) EMAIL=$OPTARG;;#could possibly have utility email results of backup upon completion, would require user to already have setup mail
             #f) FULL='TRUE';;#this flag can be used to perform a full backup when full backup option is implemented
             h) Help;;
-			i) REMOTE='$OPTARG';;#remote system ip or dns address
-            k) SSH_KEY='$OPTARG';;#ssh key to access remote system
+			i) REMOTE=$OPTARG;;#remote system ip or dns address
+            k) SSH_KEY=$OPTARG;;#ssh key to access remote system
 			#l) LOCAL='true';;#enables backing up to a local filesystem
             n) DRY_RUN='true';;
             R) REVERSE='true';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-			u) user='$OPTARG';;
+			u) user=$OPTARG;;
             v) VERBOSE='true';;
 
             :) Fatal "Option -${OPTARG} requires an argument.";;
@@ -69,7 +69,7 @@ while [ -n "$1" ]; do
 	#test to see if SSH_KEY specified exists as long as this is not a local backup
 	if [ ! $LOCAL ]; then
 		if [ ! -r $SSH_KEY ]; then
-			Fatal "'$SSH_KEY' does not exist or cannot be read!"
+			Fatal "ssh key: $SSH_KEY does not exist or cannot be read!"
 		fi
 	fi
 	
@@ -78,7 +78,7 @@ while [ -n "$1" ]; do
 	#would be much simpler if only supported running this command on backup system
 	if $REVERSE; then
 		#can only check sourcefs as it is the fs expected on the local machine
-		FSExists "$SOURCEFS" || Fatal "'$SOURCEFS' does not exist!"
+		FSExists "$SOURCEFS" || Fatal "Source file system: $SOURCEFS does not exist!"
 		
 		#create list of local snapshots
 		ListLocalSnapshots $SOURCEFS && SOURCESNAPS=$RETVAL
@@ -91,7 +91,7 @@ while [ -n "$1" ]; do
 		
 	else
 		#can only check destination fs as it is the fs expected on the local machine
-		FSExists "$DESTINATIONFS" || Fatal "'$DESTINATIONFS' does not exist!"
+		FSExists "$DESTINATIONFS" || Fatal "Destination file system: $DESTINATIONFS does not exist!"
 		
 		#create list of local snapshots
 		ListLocalSnapshots $DESTINATIONFS && DESTINATIONSNAPS=$RETVAL
