@@ -68,7 +68,7 @@ while [ -n "$1" ]; do
 	
 	#test to see if SSH_KEY specified exists as long as this is not a local backup
 	if ! $LOCAL; then
-		if ! -r $SSH_KEY; then
+		if [ ! -r $SSH_KEY ]; then
 			Fatal "'$SSH_KEY' does not exist or cannot be read!"
 		fi
 	fi
