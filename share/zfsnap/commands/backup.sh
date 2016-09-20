@@ -4,6 +4,7 @@ SSH_KEY=~/.ssh/id_rsa
 user=$USER
 LOCAL='false'
 FULL='false'
+REVERSE='false'
 
 # FUNCTIONS
 Help() {
