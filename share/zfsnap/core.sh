@@ -273,7 +273,7 @@ IsSnapshot() {
 LatestSnap(){
 	local snaps=("$@")
 	
-	local latest_snap=$(echo "${snaps[*]}" | tr " " "\n" | grep $(echo ${snaps[*]} | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
+	local latest_snap=$(echo "${snaps[*]}" | tr " " "\n" | grep $(echo ${snaps[*]} | tr " " "\n" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
 	
 	RETVAL=$latest_snap
 }
