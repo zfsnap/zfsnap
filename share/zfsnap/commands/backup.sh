@@ -41,7 +41,7 @@ EOF
 # main loop; get options, perform backup of filesystem(s)
 while [ -n "$1" ]; do
     OPTIND=1
-    while getopts b:d:e:f:hk:nRsSu:v OPT; do
+    while getopts b:d:e:f:hi:k:nRsSu:v OPT; do
         case "$OPT" in
             b) SOURCEFS='$OPTARG';;
             d) DESTINATIONFS='$OPTARG';;
