@@ -35,7 +35,7 @@ LINKS:
   bug tracking:     https://github.com/zfsnap/zfsnap/issues
 
 EOF
-    #Exit 0
+    Exit 0
 }
 
 # main loop; get options, perform backup of filesystem(s)
