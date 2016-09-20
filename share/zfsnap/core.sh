@@ -274,7 +274,7 @@ LatestSnap(){
 	local snaps=("$@")
 	
 	local latest_snap=$(echo "$snaps" | grep $(echo ${snaps[*]} | tr " " "\n" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
-	if VaildSnapshotName $latest_snap; then
+	if ValidSnapshotName $latest_snap; then
 		RETVAL=$latest_snap
 	else
 		Fatal "The latest snapshot name returned by this function, $latest_snap, was not a vaild snapshot name. You may have provided a list of invaild snapshot names."
