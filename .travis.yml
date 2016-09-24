@@ -1,0 +1,28 @@
+language: bash
+
+addons:
+  apt:
+    sources:
+      - debian-sid
+    packages:
+      - shellcheck
+
+cache:
+  directories:
+    - /home/travis/.stack
+
+before_install:
+
+install:
+    - test -f tests/lint.sh
+    - test -f tests/run.sh
+
+before_script:
+
+script:
+   - tests/lint.sh
+   - cd tests && ./run.sh
+
+after_script:
+
+sudo: false
