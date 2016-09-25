@@ -212,12 +212,12 @@ FindCommonSnapshot() {
 	if [[ -n "${local_snaps[*]}" && -n "${remote_snaps[*]}" ]]; then
 		#find common snapshot on remote and local servers
 		#this sometimes chops off after the second latest common snapshot, does not break things
-		local common_snaps=$(echo -e "${remote_snaps[*]}" "\n" "${local_snaps[*]}" | sort | uniq -d)
+		local common_snaps=$(printf "${remote_snaps[*]}\n${local_snaps[*]}\n" | sort | uniq -d)
 		#the below would work better than the above but does not work in the sh shell
-		#local common_snaps=$(comm -12 <(echo -e "${local_snaps[*]}"| sort) <(echo -e "${remote_snaps[*]}"| sort))
+		#local common_snaps=$(comm -12 <(printf "${local_snaps[*]}\n"| sort) <(printf "${remote_snaps[*]}\n"| sort))
 		if [[ -n $common_snaps ]]; then
 			#sort snapshots from previous command by date and add latest common snap to common_snap variable
-			local common_snap=$(echo "${common_snaps[*]}" | grep $(echo "${common_snaps[*]}" | cut -d "-" -f4-6 | sort | bin/tail -n 1))
+			local common_snap=$(printf "${common_snaps[*]}\n" | grep $(printf "${common_snaps[*]}\n" | cut -d "-" -f4-6 | sort | bin/tail -n 1))
 			
 			RETVAL=$common_snap
 		else
@@ -271,9 +271,9 @@ IsSnapshot() {
 
 #Find most recent zfsnap snapshot in list of snapshots
 LatestSnap() {
-	local snaps="$@"
+	local sourcefs="$1"
 	
-	local latest_snap=$(zfs list -d 1 -t snapshot -S creation -H)
+	local latest_snap=$($ZFS_CMD list -d 1 -t snapshot -S creation -H $sourcefs | tail -n 1 | cut -d@ -f2)
 	
 	RETVAL=$latest_snap
 }
@@ -283,7 +283,7 @@ ListLocalSnapshots() {
 	#specify location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
 	local snapshot_location=$1
 	
-	local local_snaps=$(zfs list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | awk '{print $1}' | awk -F @ '{print $2}')
+	local local_snaps=$($ZFS_CMD list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | awk '{print $1}' | awk -F @ '{print $2}')
 	
 	if [ -s /tmp/zfs_list_err ]; then
 		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
@@ -308,7 +308,7 @@ ListRemoteSnapshots() {
 	
 	#if we want to delete zero byte snapshots to avoid unessary snapshot sprawl before creating our list of remote snapshots we need to make a function to do so
 	
-	local remote_snaps=$(ssh -i $ssh_key $user@$remote_server "zfs list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | awk '{print $1}' | awk -F @ '{print $2}')
+	local remote_snaps=$(ssh -i $ssh_key $user@$remote_server "$ZFS_CMD list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | awk '{print $1}' | awk -F @ '{print $2}')
 	
 	if [ -s /tmp/zfs_list_err ]; then
 		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
@@ -420,8 +420,8 @@ SendSnapshots() {
 	
 	#this sends the incrementals of all snapshots created since the last snapshot send to the backup server
 	#ouput of the zfs send and zfs receive commands is saved in temporary txt files to be sent to user
-	ssh -i $ssh_key $user@$remote_server zfs send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
-	| zfs receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
+	ssh -i $ssh_key $user@$remote_server $ZFS_CMD send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
+	| $ZFS_CMD receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
 		
 	#save the exit status of the two sides of pipe in variables and add them for a exit status total
 	local pipe1=${PIPESTATUS[0]} pipe2=${PIPESTATUS[1]} 
@@ -430,7 +430,7 @@ SendSnapshots() {
 	#tests if zfs send worked successfully, if not return error with exit statuses
 	if [ $total_err -eq 0 ]; then			
 		
-		#echo "ZFS send backup SUCCEEDED"'!' "ZFS send backup SUCCEEDED! \n \n Send output:\n $( cat /tmp/zfs_send_tmp.txt) \n\n\n Receive output:\n $(cat /tmp/zfs_receive_tmp.txt)"
+		#printf "ZFS send backup SUCCEEDED"'!' "ZFS send backup SUCCEEDED! \n \n Send output:\n $( cat /tmp/zfs_send_tmp.txt) \n\n\n Receive output:\n $(cat /tmp/zfs_receive_tmp.txt)"
 		
 		rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt
 		return 0
