@@ -4,7 +4,6 @@
 # See the AUTHORS and LICENSE files for more information.
 
 SSH_KEY=~/.ssh/id_rsa
-#EMAIL=none@none
 user=$USER
 LOCAL='false'
 FULL='false'
@@ -21,7 +20,6 @@ ${0##*/} destroy [ options ] zpool/filesystem ...
 OPTIONS:
   -b           = source (to be backed up) zfs pool and filesystem, pool_name/filesystem_name
   -d           = destination (to store backup) zfs pool and filesystem, pool_name/filesystem_name
-  #-e		   = email address to send notification to
   #-f 		   = enable sendin full backup rather than incremental
   -h           = Print this help and exit
   -i		   = remote zfs systems IP address or DNS name
