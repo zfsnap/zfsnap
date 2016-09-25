@@ -205,8 +205,8 @@ GreaterDate() {
 
 #Find common snapshot from two lists of snapshot names
 FindCommonSnapshot() {
-	local local_snaps=$1
-	local remote_snaps=$2
+	local local_snaps="$1"
+	local remote_snaps="$2"
 	
 	#test to see if snapshot names were provided
 	if [[ -n "${local_snaps[*]}" && -n "${remote_snaps[*]}" ]]; then
@@ -271,7 +271,7 @@ IsSnapshot() {
 
 #Find most recent zfsnap snapshot in list of snapshots
 LatestSnap() {
-	local snaps=("$@")
+	local snaps="$@"
 	
 	local latest_snap=$(echo "${snaps[*]}" | tr " " "\n" | grep $(echo ${snaps[*]} | tr " " "\n" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
 	
