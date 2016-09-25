@@ -4,7 +4,6 @@
 # See the AUTHORS and LICENSE files for more information.
 
 SSH_KEY=~/.ssh/id_rsa
-user=$USER
 LOCAL='false'
 FULL='false'
 REVERSE='false'
@@ -20,7 +19,7 @@ ${0##*/} destroy [ options ] zpool/filesystem ...
 OPTIONS:
   -b           = source (to be backed up) zfs pool and filesystem, pool_name/filesystem_name
   -d           = destination (to store backup) zfs pool and filesystem, pool_name/filesystem_name
-  #-f 		   = enable sendin full backup rather than incremental
+  #-f 		   = enable sending full backup rather than incremental
   -h           = Print this help and exit
   -i		   = remote zfs systems IP address or DNS name
   #-l		   = indicates this will be a backup to a local zfs file system and ssh is not needed
@@ -46,19 +45,18 @@ while [ -n "$1" ]; do
     OPTIND=1
     while getopts b:d:hi:k:nRsSu:v OPT; do
         case "$OPT" in
-            b) SOURCEFS=$OPTARG;;
-            d) DESTINATIONFS=$OPTARG;;
-            #e) EMAIL=$OPTARG;;#could possibly have utility email results of backup upon completion, would require user to already have setup mail
+            b) SOURCEFS="$OPTARG";;
+            d) DESTINATIONFS="$OPTARG";;
             #f) FULL='TRUE';;#this flag can be used to perform a full backup when full backup option is implemented
             h) Help;;
-			i) REMOTE=$OPTARG;;#remote system ip or dns address
-            k) SSH_KEY=$OPTARG;;#ssh key to access remote system
+            i) REMOTE="$OPTARG";;#remote system ip or dns address
+            k) SSH_KEY="$OPTARG";;#ssh key to access remote system
 			#l) LOCAL='true';;#enables backing up to a local filesystem
             n) DRY_RUN='true';;
             R) REVERSE='true';;
             s) PopulateSkipPools 'resilver';;
             S) PopulateSkipPools 'scrub';;
-			u) user=$OPTARG;;
+            u) USER="$OPTARG";;
             v) VERBOSE='true';;
 
             :) Fatal "Option -${OPTARG} requires an argument.";;
@@ -70,8 +68,8 @@ while [ -n "$1" ]; do
     shift $(($OPTIND - 1))
 	
 	#test to see if SSH_KEY specified exists as long as this is not a local backup
-	if ! $LOCAL; then
-		if [ ! -r $SSH_KEY ]; then
+	if ISFalse "$LOCAL"; then
+		if [ ! -r "$SSH_KEY" ]; then
 			Fatal "ssh key: $SSH_KEY does not exist or cannot be read!"
 		fi
 	fi
@@ -79,15 +77,15 @@ while [ -n "$1" ]; do
 	#test to see if pool/filesytem provided is vaild
 	#can currently only be performed for the local filesystem
 	#would be much simpler if only supported running this command on backup system
-	if $REVERSE; then
+	if ISTrue "$REVERSE"; then
 		#can only check sourcefs as it is the fs expected on the local machine
 		FSExists "$SOURCEFS" || Fatal "Source file system: $SOURCEFS does not exist!"
 		
 		#create list of local snapshots
-		ListLocalSnapshots $SOURCEFS && SOURCESNAPS=$RETVAL
+		ListLocalSnapshots "$SOURCEFS" && SOURCESNAPS=$RETVAL
 		
 		#create list of remote snapshots
-		ListRemoteSnapshots $SSH_KEY $user $REMOTE $DESTINATIONFS && DESTINATIONSNAPS=$RETVAL
+		ListRemoteSnapshots "$SSH_KEY" "$USER" "$REMOTE" "$DESTINATIONFS" && DESTINATIONSNAPS=$RETVAL
 		
 		#find common snapshot
 		FindCommonSnapshot "${SOURCESNAPS[*]}" "${DESTINATIONSNAPS[*]}" && COMMONSNAP=$RETVAL
@@ -97,10 +95,10 @@ while [ -n "$1" ]; do
 		FSExists "$DESTINATIONFS" || Fatal "Destination file system: $DESTINATIONFS does not exist!"
 		
 		#create list of local snapshots
-		ListLocalSnapshots $DESTINATIONFS && DESTINATIONSNAPS=$RETVAL
+		ListLocalSnapshots "$DESTINATIONFS" && DESTINATIONSNAPS=$RETVAL
 		
 		#create list of remote snapshots
-		ListRemoteSnapshots $SSH_KEY $user $REMOTE $SOURCEFS && SOURCESNAPS=$RETVAL
+		ListRemoteSnapshots "$SSH_KEY" "$USER" "$REMOTE" "$SOURCEFS" && SOURCESNAPS=$RETVAL
 		
 		#find common snapshot
 		FindCommonSnapshot "${DESTINATIONSNAPS[*]}" "${SOURCESNAPS[*]}" && COMMONSNAP=$RETVAL
@@ -110,7 +108,7 @@ while [ -n "$1" ]; do
 	
 	if [ -n $COMMONSNAP ]; then
 		#find latest source snapshot
-		LatestSnap $SOURCESNAPS && LATESTSNAP=$RETVAL
+		LatestSnap "$SOURCESNAPS" && LATESTSNAP=$RETVAL
 		
 		if [ "$LATESTSNAP" = "$COMMONSNAP" ]; then
 			Fatal "No backup required, latest snap $LATESTSNAP, on source and the common snap, $COMMONSNAP, on the destination are the same"
