@@ -204,7 +204,7 @@ GreaterDate() {
 }
 
 #Find common snapshot from two lists of snapshot names
-FindCommonSnapshot(){
+FindCommonSnapshot() {
 	local local_snaps=$1
 	local remote_snaps=$2
 	
@@ -270,7 +270,7 @@ IsSnapshot() {
 }
 
 #Find most recent zfsnap snapshot in list of snapshots
-LatestSnap(){
+LatestSnap() {
 	local snaps=("$@")
 	
 	local latest_snap=$(echo "${snaps[*]}" | tr " " "\n" | grep $(echo ${snaps[*]} | tr " " "\n" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
@@ -279,7 +279,7 @@ LatestSnap(){
 }
 
 #Creates a list of snapshots on a local zfs system
-ListLocalSnapshots(){
+ListLocalSnapshots() {
 	#specify location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
 	local snapshot_location=$1
 	
@@ -296,7 +296,7 @@ ListLocalSnapshots(){
 }
 
 #Creates a list of snapshots on a remote zfs system
-ListRemoteSnapshots(){
+ListRemoteSnapshots() {
 	#location of ssh key to used for authentication
 	local ssh_key=$1
 	#user to authenticate as
@@ -402,7 +402,7 @@ RmZfsSnapshot() {
     fi
 }
 
-SendSnapshots(){
+SendSnapshots() {
 	#location of ssh key to used for authentication
 	local ssh_key=$1
 	#user to authenticate as
