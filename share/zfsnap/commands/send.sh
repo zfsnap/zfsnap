@@ -14,7 +14,7 @@ Help() {
 ${0##*/} v${VERSION}
 
 Syntax:
-${0##*/} destroy [ options ] zpool/filesystem ...
+${0##*/} send [ options ] ...
 
 OPTIONS:
   -b           = source (to be backed up) zfs pool and filesystem, pool_name/filesystem_name
