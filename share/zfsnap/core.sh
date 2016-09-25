@@ -217,7 +217,7 @@ FindCommonSnapshot() {
 		#local common_snaps=$(comm -12 <(echo -e "${local_snaps[*]}"| sort) <(echo -e "${remote_snaps[*]}"| sort))
 		if [[ -n $common_snaps ]]; then
 			#sort snapshots from previous command by date and add latest common snap to common_snap variable
-			local common_snap=$(echo "${common_snaps[*]}" | grep $(echo "${common_snaps[*]}" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1))
+			local common_snap=$(echo "${common_snaps[*]}" | grep $(echo "${common_snaps[*]}" | cut -d "-" -f4-6 | sort | bin/tail -n 1))
 			
 			RETVAL=$common_snap
 		else
@@ -273,7 +273,7 @@ IsSnapshot() {
 LatestSnap() {
 	local snaps="$@"
 	
-	local latest_snap=$(echo "${snaps[*]}" | tr " " "\n" | grep $(echo ${snaps[*]} | tr " " "\n" | /bin/cut -d "-" -f4-6 | /bin/sort | /usr/bin/tail -n 1) | /usr/bin/tail -n 1 )
+	local latest_snap=$(zfs list -d 1 -t snapshot -S creation -H)
 	
 	RETVAL=$latest_snap
 }
@@ -283,12 +283,12 @@ ListLocalSnapshots() {
 	#specify location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
 	local snapshot_location=$1
 	
-	local local_snaps=$(/sbin/zfs list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | /bin/awk '{print $1}' | /bin/awk -F @ '{print $2}')
+	local local_snaps=$(zfs list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | awk '{print $1}' | awk -F @ '{print $2}')
 	
 	if [ -s /tmp/zfs_list_err ]; then
 		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
 		"Error recieved: " \
-		"$(/bin/cat /tmp/zfs_list_err)" \
+		"$(cat /tmp/zfs_list_err)" \
 		"$(rm -f /tmp/zfs_list_err 2> /dev/null)"
 	else
 		RETVAL=$local_snaps
@@ -308,12 +308,12 @@ ListRemoteSnapshots() {
 	
 	#if we want to delete zero byte snapshots to avoid unessary snapshot sprawl before creating our list of remote snapshots we need to make a function to do so
 	
-	local remote_snaps=$(/bin/ssh -i $ssh_key $user@$remote_server "/sbin/zfs list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | /bin/awk '{print $1}' | /bin/awk -F @ '{print $2}')
+	local remote_snaps=$(ssh -i $ssh_key $user@$remote_server "zfs list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | awk '{print $1}' | awk -F @ '{print $2}')
 	
 	if [ -s /tmp/zfs_list_err ]; then
 		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
 		"Error recieved: " \
-		"$(/bin/cat /tmp/zfs_list_err)" \
+		"$(cat /tmp/zfs_list_err)" \
 		"$(rm -f /tmp/zfs_list_err 2>  /dev/null)"
 	else
 		RETVAL=$remote_snaps
@@ -420,8 +420,8 @@ SendSnapshots() {
 	
 	#this sends the incrementals of all snapshots created since the last snapshot send to the backup server
 	#ouput of the zfs send and zfs receive commands is saved in temporary txt files to be sent to user
-	/bin/ssh -i $ssh_key $user@$remote_server /sbin/zfs send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
-	| /sbin/zfs receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
+	ssh -i $ssh_key $user@$remote_server zfs send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
+	| zfs receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
 		
 	#save the exit status of the two sides of pipe in variables and add them for a exit status total
 	local pipe1=${PIPESTATUS[0]} pipe2=${PIPESTATUS[1]} 
@@ -432,17 +432,17 @@ SendSnapshots() {
 		
 		#echo "ZFS send backup SUCCEEDED"'!' "ZFS send backup SUCCEEDED! \n \n Send output:\n $( cat /tmp/zfs_send_tmp.txt) \n\n\n Receive output:\n $(cat /tmp/zfs_receive_tmp.txt)"
 		
-		/bin/rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt
+		rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt
 		return 0
 	else
 		Fatal "ZFS send backup FAILED! ZFS send backup FAILED! Error: " \
 		"ssh exit code: $pipe1 " \
 		"zfs receive: $pipe2 " \
 		"Send output: " \
-		"$(/bin/cat /tmp/zfs_send_tmp.txt) " \
+		"$(cat /tmp/zfs_send_tmp.txt) " \
 		"Receive output: " \
-		"$(/bin/cat /tmp/zfs_receive_tmp.txt)"\
-		"$(/bin/rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt)"
+		"$(cat /tmp/zfs_receive_tmp.txt)"\
+		"$(rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt)"
 	fi
 }
 
