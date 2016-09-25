@@ -205,30 +205,30 @@ GreaterDate() {
 
 #Find common snapshot from two lists of snapshot names
 FindCommonSnapshot() {
-	local local_snaps="$1"
-	local remote_snaps="$2"
-	
-	#test to see if snapshot names were provided
-	if [[ -n "${local_snaps[*]}" && -n "${remote_snaps[*]}" ]]; then
-		#find common snapshot on remote and local servers
-		#this sometimes chops off after the second latest common snapshot, does not break things
-		local common_snaps=$(printf "${remote_snaps[*]}\n${local_snaps[*]}\n" | sort | uniq -d)
-		#the below would work better than the above but does not work in the sh shell
-		#local common_snaps=$(comm -12 <(printf "${local_snaps[*]}\n"| sort) <(printf "${remote_snaps[*]}\n"| sort))
-		if [[ -n $common_snaps ]]; then
-			#sort snapshots from previous command by date and add latest common snap to common_snap variable
-			local common_snap=$(printf "${common_snaps[*]}\n" | grep $(printf "${common_snaps[*]}\n" | cut -d "-" -f4-6 | sort | bin/tail -n 1))
-			
-			RETVAL=$common_snap
-		else
-			Fatal "Failed to find common snapshot. This is bad as it means an incremental backup cannot be performed." \
-			"Please transfer a new full snapshot."
-		fi
-	else
-		Fatal "Failed to find common snapshot because the list of common local snapshots or remote snapshots was empty." \
-		"Local snapshots: \n" "${local_snaps[@]}" \
-		"Remote snapshots: \n" "${remote_snaps[@]}"
-	fi
+    local local_snaps="$1"
+    local remote_snaps="$2"
+    
+    #test to see if snapshot names were provided
+    if [[ -n "${local_snaps[*]}" && -n "${remote_snaps[*]}" ]]; then
+        #find common snapshot on remote and local servers
+        #this sometimes chops off after the second latest common snapshot, does not break things
+        local common_snaps=$(printf "${remote_snaps[*]}\n${local_snaps[*]}\n" | sort | uniq -d)
+        #the below would work better than the above but does not work in the sh shell
+        #local common_snaps=$(comm -12 <(printf "${local_snaps[*]}\n"| sort) <(printf "${remote_snaps[*]}\n"| sort))
+        if [[ -n $common_snaps ]]; then
+            #sort snapshots from previous command by date and add latest common snap to common_snap variable
+            local common_snap=$(printf "${common_snaps[*]}\n" | grep $(printf "${common_snaps[*]}\n" | cut -d "-" -f4-6 | sort | bin/tail -n 1))
+            
+            RETVAL=$common_snap
+        else
+            Fatal "Failed to find common snapshot. This is bad as it means an incremental backup cannot be performed." \
+            "Please transfer a new full snapshot."
+        fi
+    else
+        Fatal "Failed to find common snapshot because the list of common local snapshots or remote snapshots was empty." \
+        "Local snapshots: \n" "${local_snaps[@]}" \
+        "Remote snapshots: \n" "${remote_snaps[@]}"
+    fi
 }
 
 # Returns 0 if filesystem exists
@@ -271,53 +271,53 @@ IsSnapshot() {
 
 #Find most recent zfsnap snapshot in list of snapshots
 LatestSnap() {
-	local sourcefs="$1"
-	
-	local latest_snap=$($ZFS_CMD list -d 1 -t snapshot -S creation -H $sourcefs | tail -n 1 | cut -d@ -f2)
-	
-	RETVAL=$latest_snap
+    local sourcefs="$1"
+    
+    local latest_snap=$($ZFS_CMD list -d 1 -t snapshot -S creation -H $sourcefs | tail -n 1 | cut -d@ -f2)
+    
+    RETVAL=$latest_snap
 }
 
 #Creates a list of snapshots on a local zfs system
 ListLocalSnapshots() {
-	#specify location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
-	local snapshot_location=$1
-	
-	local local_snaps=$($ZFS_CMD list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | awk '{print $1}' | awk -F @ '{print $2}')
-	
-	if [ -s /tmp/zfs_list_err ]; then
-		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
-		"Error recieved: " \
-		"$(cat /tmp/zfs_list_err)" \
-		"$(rm -f /tmp/zfs_list_err 2> /dev/null)"
-	else
-		RETVAL=$local_snaps
-	fi
+    #specify location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
+    local snapshot_location=$1
+    
+    local local_snaps=$($ZFS_CMD list -Hr -t snap $snapshot_location 2> /tmp/zfs_list_err | awk '{print $1}' | awk -F @ '{print $2}')
+    
+    if [ -s /tmp/zfs_list_err ]; then
+        Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
+        "Error recieved: " \
+        "$(cat /tmp/zfs_list_err)" \
+        "$(rm -f /tmp/zfs_list_err 2> /dev/null)"
+    else
+        RETVAL=$local_snaps
+    fi
 }
 
 #Creates a list of snapshots on a remote zfs system
 ListRemoteSnapshots() {
-	#location of ssh key to used for authentication
-	local ssh_key=$1
-	#user to authenticate as
-	local user=$2
-	#ip or dns of remote server
-	local remote_server=$3
-	#location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
-	local snapshot_location=$4
-	
-	#if we want to delete zero byte snapshots to avoid unessary snapshot sprawl before creating our list of remote snapshots we need to make a function to do so
-	
-	local remote_snaps=$(ssh -i $ssh_key $user@$remote_server "$ZFS_CMD list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | awk '{print $1}' | awk -F @ '{print $2}')
-	
-	if [ -s /tmp/zfs_list_err ]; then
-		Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
-		"Error recieved: " \
-		"$(cat /tmp/zfs_list_err)" \
-		"$(rm -f /tmp/zfs_list_err 2>  /dev/null)"
-	else
-		RETVAL=$remote_snaps
-	fi
+    #location of ssh key to used for authentication
+    local ssh_key=$1
+    #user to authenticate as
+    local user=$2
+    #ip or dns of remote server
+    local remote_server=$3
+    #location of snapshots in format of "zfs_pool_name/zfs_filesystem_name"
+    local snapshot_location=$4
+    
+    #if we want to delete zero byte snapshots to avoid unessary snapshot sprawl before creating our list of remote snapshots we need to make a function to do so
+    
+    local remote_snaps=$(ssh -i $ssh_key $user@$remote_server "$ZFS_CMD list -Hr -t snap $snapshot_location " 2> /tmp/ssh_list_err | awk '{print $1}' | awk -F @ '{print $2}')
+    
+    if [ -s /tmp/zfs_list_err ]; then
+        Fatal "Recieved error from zfs list, perhaps $snapshot_location does not exist" \
+        "Error recieved: " \
+        "$(cat /tmp/zfs_list_err)" \
+        "$(rm -f /tmp/zfs_list_err 2>  /dev/null)"
+    else
+        RETVAL=$remote_snaps
+    fi
 }
 
 # Divide one integer by another
@@ -403,47 +403,47 @@ RmZfsSnapshot() {
 }
 
 SendSnapshots() {
-	#location of ssh key to used for authentication
-	local ssh_key=$1
-	#user to authenticate as
-	local user=$2
-	#ip or dns of remote server
-	local remote_server=$3
-	#remote filesystem in format of "zfs_pool_name/zfs_filesystem_name"
-	local remote_fs=$4
-	#local filesystem in format of "zfs_pool_name/zfs_filesystem_name"
-	local local_fs=$5
-	#common snapshot"
-	local common_snap=$6
-	#latest snapshot"
-	local latest_snap=$7
-	
-	#this sends the incrementals of all snapshots created since the last snapshot send to the backup server
-	#ouput of the zfs send and zfs receive commands is saved in temporary txt files to be sent to user
-	ssh -i $ssh_key $user@$remote_server $ZFS_CMD send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
-	| $ZFS_CMD receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
-		
-	#save the exit status of the two sides of pipe in variables and add them for a exit status total
-	local pipe1=${PIPESTATUS[0]} pipe2=${PIPESTATUS[1]} 
-	local total_err=$(($pipe1+$pipe2))
-		
-	#tests if zfs send worked successfully, if not return error with exit statuses
-	if [ $total_err -eq 0 ]; then			
-		
-		#printf "ZFS send backup SUCCEEDED"'!' "ZFS send backup SUCCEEDED! \n \n Send output:\n $( cat /tmp/zfs_send_tmp.txt) \n\n\n Receive output:\n $(cat /tmp/zfs_receive_tmp.txt)"
-		
-		rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt
-		return 0
-	else
-		Fatal "ZFS send backup FAILED! ZFS send backup FAILED! Error: " \
-		"ssh exit code: $pipe1 " \
-		"zfs receive: $pipe2 " \
-		"Send output: " \
-		"$(cat /tmp/zfs_send_tmp.txt) " \
-		"Receive output: " \
-		"$(cat /tmp/zfs_receive_tmp.txt)"\
-		"$(rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt)"
-	fi
+    #location of ssh key to used for authentication
+    local ssh_key=$1
+    #user to authenticate as
+    local user=$2
+    #ip or dns of remote server
+    local remote_server=$3
+    #remote filesystem in format of "zfs_pool_name/zfs_filesystem_name"
+    local remote_fs=$4
+    #local filesystem in format of "zfs_pool_name/zfs_filesystem_name"
+    local local_fs=$5
+    #common snapshot"
+    local common_snap=$6
+    #latest snapshot"
+    local latest_snap=$7
+    
+    #this sends the incrementals of all snapshots created since the last snapshot send to the backup server
+    #ouput of the zfs send and zfs receive commands is saved in temporary txt files to be sent to user
+    ssh -i $ssh_key $user@$remote_server $ZFS_CMD send -vI $remote_fs@$common_snap $remote_fs@$latest_snap 2> /tmp/zfs_send_tmp.txt\
+    | $ZFS_CMD receive -vF $local_fs &> /tmp/zfs_receive_tmp.txt
+        
+    #save the exit status of the two sides of pipe in variables and add them for a exit status total
+    local pipe1=${PIPESTATUS[0]} pipe2=${PIPESTATUS[1]} 
+    local total_err=$(($pipe1+$pipe2))
+        
+    #tests if zfs send worked successfully, if not return error with exit statuses
+    if [ $total_err -eq 0 ]; then            
+        
+        #printf "ZFS send backup SUCCEEDED"'!' "ZFS send backup SUCCEEDED! \n \n Send output:\n $( cat /tmp/zfs_send_tmp.txt) \n\n\n Receive output:\n $(cat /tmp/zfs_receive_tmp.txt)"
+        
+        rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt
+        return 0
+    else
+        Fatal "ZFS send backup FAILED! ZFS send backup FAILED! Error: " \
+        "ssh exit code: $pipe1 " \
+        "zfs receive: $pipe2 " \
+        "Send output: " \
+        "$(cat /tmp/zfs_send_tmp.txt) " \
+        "Receive output: " \
+        "$(cat /tmp/zfs_receive_tmp.txt)"\
+        "$(rm -f /tmp/zfs_receive_tmp.txt /tmp/zfs_send_tmp.txt)"
+    fi
 }
 
 # Returns 1 if ZFS operations on given pool should be skipped.
