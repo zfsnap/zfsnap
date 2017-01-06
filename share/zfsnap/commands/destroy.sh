@@ -71,7 +71,7 @@ while [ -n "$1" ]; do
     done
 
     # discard all arguments processed thus far
-    shift $(($OPTIND - 1))
+    shift $((OPTIND - 1))
 
     # operate on pool/fs supplied
     if [ -n "$1" ]; then

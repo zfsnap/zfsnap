@@ -49,7 +49,7 @@ done
 [ -z "$NEW_SHEBANG" ] && printf "You must specify a new shebang with the -s option.\n" && exit 1
 
 # discard all arguments processed thus far
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
 while [ "$1" ]; do
     ORIG_FILE=`cat "$1"`

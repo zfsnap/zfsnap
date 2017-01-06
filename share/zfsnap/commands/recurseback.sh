@@ -61,7 +61,7 @@ while [ -n "$1" ]; do
     done
 
     # discard all arguments processed thus far
-    shift $(($OPTIND - 1))
+    shift $((OPTIND - 1))
 
     # rollback
     if [ -n "$1" ]; then
