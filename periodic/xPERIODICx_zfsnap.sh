@@ -31,6 +31,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
             [Yy][Ee][Ss]) OPTIONS="$OPTIONS -p ${xPERIODICx_zfsnap_prefix:-"xPERIODICx-"}" ;;
         esac
 
+        # shellcheck disable=SC2194
         case 'xPERIODICx' in
             'hourly')
                 default_ttl='3d'

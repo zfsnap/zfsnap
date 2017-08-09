@@ -81,7 +81,7 @@ while [ -n "$1" ]; do
             # print estimate of data to be freed
             BYTES_FREE=0
             for FREE in `$ZFS_CMD list -Hp $DEPTH -o written@${SNAPSHOT_NAME} -r ${FS_NAME}`; do
-                IsInt "$FREE" && BYTES_FREE=$(($BYTES_FREE + $FREE))
+                IsInt "$FREE" && BYTES_FREE=$((BYTES_FREE + FREE))
             done
 
             BytesToHuman "$BYTES_FREE" && HUMAN_UNITS=$RETVAL
