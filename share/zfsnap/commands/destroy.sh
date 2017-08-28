@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
@@ -93,7 +93,13 @@ while [ -n "$1" ]; do
                 if IsTrue "$FORCE_DELETE_BY_AGE"; then
                     DatePlusTTL "$CREATE_DATE" "$FORCE_AGE_TTL" && EXPIRATION_DATE=$RETVAL || continue
                 else
-                    TrimToTTL "$SNAPSHOT_NAME" && TTL=$RETVAL || continue
+					if GetZfsPropTTL "$SNAPSHOT"; then
+						TTL=$RETVAL 
+					elif  TrimToTTL "$SNAPSHOT_NAME"; then
+					        TTL=$RETVAL
+					else
+                                            continue
+					fi 
                     [ "$TTL" = 'forever' ] && continue
                     DatePlusTTL "$CREATE_DATE" "$TTL" && EXPIRATION_DATE=$RETVAL || continue
                 fi
