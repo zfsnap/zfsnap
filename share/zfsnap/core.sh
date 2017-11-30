@@ -438,7 +438,7 @@ ValidDate() {
 ValidPrefix() {
     local snapshot_prefix="$1"
 
-    [ -z "$PREFIXES" ] && [ -z "$snapshot_prefix" ] && return 0
+    [ -z "$PREFIXES" ] && return 0
 
     local i
     for i in $PREFIXES; do
