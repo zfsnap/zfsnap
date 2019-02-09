@@ -9,6 +9,7 @@ FORCE_DELETE_BY_AGE='false'         # Ignore TTL expiration and delete if older 
 FORCE_AGE_TTL=''                    # Used to store "age" TTL if FORCE_DELETE_BY_AGE is set.
 RECURSIVE='false'
 PREFIXES=''                         # List of prefixes
+PREFIX_FILTER='true'
 
 # FUNCTIONS
 Help() {
@@ -58,7 +59,7 @@ while [ -n "$1" ]; do
             h) Help;;
             n) DRY_RUN='true';;
             p) PREFIX=$OPTARG; PREFIXES="${PREFIXES:+$PREFIXES }$PREFIX";;
-            P) PREFIX=''; PREFIXES='';;
+            P) PREFIX=''; PREFIXES=''; PREFIX_FILTER='false';;
             r) RECURSIVE='true';;
             R) RECURSIVE='false';;
             s) PopulateSkipPools 'resilver';;
