@@ -15,4 +15,4 @@ jobs:
     - name: Prepare ZFS environment
       run: cd tests && sudo sh prepare.sh
     - name: Run tests
-      run: cd tests && sudo sh ./run.sh
+      run: cd tests && sudo env RUN_TESTS="unit integration system" sh ./run.sh

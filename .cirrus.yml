@@ -11,4 +11,4 @@ Tests_task:
   prepare_script:
   - cd tests && sh prepare.sh
   test_script:
-  - cd tests && sh run.sh
+  - cd tests && env RUN_TESTS="unit integration system" sh ./run.sh

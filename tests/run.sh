@@ -3,8 +3,9 @@
 # See the AUTHORS and LICENSE files for more information.
 
 EXIT_WITH_ERROR=0
+RUN_TESTS=${RUN_TESTS:-"unit integration"}
 
-for i in unit integration system; do
+for i in ${RUN_TESTS}; do
     cd "$i"
     for t in ./* ; do
         "./${t}"
