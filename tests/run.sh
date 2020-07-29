@@ -4,7 +4,7 @@
 
 EXIT_WITH_ERROR=0
 
-for i in unit integration; do
+for i in unit integration system; do
     cd "$i"
     for t in ./* ; do
         "./${t}"

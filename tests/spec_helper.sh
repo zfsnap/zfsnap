@@ -2,6 +2,10 @@
 # See the AUTHORS and LICENSE files for more information.
 
 TEST_MODE='true'
+TEST_POOL=${TEST_POOL:-"tpool"}
+TEST_DATASET=${TEST_DATASET:-"test"}
+TEST_SUBDATASETS="subds1 subds2"
+ZFS=${ZFS:-`which zfs`}
 
 SPEC_FAILED=0
 
@@ -67,4 +71,13 @@ ItEchos () {
 
 ExitTests () {
   exit "$SPEC_FAILED"
+}
+
+VerifySnap () {
+  ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 0
+}
+
+DestroySnap () {
+  ItReturns "$ZFS destroy $1 2> /dev/null" 0
+  ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 1
 }
