@@ -1,0 +1,37 @@
+#!/bin/sh -
+
+. /etc/rc.subr
+
+# checknumber var
+#	Test $1 variable, and warn if not set to unsigned number.
+#	Return 0 if it's not a number, nonzero otherwise.
+
+checknumber() {
+	eval _value=\$${1}
+	debug "checknumber: $1 is set to $_value."
+
+	case $_value in
+	*[!0-9]*)
+		warn "$1 is not set properly."
+		return 0
+		;;
+	*)
+		return 1
+	esac
+}
+
+# checknotempty var
+#	Test $1 variable and warn if it doesn't contain anything.
+#	Return 0 if it has no data, nonzero otherwise.
+
+checknotempty() {
+	eval _value=\$${1}
+	debug "checknotempty: $1 is set to $_value."
+
+	if [ -z "$_value" ]; then
+		warn "$1 is not set properly."
+		return 0
+	else
+		return 1
+	fi
+}
