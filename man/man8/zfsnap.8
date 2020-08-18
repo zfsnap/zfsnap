@@ -21,10 +21,18 @@
 .Nm
 creates and deletes rolling ZFS snapshots \[em] usually with cron.
 .Nm Ap s
-main advantages are its portability and that all information needed for
-snapshot management is kept in the snapshot name itself.
+main advantages are its portability.Original  version store all information needed for
+snapshot management in the snapshot name itself. But this is not very convenient for
+many uses. (Ex.  samba vfs_shadow_copy2)
 .Pp
-zfsnap snapshots are in the format of pool/fs@[prefix]Timestamp\-\-TimeToLive
+ zfsnap snapshots are in the format of pool/fs@[prefix]Timestamp
+ TimeToLive is  stored in zfs property (default zfsnap:ttl).
+ Usual commands zfs get/set to read/modify.
+.Pq e.g. zpool/var@monthly\-2010\-08\-03_02.06.00
+.Pq zfs get zfsnap:ttl zpool/var@monthly\-2010\-08\-03_02.06.00
+.Pq zfs list -t snapshot -o name,zfsnap:ttl
+.Pp
+old zfsnap snapshots are in the format of pool/fs@[prefix]Timestamp\-\-TimeToLive
 .Pq e.g. zpool/var@monthly\-2010\-08\-03_02.06.00\-\-1y .
 .Pp
 The prefix is optional and is quite useful for filtering; Timestamp is the date
@@ -76,6 +84,8 @@ By default,
 .Nm Cm destroy
 will only delete snapshots whose TTLs have expired. However, options
 are provided to override that behavior with more aggressive approaches.
+New version is still compatible with snapshots with ttl stored in snapshot name. 
+If the ttl is both in  name and  zfs property, only the zfs property is considered.
 .Pp
 Only snapshots created by
 .Nm
@@ -164,6 +174,8 @@ for more information.
 Print a summary of
 .Cm snapshot Ap s
 command\[hy]line options and then exit.
+.It Fl L
+Legacy write ttl in  name instead to use new default  zfs property zfsnap:ttl.
 .It Fl n
 Dry\[hy]run. Perform a trial run with no actions actually performed.
 .It Fl p Ar prefix

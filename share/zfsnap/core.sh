@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
@@ -11,6 +11,8 @@
 [ -n "${ZSH_VERSION-}" ] && emulate -R sh
 
 readonly VERSION='2.0.0.beta3'
+# zfs property label
+ZFS_TTL_FIELD='zfsnap:ttl'
 
 # COMMANDS
 ZFS_CMD='/sbin/zfs'
@@ -29,6 +31,7 @@ readonly DATE_PATTERN='[12][90][0-9][0-9]-[01][0-9]-[0-3][0-9]_[0-2][0-9].[0-5][
 TEST_MODE=${TEST_MODE:-false}       # When set to "true", Exit won't really exit
 TIME_FORMAT='%Y-%m-%d_%H.%M.%S'     # date/time format for snapshot creation and comparison
 RETVAL=''                           # used by functions so we can avoid spawning subshells
+TTL_IN_ZFS_PROPERTY='true'
 
 ## HELPER FUNCTIONS
 Err() {
@@ -419,12 +422,26 @@ TrimToSnapshotName() {
 # If no valid TTL is found, it will return 1.
 TrimToTTL() {
     local snapshot="$1"
+    [[ "$snapshot_name" =~ .*--.* ]] || (RETVAL='' && return 1)
     local ttl="${snapshot##*--}"
-
     if ValidTTL "$ttl"; then
         RETVAL=$ttl && return 0
     else
         RETVAL='' && return 1
+    fi
+}
+
+# Read  TTL from  $ZFS_TTL_FIELD property set in zfs snapshot
+# If no valid TTL is found, it will return 1.
+GetZfsPropTTL() {
+    local snapshot="$1"
+    local ttl="$( $ZFS_CMD get ${ZFS_TTL_FIELD} -H -o value  ${snapshot})"
+    if ValidTTL "$ttl"; then
+       TTL_IN_ZFS_PROPERTY='true'
+       RETVAL=$ttl && return 0
+    else
+       TTL_IN_ZFS_PROPERTY='false'
+       RETVAL='' && return 1
     fi
 }
 
@@ -456,17 +473,21 @@ ValidSnapshotName() {
 
     TrimToPrefix "$snapshot_name" && local snapshot_prefix="$RETVAL" || return 1
     TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL" || return 1
-    TrimToTTL "$snapshot_name" && local snapshot_ttl="$RETVAL" || return 1
-
-    local rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
+    local snapshot_ttl=''
+    if [[ "$snapshot_name" =~ .*--.* ]]; then 
+       TrimToTTL "$snapshot_name" && snapshot_ttl="--${RETVAL}" || return 1
+    fi   
+    local rebuilt_name="${snapshot_prefix}${snapshot_date}${snapshot_ttl}"
     [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
 }
 
 # Check validity of TTL
 ValidTTL() {
     local ttl="$1"
-
+    
     [ -z "$ttl" ] && return 1
+    [ "$ttl" = '-' ]  && return 1
+    [ "$ttl" = ' ' ]  && return 1
     [ "$ttl" = 'forever' ] && return 0
 
     while [ -n "$ttl" ]; do
