@@ -84,12 +84,12 @@ BytesToHuman() {
 
     while [ ${#answer} -gt 9 ] || [ ${answer:-0} -ge 1024 ]; do
         LongDivide $answer 1024 && prev_answer=$answer && answer=$RETVAL
-        count=$(( $count + 1 ))
+        count=$(( count + 1 ))
     done
 
     # if 2 digits or fewer, add one decimal of precision
     if [ ${#answer} -le 2 ] && [ -n "$prev_answer" ]; then
-        local remainder=$(( $prev_answer % 1024 ))
+        local remainder=$(( prev_answer % 1024 ))
         answer="${answer}.$(( ${remainder}0 / 1024 ))"
         answer=${answer%.0} # remove .0
     fi
@@ -97,7 +97,7 @@ BytesToHuman() {
     local unit
     for unit in '' K M G T P E Z; do
         [ $count -eq 0 ] && break
-        count=$(( $count - 1 ))
+        count=$(( count - 1 ))
     done
 
     RETVAL="${answer}${unit}" && return 0
@@ -129,26 +129,26 @@ DatePlusTTL() {
 
     while [ -n "$ttl" ]; do
         case "$ttl" in
-            *y*) y=$((${ttl%%y*} + $y)); ttl=${ttl#*y} ;;
-            *m*) m=$((${ttl%%m*} + $m)); ttl=${ttl#*m} ;;
-            *w*) d=$(((${ttl%%w*} * 7) + $d)); ttl=${ttl#*w} ;;
-            *d*) d=$((${ttl%%d*} + $d)); ttl=${ttl#*d} ;;
-            *h*) h=$((${ttl%%h*} + $h)); ttl=${ttl#*h} ;;
-            *M*) M=$((${ttl%%M*} + $M)); ttl=${ttl#*M} ;;
-             *s) s=$((${ttl%%s*} + $s)); ttl=${ttl#*s} ;;
+            *y*) y=$((${ttl%%y*} + y)); ttl=${ttl#*y} ;;
+            *m*) m=$((${ttl%%m*} + m)); ttl=${ttl#*m} ;;
+            *w*) d=$(((${ttl%%w*} * 7) + d)); ttl=${ttl#*w} ;;
+            *d*) d=$((${ttl%%d*} + d)); ttl=${ttl#*d} ;;
+            *h*) h=$((${ttl%%h*} + h)); ttl=${ttl#*h} ;;
+            *M*) M=$((${ttl%%M*} + M)); ttl=${ttl#*M} ;;
+             *s) s=$((${ttl%%s*} + s)); ttl=${ttl#*s} ;;
               *) Warn "Invalid TTL '$ttl' in DatePlusTTL."; RETVAL=''; return 1 ;;
         esac
     done
 
     # roll seconds into minutes into hours into days
-    [ $s -ge 60 ] && M=$(($M + ($s / 60))) && s=$(($s % 60))
-    [ $M -ge 60 ] && h=$(($h + ($M / 60))) && M=$(($M % 60))
-    [ $h -ge 24 ] && d=$(($d + ($h / 24))) && h=$(($h % 24))
+    [ $s -ge 60 ] && M=$((M + (s / 60))) && s=$((s % 60))
+    [ $M -ge 60 ] && h=$((h + (M / 60))) && M=$((M % 60))
+    [ $h -ge 24 ] && d=$((d + (h / 24))) && h=$((h % 24))
 
     # days, months, years
     while true; do
         # roll months into years
-        [ $m -gt 12 ] && y=$(($y + ($m / 12))) && m=$(($m % 12))
+        [ $m -gt 12 ] && y=$((y + (m / 12))) && m=$((m % 12))
         [ $m -eq 0 ] && m=1
 
         # roll days into months
@@ -156,7 +156,7 @@ DatePlusTTL() {
         local m_num=0
         local m_length
         for m_length in $month_lengths; do
-            m_num=$(($m_num + 1))
+            m_num=$((m_num + 1))
 
             # skip if we're not to current month yet
             [ $m -gt $m_num ] && continue
@@ -166,7 +166,7 @@ DatePlusTTL() {
 
             [ $d -le $m_length ] && break 2
 
-            d=$(($d - $m_length)) && m=$(($m + 1))
+            d=$((d - m_length)) && m=$((m + 1))
         done
     done
 
@@ -226,9 +226,9 @@ IsLeapYear() {
     local year="$1"
     IsInt "$year" || return 1
 
-    [ $(($year % 400)) -eq 0 ] && return 0
-    [ $(($year % 100)) -eq 0 ] && return 1
-    [ $(($year % 4)) -eq 0 ] && return 0
+    [ $((year % 400)) -eq 0 ] && return 0
+    [ $((year % 100)) -eq 0 ] && return 1
+    [ $((year % 4)) -eq 0 ] && return 0
 
     return 1
 }
@@ -263,8 +263,8 @@ LongDivide() {
         chunk="${chunk}${first}"
 
         if [ ${chunk:-0} -ge $denom ]; then
-            answer="${answer}$(( $chunk / $denom ))" # append quotient
-            chunk=$(( $chunk % $denom )) # assign remainder
+            answer="${answer}$(( chunk / denom ))" # append quotient
+            chunk=$(( chunk % denom )) # assign remainder
         else
             [ -n "$answer" ] && answer="${answer}0" # don't build leading zeros
         fi
