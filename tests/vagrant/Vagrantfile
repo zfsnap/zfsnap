@@ -4,43 +4,292 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   ### Boxes
-  # Debian Wheezy
+  # Debian Wheezy (7)
   config.vm.define :wheezy do |wheezy_config|
-    wheezy_config.vm.box = "deb/wheezy-amd64"
+    wheezy_config.vm.box = "bento/debian-7"
     wheezy_config.vm.host_name = "wheezy"
+  end
+  # Debian Jessie (8)
+  config.vm.define :jessie do |jessie_config|
+    jessie_config.vm.box = "bento/debian-8"
+    jessie_config.vm.host_name = "jessie"
+  end
+  # Debian stretch (9)
+  config.vm.define :stretch do |stretch_config|
+    stretch_config.vm.box = "bento/debian-9"
+    stretch_config.vm.host_name = "stretch"
+  end
+  # Debian Buster (10)
+  config.vm.define :buster do |buster_config|
+    buster_config.vm.box = "bento/debian-10"
+    buster_config.vm.host_name = "buster"
+  end
+  # Debian Bullseye (11)
+  config.vm.define :bullseye do |bullseye_config|
+    bullseye_config.vm.box = "bento/debian-11"
+    bullseye_config.vm.host_name = "bullseye"
+  end
+  # Debian Bookworm (12)
+  config.vm.define :bookworm do |bookworm_config|
+    bookworm_config.vm.box = "bento/debian-12"
+    bookworm_config.vm.host_name = "bookworm"
+  end
+
+  # Ubuntu 16.04 Xenial Xerus
+  config.vm.define :xenial do |xenial_config|
+    xenial_config.vm.box = "bento/ubuntu-16.04"
+    xenial_config.vm.host_name = "xenial"
+  end
+  # Ubuntu 18.04 Bionic Beaver
+  config.vm.define :bionic do |bionic_config|
+    bionic_config.vm.box = "bento/ubuntu-18.04"
+    bionic_config.vm.host_name = "bionic"
+  end
+  # Ubuntu 20.04 Focal Fossa
+  config.vm.define :focal do |focal_config|
+    focal_config.vm.box = "bento/ubuntu-20.04"
+    focal_config.vm.host_name = "focal"
+  end
+  # Ubuntu 22.04 Jammy Jellyfish
+  config.vm.define :jammy do |jammy_config|
+    jammy_config.vm.box = "bento/ubuntu-22.04"
+    jammy_config.vm.host_name = "jammy"
   end
 
   # Fedora 21
-  config.vm.define :fedora do |fedora_config|
-    fedora_config.vm.box = "chef/fedora-21"
-    fedora_config.vm.host_name = "fedora"
+  config.vm.define :fedora21 do |fedora21_config|
+    fedora21_config.vm.box = "bento/fedora-21"
+    fedora21_config.vm.host_name = "fedora21"
+  end
+  # Fedora 22
+  config.vm.define :fedora22 do |fedora22_config|
+    fedora22_config.vm.box = "bento/fedora-22"
+    fedora22_config.vm.host_name = "fedora22"
+  end
+  # Fedora 23
+  config.vm.define :fedora23 do |fedora23_config|
+    fedora23_config.vm.box = "bento/fedora-23"
+    fedora23_config.vm.host_name = "fedora23"
+  end
+  # Fedora 24
+  config.vm.define :fedora24 do |fedora24_config|
+    fedora24_config.vm.box = "bento/fedora-24"
+    fedora24_config.vm.host_name = "fedora24"
+  end
+  # Fedora 25
+  config.vm.define :fedora25 do |fedora25_config|
+    fedora25_config.vm.box = "bento/fedora-25"
+    fedora25_config.vm.host_name = "fedora25"
+  end
+  # Fedora 26
+  config.vm.define :fedora26 do |fedora26_config|
+    fedora26_config.vm.box = "bento/fedora-26"
+    fedora26_config.vm.host_name = "fedora26"
+  end
+  # Fedora 27
+  config.vm.define :fedora27 do |fedora27_config|
+    fedora27_config.vm.box = "bento/fedora-27"
+    fedora27_config.vm.host_name = "fedora27"
+  end
+  # Fedora 28
+  config.vm.define :fedora28 do |fedora28_config|
+    fedora28_config.vm.box = "bento/fedora-28"
+    fedora28_config.vm.host_name = "fedora28"
+  end
+  # Fedora 29
+  config.vm.define :fedora29 do |fedora29_config|
+    fedora29_config.vm.box = "bento/fedora-29"
+    fedora29_config.vm.host_name = "fedora29"
+  end
+  # Fedora 30
+  config.vm.define :fedora30 do |fedora30_config|
+    fedora30_config.vm.box = "bento/fedora-30"
+    fedora30_config.vm.host_name = "fedora30"
+  end
+  # Fedora 31
+  config.vm.define :fedora31 do |fedora31_config|
+    fedora31_config.vm.box = "bento/fedora-31"
+    fedora31_config.vm.host_name = "fedora31"
+  end
+  # Fedora 32
+  config.vm.define :fedora32 do |fedora32_config|
+    fedora32_config.vm.box = "bento/fedora-32"
+    fedora32_config.vm.host_name = "fedora32"
+  end
+  # Fedora 33
+  config.vm.define :fedora33 do |fedora33_config|
+    fedora33_config.vm.box = "bento/fedora-33"
+    fedora33_config.vm.host_name = "fedora33"
+  end
+  # Fedora 34
+  config.vm.define :fedora34 do |fedora34_config|
+    fedora34_config.vm.box = "bento/fedora-34"
+    fedora34_config.vm.host_name = "fedora34"
+  end
+  # Fedora 35
+  config.vm.define :fedora35 do |fedora35_config|
+    fedora35_config.vm.box = "bento/fedora-35"
+    fedora35_config.vm.host_name = "fedora35"
+  end
+  # Fedora 36
+  config.vm.define :fedora36 do |fedora36_config|
+    fedora36_config.vm.box = "bento/fedora-36"
+    fedora36_config.vm.host_name = "fedora36"
+  end
+  # Fedora 37
+  config.vm.define :fedora37 do |fedora37_config|
+    fedora37_config.vm.box = "bento/fedora-37"
+    fedora37_config.vm.host_name = "fedora37"
+  end
+  # Fedora 38
+  config.vm.define :fedora38 do |fedora38_config|
+    fedora38_config.vm.box = "bento/fedora-38"
+    fedora38_config.vm.host_name = "fedora38"
   end
 
+  # FreeBSD
   # FreeBSD 10
   config.vm.define :freebsd10 do |freebsd10_config|
-    freebsd10_config.vm.box = "chef/freebsd-10.0"
+    freebsd10_config.vm.box = "bento/freebsd-10"
     freebsd10_config.vm.host_name = "freebsd10"
   end
+  # FreeBSD 11
+  config.vm.define :freebsd11 do |freebsd11_config|
+    freebsd11_config.vm.box = "generic/freebsd11"
+    freebsd11_config.vm.host_name = "freebsd11"
+  end
+  # FreeBSD 12
+  config.vm.define :freebsd12 do |freebsd12_config|
+    freebsd12_config.vm.box = "generic/freebsd12"
+    freebsd12_config.vm.host_name = "freebsd12"
+  end
+  # FreeBSD 13
+  config.vm.define :freebsd13 do |freebsd13_config|
+    freebsd13_config.vm.box = "generic/freebsd13"
+    freebsd13_config.vm.host_name = "freebsd13"
+  end
 
+  # OmniOS
   # OmniOS r151012
-  config.vm.define :omnios do |omnios_config|
-    omnios_config.vm.box = "omniti/omnios-r151012"
-    omnios_config.vm.box_url = "http://omnios.omniti.com/media/omnios-r151012.box"
-    omnios_config.vm.host_name = "omnios"
+  config.vm.define :omnios12 do |omnios12_config|
+    omnios12_config.vm.box = "omnios/r151012"
+    omnios12_config.vm.host_name = "omnios12"
+  end
+  # OmniOS r151014
+  config.vm.define :omnios14 do |omnios14_config|
+    omnios14_config.vm.box = "omnios/r151014"
+    omnios14_config.vm.host_name = "omnios14"
+  end
+  # OmniOS r151016
+  config.vm.define :omnios16 do |omnios16_config|
+    omnios16_config.vm.box = "omnios/r151016"
+    omnios16_config.vm.host_name = "omnios16"
+  end
+  # OmniOS r151018
+  config.vm.define :omnios18 do |omnios18_config|
+    omnios18_config.vm.box = "omnios/r151018"
+    omnios18_config.vm.host_name = "omnios18"
+  end
+  # OmniOS r151020
+  config.vm.define :omnios20 do |omnios20_config|
+    omnios20_config.vm.box = "omnios/r151020"
+    omnios20_config.vm.host_name = "omnios20"
   end
 
-  # Solaris 11
+  # Solaris
   # Solaris 10/06 was the first ZFS, but I have yet to find a vagrant box of it
-  config.vm.define :solaris11 do |solaris11_config|
-    solaris11_config.vm.box = "ruby-concurrency/oracle-solaris-11"
-    solaris11_config.vm.host_name = "solaris11"
+  # Solaris 10.5
+  config.vm.define :solaris1005 do |solaris1005_config|
+    solaris1005_config.vm.box = "FEBO/solaris-10.5"
+    solaris1005_config.vm.host_name = "solaris1005"
+  end
+  # Solaris 10.6
+  config.vm.define :solaris1006 do |solaris1006_config|
+    solaris1006_config.vm.box = "FEBO/solaris-10.6"
+    solaris1006_config.vm.host_name = "solaris1006"
+  end
+  # Solaris 10.7
+  config.vm.define :solaris1007 do |solaris1007_config|
+    solaris1007_config.vm.box = "FEBO/solaris-10.7"
+    solaris1007_config.vm.host_name = "solaris1007"
+  end
+  # Solaris 10.8
+  config.vm.define :solaris1008 do |solaris1008_config|
+    solaris1008_config.vm.box = "FEBO/solaris-10.8"
+    solaris1008_config.vm.host_name = "solaris1008"
+  end
+  # Solaris 10.9
+  config.vm.define :solaris1009 do |solaris1009_config|
+    solaris1009_config.vm.box = "FEBO/solaris-10.9"
+    solaris1009_config.vm.host_name = "solaris1009"
+  end
+  # Solaris 10.10
+  config.vm.define :solaris1010 do |solaris1010_config|
+    solaris1010_config.vm.box = "FEBO/solaris-10.10"
+    solaris1010_config.vm.host_name = "solaris1010"
+  end
+  # Solaris 10.11
+  config.vm.define :solaris1011 do |solaris1011_config|
+    solaris1011_config.vm.box = "FEBO/solaris-10.11"
+    solaris1011_config.vm.host_name = "solaris1011"
+  end
+  # Solaris 11.0
+  config.vm.define :solaris1100 do |solaris1100_config|
+    solaris1100_config.vm.box = "FEBO/solaris-11.0"
+    solaris1100_config.vm.host_name = "solaris1100"
+  end
+  # Solaris 11.1
+  config.vm.define :solaris1101 do |solaris1101_config|
+    solaris1101_config.vm.box = "FEBO/solaris-11.1"
+    solaris1101_config.vm.host_name = "solaris1101"
+  end
+  # Solaris 11.2
+  config.vm.define :solaris1102 do |solaris1102_config|
+    solaris1102_config.vm.box = "FEBO/solaris-11.2"
+    solaris1102_config.vm.host_name = "solaris1102"
+  end
+  # Solaris 11.3
+  config.vm.define :solaris1103 do |solaris1103_config|
+    solaris1103_config.vm.box = "FEBO/solaris-11.3"
+    solaris1103_config.vm.host_name = "solaris1103"
+  end
+  # Solaris 11.4
+  config.vm.define :solaris1104 do |solaris1104_config|
+    solaris1104_config.vm.box = "FEBO/solaris-11.4"
+    solaris1104_config.vm.host_name = "solaris1104"
   end
 
-  # OS X Yosemite
-  config.vm.define :osx do |osx_config|
-    osx_config.vm.box = "dryga/yosemite"
-    osx_config.vm.box_url = "http://files.dryga.com/boxes/osx-yosemite-0.2.0.box"
-    osx_config.vm.host_name = "osx"
+  # OSX/MacOS
+  # OS X Yosemite (10.10)
+  config.vm.define :osx1010 do |osx1010_config|
+    osx1010_config.vm.box = "jhcook/osx-yosemite-10.10"
+    osx1010_config.vm.host_name = "osx1010"
+  end
+  # OS X El Capitan (10.11)
+  config.vm.define :osx1011 do |osx1011_config|
+    osx1011_config.vm.box = "jhcook/osx-elcapitan-10.11"
+    osx1011_config.vm.host_name = "osx1011"
+  end
+  # OS X Sierra (10.12)
+  config.vm.define :osx1012 do |osx1012_config|
+    osx1012_config.vm.box = "jhcook/macos-sierra"
+    osx1012_config.vm.host_name = "osx1012"
+  end
+  # OS X High Sierra (10.13)
+  config.vm.define :osx1013 do |osx1013_config|
+    osx1013_config.vm.box = "ramsey/macos-high-sierra"
+    osx1013_config.vm.host_name = "osx1013"
+  end
+  # OS X Mojave (10.14)
+  config.vm.define :osx1014 do |osx1014_config|
+    osx1014_config.vm.box = "ramsey/macos-mojave"
+    osx1014_config.vm.host_name = "osx1014"
+  end
+  # OS X Catalina (10.15)
+  config.vm.define :osx1015 do |osx1015_config|
+    osx1015_config.vm.box = "ramsey/macos-catalina"
+    #osx1015_config.vm.box = "apscommode/macos-10.15"
+    osx1015_config.vm.host_name = "osx1015"
   end
 
   ### Settings
