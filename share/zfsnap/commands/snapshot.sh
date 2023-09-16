@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
@@ -16,6 +16,7 @@ ${0##*/} snapshot [ options ] zpool/filesystem ...
 OPTIONS:
   -a ttl       = How long the snapshot(s) should be kept (default: 1 month)
   -h           = Print this help and exit
+  -L           = Legacy write ttl in  name instead to use new default  zfs property zfsnap:ttl
   -n           = Dry-run. Perform a trial run with no actions actually performed
   -p prefix    = Prefix to use when naming snapshots for all ZFS file
                  systems that follow this option
@@ -42,12 +43,13 @@ EOF
 # main loop; get options, process snapshot creation
 while [ "$1" ]; do
     OPTIND=1
-    while getopts :a:hnp:PrRsSvz OPT; do
+    while getopts :a:hLnp:PrRsSvz OPT; do
         case "$OPT" in
             a) ValidTTL "$OPTARG" || Fatal "Invalid TTL: $OPTARG"
                TTL=$OPTARG
                ;;
             h) Help;;
+            L) TTL_IN_ZFS_PROPERTY='false';;
             n) DRY_RUN='true';;
             p) PREFIX=$OPTARG;;
             P) PREFIX='';;
@@ -57,7 +59,6 @@ while [ "$1" ]; do
             S) PopulateSkipPools 'scrub';;
             v) VERBOSE='true';;
             z) TIME_FORMAT='%Y-%m-%d_%H.%M.00';;
-
             :) Fatal "Option -${OPTARG} requires an argument.";;
            \?) Fatal "Invalid option: -${OPTARG}.";;
         esac
@@ -72,10 +73,14 @@ while [ "$1" ]; do
         ! SkipPool "$1" && shift && continue
 
         CURRENT_DATE=${CURRENT_DATE:-`date "+$TIME_FORMAT"`}
-
-        ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE}--${TTL}"
+        ZFS_SNAPSHOT=""
+        if IsTrue "$TTL_IN_ZFS_PROPERTY"; then
+            ZFS_SNAPSHOT="( $ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE} && $ZFS_CMD set ${ZFS_TTL_FIELD}=${TTL}  ${1}@${PREFIX}${CURRENT_DATE} )"
+        else
+            ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE}--${TTL}"
+        fi
         if IsFalse "$DRY_RUN"; then
-            if $ZFS_SNAPSHOT >&2; then
+            if eval $ZFS_SNAPSHOT >&2; then
                 IsTrue $VERBOSE && printf '%s ... DONE\n' "$ZFS_SNAPSHOT"
             else
                 IsTrue $VERBOSE && printf '%s ... FAIL\n' "$ZFS_SNAPSHOT"
