@@ -271,13 +271,30 @@ exits 0 on success and 1 if an error occurs.
 .Sh EXAMPLES
 .Nm
 was designed to work with cron. Thus, some of these examples will include cron
-markup.
+markup. Provide concrete values for minute (m), hour (h), day of month (dom),
+month (m), and day of week (dow) or use '*' in these fields (for 'any').
 .Pp
-Every hour, create recursive snapshots of an entire pool and keep for 5 days.
+Every hour, on the hour, create recursive snapshots of an entire pool and keep for 5 days.
 .Bd -literal -offset indent
-# Minute  Hour  Day  Month  Day  Who   Command
-5         *     *    *      *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+# m    h    dom  mon  dow  who   command
+0      *    *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
 .Ed
+.Pp
+Every 20 minutes, create recursive snapshots of an entire pool and keep for 5 days.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+*/20   *    *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+.Ed
+.Pp
+Every 2 hours, at 10 minutes after, create recursive snapshots of an entire pool and keep for 5 days.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+10     */2  *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+.Ed
+.Pp
+.Cm Caution
+Make sure that the minute value is specified, otherwise you will create a snapshot
+every minute the larger crontime matches.
 .Pp
 Create snapshots of different datasets in different zpools and keep for 2 weeks.
 .Pp
@@ -310,8 +327,8 @@ Deleting ZFS snapshots is much slower than creating them, and it's usually not
 a problem if snapshots live a few hours longer. Thus, it is usually best to
 delete old snapshots once a day.
 .Bd -literal -offset indent
-# Minute  Hour  Day  Month  Day  Who   Command
-0         1     *    *      *    root  /sbin/zfsnap destroy \-r zpool
+# m    h    dom  mon  dow  who   command
+0      1    *    *    *    root  /sbin/zfsnap destroy \-r zpool
 .Ed
 .
 .Sh SEE ALSO
