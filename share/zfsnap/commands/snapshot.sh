@@ -73,6 +73,8 @@ while [ "$1" ]; do
 
         CURRENT_DATE=${CURRENT_DATE:-`date "+$TIME_FORMAT"`}
 
+        [ -z ${PREFIX} ] || PREFIX=${PREFIX%%[-]}-
+
         ZFS_SNAPSHOT="$ZFS_CMD snapshot $ZOPT ${1}@${PREFIX}${CURRENT_DATE}--${TTL}"
         if IsFalse "$DRY_RUN"; then
             if $ZFS_SNAPSHOT >&2; then
