@@ -27,7 +27,7 @@ VerifySnapNotExists "$DATASET@zs$TEST_DATE--1m"
 ItReturns "CURRENT_DATE=$TEST_DATE $zfsnap snapshot -p zs $DATASET 2> /dev/null" 0
 for subds in $TEST_SUBDATASETS
 do
-	VerifySnapNotExists "$DATASET/$subds@zs$TEST_DATE--1m"
+	VerifySnapNotExists "$DATASET/$subds@zs-$TEST_DATE--1m"
 done
 DestroySnap "$DATASET@zs$TEST_DATE--1m"
 
