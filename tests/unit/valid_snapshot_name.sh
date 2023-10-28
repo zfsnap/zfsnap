@@ -30,9 +30,18 @@ ItReturns "ValidSnapshotName 'weekly-2011-04-05_02.06.00--6m'"       0   # middl
 ItReturns "ValidSnapshotName 'monthly-2011-04-05_02.06.00--5M'"      0   # last prefix w/ three prefixes defined
 ItReturns "ValidSnapshotName 'monthly-2011-04-05_02.06.00--forever'" 0   # forever TTL
 
+# Valid names w/ no prefix filtering
+PREFIXES=''
+SKIP_PREFIX_FILTER='true'
+ItReturns "ValidSnapshotName '2011-04-05_02.06.00--1y'"                 0   # typical snapshot name
+ItReturns "ValidSnapshotName 'pffhourly-2011-04-05_02.06.00--3w'"       0   # snapshot name w/ prefix
+ItReturns "ValidSnapshotName 'pffmonthly-2011-04-05_02.06.00--forever'" 0   # forever TTL
+
 ###
 # Invalid names
 ###
+# With SKIP_PREFIX_FILTER unset
+SKIP_PREFIX_FILTER=''
 PREFIXES=''
 ItReturns "ValidSnapshotName ''"                                     1   # empty
 
@@ -58,7 +67,36 @@ ItReturns "ValidSnapshotName 'zpool/child'"                          1   # files
 PREFIXES='hour'
 ItReturns "ValidSnapshotName 'hourly-2011-04-05_02.06.00--1y'"       1   # prefixes includes substring of snapshot_prefix
 
+# With SKIP_PREFIX_FILTER explicitly set to false
+SKIP_PREFIX_FILTER='false'
+PREFIXES=''
+ItReturns "ValidSnapshotName ''"                                     1   # empty
+
+# Valid in every way except not a selected prefix
+PREFIXES=''
+ItReturns "ValidSnapshotName 'pffteal-2011-04-05_02.06.00--1y'"      1   # invalid w/o a prefix defined
+
+PREFIXES='hourly-'
+ItReturns "ValidSnapshotName 'pfforange-2011-04-05_02.06.00--1M'"    1   # invalid w/ one prefix defined
+
+PREFIXES='daily--'
+ItReturns "ValidSnapshotName 'pffpurple--2011-04-05_02.06.00--1d'"   1   # invalid w/ one prefix defined using TTL delim
+
+PREFIXES='hourly- weekly-'
+ItReturns "ValidSnapshotName 'pffblue-2011-04-05_02.06.00--1w'"      1   # invalid w/ two prefixes defined
+
+PREFIXES='hourly- weekly- monthly-'
+ItReturns "ValidSnapshotName 'pffblack-2011-04-05_02.06.00--1s'"     1   # invalid w/ three prefixes defined
+
+PREFIXES='hourly- weekly- monthly-'
+ItReturns "ValidSnapshotName 'zpool/child'"                          1   # filesystem submitted
+
+PREFIXES='pffhour'
+ItReturns "ValidSnapshotName 'pffhourly-2011-04-05_02.06.00--1y'"    1   # prefixes includes substring of snapshot_prefix
+
+
 # Valid name; invalid TTL
+SKIP_PREFIX_FILTER=''
 PREFIXES=''
 ItReturns "ValidSnapshotName '2011-04-05_02.06.00--'"                1   # TTL delim without a TTL afterwards
 ItReturns "ValidSnapshotName '2010-04-05_02.06.00--45s5y'"           1   # TTL has s before y
