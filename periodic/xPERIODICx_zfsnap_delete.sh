@@ -15,6 +15,7 @@ fi
 # xPERIODICx_zfsnap_delete_prefixes - Space-separated list of prefixes of expired zfsnap snapshots to delete
 #                                     'hourly-', 'daily-', 'weekly-', 'monthly-', and 'reboot-' prefixes are hardcoded
 
+# shellcheck disable=SC2154
 case "${xPERIODICx_zfsnap_delete_enable-"NO"}" in
     [Yy][Ee][Ss])
         OPTIONS="$xPERIODICx_zfsnap_delete_flags"
