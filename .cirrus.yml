@@ -5,9 +5,9 @@ env:
 Tests_task:
   matrix:
     freebsd_instance:
-      image_family: freebsd-12-1
+      image_family: freebsd-13-2
     freebsd_instance:
-      image_family: freebsd-11-4
+      image_family: freebsd-12-4
   prepare_script:
   - cd tests && sh prepare.sh
   test_script:
