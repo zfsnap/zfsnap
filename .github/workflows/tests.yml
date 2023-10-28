@@ -9,10 +9,10 @@ jobs:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
     steps:
-    - uses: actions/checkout@master
-    - name: Install dependencies
-      run: sudo apt-get install -y zfsutils-linux
-    - name: Prepare ZFS environment
-      run: cd tests && sudo sh prepare.sh
-    - name: Run tests
-      run: cd tests && sudo env RUN_TESTS="unit integration system" sh ./run.sh
+      - uses: actions/checkout@master
+      - name: Install dependencies
+        run: sudo apt-get install -y zfsutils-linux
+      - name: Prepare ZFS environment
+        run: cd tests && sudo sh prepare.sh
+      - name: Run tests
+        run: cd tests && sudo env RUN_TESTS="unit integration" sh ./run.sh
