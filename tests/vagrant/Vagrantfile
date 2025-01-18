@@ -55,6 +55,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     jammy_config.vm.box = "bento/ubuntu-22.04"
     jammy_config.vm.host_name = "jammy"
   end
+  # Ubuntu 24.04 noble Numbat
+  config.vm.define :noble do |noble_config|
+    noble_config.vm.box = "bento/ubuntu-24.04"
+    noble_config.vm.host_name = "noble"
+  end
 
   # Fedora 21
   config.vm.define :fedora21 do |fedora21_config|
@@ -146,6 +151,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     fedora38_config.vm.box = "bento/fedora-38"
     fedora38_config.vm.host_name = "fedora38"
   end
+  # Fedora 39
+  config.vm.define :fedora39 do |fedora39_config|
+    fedora39_config.vm.box = "bento/fedora-39"
+    fedora39_config.vm.host_name = "fedora39"
+  end
+  # Fedora 40
+  config.vm.define :fedora40 do |fedora40_config|
+    fedora40_config.vm.box = "bento/fedora-40"
+    fedora40_config.vm.host_name = "fedora40"
+  end
+  # Fedora 41
+  config.vm.define :fedora41 do |fedora41_config|
+    fedora41_config.vm.box = "bento/fedora-41"
+    fedora41_config.vm.host_name = "fedora41"
+  end
+  # Fedora 42
+  config.vm.define :fedora42 do |fedora42_config|
+    fedora42_config.vm.box = "bento/fedora-42"
+    fedora42_config.vm.host_name = "fedora42"
+  end
+  # Fedora 43
+  config.vm.define :fedora43 do |fedora43_config|
+    fedora43_config.vm.box = "bento/fedora-43"
+    fedora43_config.vm.host_name = "fedora43"
+  end
 
   # FreeBSD
   # FreeBSD 10
@@ -167,6 +197,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define :freebsd13 do |freebsd13_config|
     freebsd13_config.vm.box = "generic/freebsd13"
     freebsd13_config.vm.host_name = "freebsd13"
+  end
+  # FreeBSD 14
+  config.vm.define :freebsd14 do |freebsd14_config|
+    freebsd14_config.vm.box = "generic/freebsd14"
+    freebsd14_config.vm.host_name = "freebsd14"
   end
 
   # OmniOS

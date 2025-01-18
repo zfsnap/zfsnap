@@ -3,12 +3,13 @@
 # This file is licensed under the BSD-3-Clause license.
 # See the AUTHORS and LICENSE files for more information.
 
-VM_BSD='freebsd10 freebsd11 freebsd12 freebsd13'
+VM_BSD='freebsd10 freebsd11 freebsd12 freebsd13 freebsd14'
 VM_DEBIAN='wheezy jessie stretch buster bullseye bookworm'
-VM_UBUNTU='xenial bionic focal jammy'
+VM_UBUNTU='xenial bionic focal jammy noble'
 VM_FEDORA20='fedora21 fedora22 fedora23 fedora24 fedora25 fedora26 fedora27 fedora28 fedora29'
 VM_FEDORA30='fedora30 fedora31 fedora32 fedora33 fedora34 fedora35 fedora36 fedora37 fedora38'
-VM_FEDORA="$VM_FEDORA20 $VM_FEDORA30"
+VM_FEDORA40='fedora40 fedora41 fedora42 fedora43'
+VM_FEDORA="$VM_FEDORA20 $VM_FEDORA30 $VM_FEDORA40"
 VM_LINUX="$VM_DEBIAN $VM_UBUNTU $VM_FEDORA"
 VM_OSX='osx1010 osx1011 osx1012 osx1013 osx1014 osx1015'
 VM_OMNIOS='omnios12 omnios14 omnios16 omnios18 omnios20'
