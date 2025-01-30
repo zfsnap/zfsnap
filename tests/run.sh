@@ -14,6 +14,6 @@ echo
 if [ $exit_with_error -eq 0 ]; then
   echo "All tests passed"
 else
-  echo "Some tests failed" > /dev/stderr
+  echo "Some tests failed" >&2
   exit 1
 fi
