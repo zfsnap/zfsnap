@@ -26,20 +26,20 @@ Exit() {
 }
 
 Note() {
-    echo "NOTE: $*" > /dev/stderr
+    echo "NOTE: $*" >&2
 }
 
 Err() {
-    echo "ERROR: $*" > /dev/stderr
+    echo "ERROR: $*" >&2
 }
 
 Fatal() {
-    echo "FATAL: $*" > /dev/stderr
+    echo "FATAL: $*" >&2
     exit 1
 }
 
 Warn() {
-    echo "WARNING: $*" > /dev/stderr
+    echo "WARNING: $*" >&2
 }
 
 
@@ -198,7 +198,7 @@ RmZfsSnapshot() {
     # hardening: make really, really sure we are deleting snapshot
     if echo $* | grep -q -e '@'; then
         if IsFalse $dry_run; then
-            if $zfs_destroy > /dev/stderr; then
+            if $zfs_destroy >&2; then
                 IsTrue $verbose && echo "$zfs_destroy  ... DONE"
             else
                 IsTrue $verbose && echo "$zfs_destroy  ... FAIL"
@@ -208,13 +208,13 @@ RmZfsSnapshot() {
             echo "$zfs_destroy"
         fi
     else
-        echo "FATAL: trying to delete zfs pool or filesystem? WTF?" > /dev/stderr
-        echo "  This is bug, we definitely don't want that." > /dev/stderr
-        echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" > /dev/stderr
-        echo "  Don't panic, nothing was deleted :)" > /dev/stderr
-        echo "" > /dev/stderr
-        echo "  The error was raised becaus of:" > /dev/stderr
-        echo "  $*" > /dev/stderr
+        echo "FATAL: trying to delete zfs pool or filesystem? WTF?" >&2
+        echo "  This is bug, we definitely don't want that." >&2
+        echo "  Please report it to https://github.com/graudeejs/zfSnap/issues" >&2
+        echo "  Don't panic, nothing was deleted :)" >&2
+        echo "" >&2
+        echo "  The error was raised becaus of:" >&2
+        echo "  $*" >&2
         IsTrue $count_failures && [ $failures -gt 0 ] && Exit $failures
         Exit 1
     fi
@@ -385,7 +385,7 @@ while [ "$1" ]; do
             if [ $1 = `echo $1 | $ESED -e 's/^-//'` ]; then
                 zfs_snapshot="$zfs_cmd snapshot $zopt $1@${prefix}${ntime}--${ttl}"
                 if IsFalse $dry_run; then
-                    if $zfs_snapshot > /dev/stderr; then
+                    if $zfs_snapshot >&2; then
                         IsTrue $verbose && echo "$zfs_snapshot ... DONE"
                     else
                         IsTrue $verbose && echo "$zfs_snapshot ... FAIL"
