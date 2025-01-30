@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04]
+        os: [ubuntu-24.04, ubuntu-22.04]
     steps:
       - uses: actions/checkout@master
       - name: Install dependencies
@@ -15,4 +15,4 @@ jobs:
       - name: Prepare ZFS environment
         run: cd tests && sudo sh prepare.sh
       - name: Run tests
-        run: cd tests && sudo env RUN_TESTS="unit integration" sh ./run.sh
+        run: cd tests && sudo env RUN_TESTS="unit integration system" sh ./run.sh
