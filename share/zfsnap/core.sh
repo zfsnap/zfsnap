@@ -438,7 +438,12 @@ ValidDate() {
 ValidPrefix() {
     local snapshot_prefix="$1"
 
-    [ -z "$PREFIXES" ] && [ -z "$snapshot_prefix" ] && return 0
+    # if there are no filter prefixes specified, then always succeed
+    [ -z "$PREFIXES" ] && return 0
+
+    # if there are filter prefixes specified, but this snap
+    # doesn't have a prefix, then fail.
+    [ -n "$PREFIXES" ] && [ -z "$snapshot_prefix" ] && return 1
 
     local i
     for i in $PREFIXES; do
