@@ -449,17 +449,28 @@ ValidPrefix() {
 }
 
 # Returns 0 if it's a snapshot name that matches zfsnap's name pattern
-# This also filters for any prefixes in effect
+# This also filters for any prefixes in effect unless prefix filtering is disabled
 ValidSnapshotName() {
     IsSnapshot "$1" && return 1
     local snapshot_name="$1"
+    local skip_prefix_filter=false
+    [ -n "$SKIP_PREFIX_FILTER" ] && skip_prefix_filter="$SKIP_PREFIX_FILTER"
 
-    TrimToPrefix "$snapshot_name" && local snapshot_prefix="$RETVAL" || return 1
+    if IsFalse "$skip_prefix_filter"; then
+        TrimToPrefix "$snapshot_name" && local snapshot_prefix="$RETVAL" || return 1
+    fi
     TrimToDate "$snapshot_name" && local snapshot_date="$RETVAL" || return 1
     TrimToTTL "$snapshot_name" && local snapshot_ttl="$RETVAL" || return 1
 
     local rebuilt_name="${snapshot_prefix}${snapshot_date}--${snapshot_ttl}"
-    [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
+    if IsFalse "$skip_prefix_filter"; then
+        [ "$rebuilt_name" = "$snapshot_name" ] && return 0 || return 1
+    else
+        case "$snapshot_name" in
+          *"$rebuilt_name") return 0;;
+          *) return 1;;
+        esac
+    fi
 }
 
 # Check validity of TTL
