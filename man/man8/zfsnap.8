@@ -12,6 +12,8 @@
 .Nm
 .Op Fl h
 .Op Fl V
+.Op Fl s
+.Ar <args>
 |
 .Ar <command>
 .Op options
@@ -44,6 +46,8 @@ Print a summary of
 command\[hy]line options and then exit.
 .It Fl V
 Print the version number and exit.
+.It Fl s
+Use ssh to run all zfs/zpool commands on a remote host. Use parentheses to pass options to ssh, e.g. "-p 2223 user@host". See ssh(1) manual page for all options.
 .El
 .Pp
 .Nm

@@ -38,8 +38,9 @@ COMMANDS:
 `for C in $ZFSNAP_LIB_DIR/commands/*.sh; do [ -f "$C" ] && C_NAME="${C##*/}" && printf '  %s\n' "${C_NAME%.*}"; done`
 
 OPTIONS:
-  -h, --help        = Print this help and exit
-  -V, --version     = Print the version number and exit
+  -h, --help                = Print this help and exit
+  -V, --version             = Print the version number and exit
+  -s <args>, --ssh <args>   = Use ssh to run zfs/zpool commands on remote host
 
 MORE HELP:
   All commands accept the -h option; use it for command-specific help.
@@ -60,6 +61,15 @@ case "$1" in
     '-V'|'--version')
         printf '%s v%s\n' "${0##*/}" "${VERSION}"; Exit 0;;
     *)
+        case "$1" in
+            '-s'|'--ssh')
+                shift
+                REMOTE_HOST=$1
+                ZFS_CMD="ssh $REMOTE_HOST $ZFS_CMD"
+                ZPOOL_CMD="ssh $REMOTE_HOST $ZFS_CMD"
+                shift;;
+        esac
+
         CMD="$1"
         if [ -f "${ZFSNAP_LIB_DIR}/commands/${CMD}.sh" ]; then
             shift
