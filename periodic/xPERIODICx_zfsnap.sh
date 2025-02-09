@@ -18,6 +18,7 @@ fi
 # xPERIODICx_zfsnap_enable_prefix   - Create snapshots with prefix (values: YES | NO) (Default = YES)
 # xPERIODICx_zfsnap_prefix          - set prefix for snapshots (Default = xPERIODICx)
 
+# shellcheck disable=SC2154
 case "${xPERIODICx_zfsnap_enable-"NO"}" in
     [Yy][Ee][Ss])
         OPTIONS="$xPERIODICx_zfsnap_flags"
@@ -30,6 +31,7 @@ case "${xPERIODICx_zfsnap_enable-"NO"}" in
             [Yy][Ee][Ss]) OPTIONS="$OPTIONS -p ${xPERIODICx_zfsnap_prefix:-"xPERIODICx-"}" ;;
         esac
 
+        # shellcheck disable=SC2194
         case 'xPERIODICx' in
             'hourly')
                 default_ttl='3d'
