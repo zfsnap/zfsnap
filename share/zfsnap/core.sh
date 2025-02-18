@@ -205,6 +205,7 @@ GreaterDate() {
 
 # Returns 0 if filesystem exists
 FSExists() {
+    [ -z "$1" ] && return 1
     $ZFS_CMD list -H -o name $1 >/dev/null 2>&1
 }
 
