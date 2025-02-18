@@ -205,14 +205,7 @@ GreaterDate() {
 
 # Returns 0 if filesystem exists
 FSExists() {
-    FS_LIST=${FS_LIST:-`$ZFS_CMD list -H -o name`}
-
-    local i
-    for i in $FS_LIST; do
-        [ "$1" = "$i" ] && return 0
-    done
-
-    return 1
+    $ZFS_CMD list -H -o name $1 >/dev/null 2>&1
 }
 
 # Returns 0 if argument is an integer
