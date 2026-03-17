@@ -5,86 +5,97 @@ TEST_MODE='true'
 TEST_POOL=${TEST_POOL:-"tpool"}
 TEST_DATASET=${TEST_DATASET:-"test"}
 TEST_SUBDATASETS="subds1 subds2"
-ZFS=${ZFS:-`which zfs`}
+# Allow tests to run against built distribution. If ZFSNAP_PREFIX is set use that
+# otherwise default to the repository layout (for historical behavior)
+: ${ZFSNAP_PREFIX:=}
+if [ -n "$ZFSNAP_PREFIX" ]; then
+	# expected location of core lib in distributable layout
+	ZFSNAP_LIB_DIR="$ZFSNAP_PREFIX/share/zfsnap"
+else
+	# during development the source tree lives under src/
+	ZFSNAP_LIB_DIR=".."/src/share/zfsnap
+fi
+
+ZFS=${ZFS:-$(which zfs)}
 
 SPEC_FAILED=0
 
-ItReturns () {
-  local cmd="$1"
-  local expected_return="$2"
+ItReturns() {
+	local cmd="$1"
+	local expected_return="$2"
 
-  eval "$cmd"
-  local actual_return="$?"
+	eval "$cmd"
+	local actual_return="$?"
 
-  printf '`%s` returns %s ... ' "$cmd" "$expected_return"
-  if [ "$expected_return" -eq "$actual_return" ]; then
-    printf '\033[1;32mpassed\033[0m\n'
-  else
-    SPEC_FAILED=1
-    printf '\033[1;31mfailed\n'
-    printf '\texpected return value: %s\n' "$expected_return"
-    printf '\tactual return value:   %s\n' "$actual_return"
-    printf '\033[0m'
-  fi
+	printf '`%s` returns %s ... ' "$cmd" "$expected_return"
+	if [ "$expected_return" -eq "$actual_return" ]; then
+		printf '\033[1;32mpassed\033[0m\n'
+	else
+		SPEC_FAILED=1
+		printf '\033[1;31mfailed\n'
+		printf '\texpected return value: %s\n' "$expected_return"
+		printf '\tactual return value:   %s\n' "$actual_return"
+		printf '\033[0m'
+	fi
 }
 
 # Check both the global variable RETVAL and the return of a given function
 ItsRetvalIs() {
-  local cmd="$1"
-  local expected_retval="$2"
-  local expected_return="$3"
+	local cmd="$1"
+	local expected_retval="$2"
+	local expected_return="$3"
 
-  eval "$cmd"
-  local actual_return="$?"
-  local actual_retval="$RETVAL"
+	eval "$cmd"
+	local actual_return="$?"
+	local actual_retval="$RETVAL"
 
-  printf '`%s` sets retval to "%s" and returns %s ... ' "$cmd" "$expected_retval" "$expected_return"
-  if [ "$expected_retval" = "$actual_retval" ] && [ "$expected_return" -eq "$actual_return" ]; then
-    printf '\033[1;32mpassed\033[0m\n'
-  else
-    SPEC_FAILED=1
-    printf '\033[1;31mfailed\n'
-    printf '\texpected retval: %s\n' "$expected_retval"
-    printf '\tactual retval:   %s\n' "$actual_retval"
-    printf '\texpected return value: %s\n' "$expected_return"
-    printf '\tactual return value:   %s\n' "$actual_return"
-    printf '\033[0m\n'
-  fi
+	printf '`%s` sets retval to "%s" and returns %s ... ' "$cmd" "$expected_retval" "$expected_return"
+	if [ "$expected_retval" = "$actual_retval" ] && [ "$expected_return" -eq "$actual_return" ]; then
+		printf '\033[1;32mpassed\033[0m\n'
+	else
+		SPEC_FAILED=1
+		printf '\033[1;31mfailed\n'
+		printf '\texpected retval: %s\n' "$expected_retval"
+		printf '\tactual retval:   %s\n' "$actual_retval"
+		printf '\texpected return value: %s\n' "$expected_return"
+		printf '\tactual return value:   %s\n' "$actual_return"
+		printf '\033[0m\n'
+	fi
 }
 
-ItEchos () {
-  local cmd="$1"
-  local expected_result="$2"
-  local actual_result=`eval "$cmd"`
+ItEchos() {
+	local cmd="$1"
+	local expected_result="$2"
+	local actual_result=$(eval "$cmd")
 
-  printf '`%s` echos "%s" ... ' "$cmd" "$expected_result"
-  if [ "$expected_result" = "$actual_result" ]; then
-    printf "\033[1;32mpassed\033[0m\n"
-  else
-    SPEC_FAILED=1
-    printf '\033[1;31mfailed\n'
-    printf '\texpected result: %s\n' "$expected_result"
-    printf '\tactual result:   %s\n' "$actual_result"
-    printf '\033[0m\n'
-  fi
+	printf '`%s` echos "%s" ... ' "$cmd" "$expected_result"
+	if [ "$expected_result" = "$actual_result" ]; then
+		printf "\033[1;32mpassed\033[0m\n"
+	else
+		SPEC_FAILED=1
+		printf '\033[1;31mfailed\n'
+		printf '\texpected result: %s\n' "$expected_result"
+		printf '\tactual result:   %s\n' "$actual_result"
+		printf '\033[0m\n'
+	fi
 }
 
-ExitTests () {
-  exit "$SPEC_FAILED"
+ExitTests() {
+	exit "$SPEC_FAILED"
 }
 
-VerifySnapExists () {
-  ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 0
+VerifySnapExists() {
+	ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 0
 }
 
-VerifySnapNotExists () {
-  ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 1
+VerifySnapNotExists() {
+	ItReturns "$ZFS list -H -t snapshot $1 > /dev/null 2> /dev/null" 1
 }
 
-CreateSnap () {
-  ItReturns "$ZFS snapshot $1 > /dev/null 2> /dev/null" 0
+CreateSnap() {
+	ItReturns "$ZFS snapshot $1 > /dev/null 2> /dev/null" 0
 }
 
-DestroySnap () {
-  ItReturns "$ZFS destroy $1 2> /dev/null" 0
+DestroySnap() {
+	ItReturns "$ZFS destroy $1 2> /dev/null" 0
 }

@@ -3,9 +3,9 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. ../../share/zfsnap/core.sh
+. "$ZFSNAP_LIB_DIR/core.sh"
 
 ItReturns "IsFalse 'false'" 0
-ItReturns "IsFalse 'true'"  1
+ItReturns "IsFalse 'true'" 1
 
 ExitTests

@@ -6,17 +6,17 @@ EXIT_WITH_ERROR=0
 RUN_TESTS=${RUN_TESTS:-"unit integration"}
 
 for i in ${RUN_TESTS}; do
-    cd "$i"
-    for t in ./* ; do
-        "./${t}"
-        [ "$?" -ne 0 ] && EXIT_WITH_ERROR=1
-    done
-    cd ..
+	cd "$i"
+	for t in ./*; do
+		"./${t}"
+		[ "$?" -ne 0 ] && EXIT_WITH_ERROR=1
+	done
+	cd ..
 done
 
 if [ "$EXIT_WITH_ERROR" -eq 0 ]; then
-    printf "\n\033[1;32m%s\033[0m\n" "All tests passed."
+	printf "\n\033[1;32m%s\033[0m\n" "All tests passed."
 else
-    printf "\n\033[1;31m%s\033[0m\n" "Some tests failed." >&2
-    exit 1
+	printf "\n\033[1;31m%s\033[0m\n" "Some tests failed." >&2
+	exit 1
 fi

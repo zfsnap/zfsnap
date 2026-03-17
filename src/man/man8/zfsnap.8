@@ -1,0 +1,365 @@
+.\" This file is licensed under the BSD\[hy]3\[hy]Clause license.
+.\" See the AUTHORS and LICENSE files for more information.
+.Dd August 28, 2015
+.Dt ZFSNAP 8
+.Os \" Current operating system.
+.
+.Sh NAME
+.Nm zfsnap
+.Nd create and delete rolling ZFS snapshots
+.
+.Sh SYNOPSIS
+.Nm
+.Op Fl h
+.Op Fl V
+|
+.Ar <command>
+.Op options
+.Ar zpool/filesystem ...
+.
+.Sh DESCRIPTION
+.Nm
+creates and deletes rolling ZFS snapshots \[em] usually with cron.
+.Nm Ap s
+main advantages are its portability and that all information needed for
+snapshot management is kept in the snapshot name itself.
+.Pp
+zfsnap snapshots are in the format of pool/fs@[prefix]Timestamp\-\-TimeToLive
+.Pq e.g. zpool/var@monthly\-2010\-08\-03_02.06.00\-\-1y .
+.Pp
+The prefix is optional and is quite useful for filtering; Timestamp is the date
+and time when the snapshot was created; and TimeToLive (TTL) is the amount of
+time the snapshot will be kept until it's ready for deletion.
+.
+.Ss Top\[hy]level Options
+The majority of functionality is implemented at the
+.Ar <command>
+layer. However, a few options can be passed to
+.Nm
+directly.
+.Bl -tag -width Ds
+.It Fl h
+Print a summary of
+.Nm Ap s
+command\[hy]line options and then exit.
+.It Fl V
+Print the version number and exit.
+.El
+.Pp
+.Nm
+operates only on snapshots and will
+.Em never
+destroy or create a pool or filesystem.
+.
+.Sh Commands
+Most
+.Nm
+actions are performed by using a
+.Ar <command> .
+All options and arguments passed to a
+.Ar <command>
+are operated on as they are read
+.Pq i.e. sequentially .
+This provides the flexibility needed for complex scenarios, but also has the
+capacity to bite you if you're not paying attention. Remember,
+.Fl n
+.Pq dry\[hy]run
+is provided for a reason.
+.Pp
+Only one
+.Ar <command>
+can be passed per invocation of
+.Nm .
+.
+.Ss destroy
+By default,
+.Nm Cm destroy
+will only delete snapshots whose TTLs have expired. However, options
+are provided to override that behavior with more aggressive approaches.
+.Pp
+Only snapshots created by
+.Nm
+.Pq or, more specifically, snapshots which match the very specific name pattern it employs
+will be considered for deletion.
+.Bl -tag -width Ds
+.It Fl D
+Delete all zfsnap snapshots \[em] regardless of their TTL expiration \[em] on
+all ZFS file systems that follow this option.
+.It Fl F Ar age
+Force delete all snapshots exceeding
+.Ar age
+.Pq defined in TTL format
+\[em] regardless of their TTL expiration \[em] on all ZFS file systems that
+follow this option. See
+.Sx TTL SYNTAX
+for more information.
+.It Fl h
+Print a summary of
+.Cm destroy Ap s
+command\[hy]line options and then exit.
+.It Fl n
+Dry\[hy]run. Perform a trial run with no actions actually performed.
+.It Fl p Ar prefix
+Enable filtering to only consider snapshots with
+.Ar prefix ;
+it can be specified multiple times to build a list.
+.It Fl P
+Disable filtering for prefixes.
+.It Fl r
+Operate recursively for snapshots on all ZFS file systems that follow this
+option.
+.It Fl R
+Do not operate recursively for snapshots on all ZFS file systems that follow
+this option.
+.It Fl s
+Skip pools that are resilvering.
+.It Fl S
+Skip pools that are scrubbing.
+.It Fl v
+Verbose output.
+.El
+.
+.Ss recurseback
+.Nm Cm recurseback
+is different from `zfs rollback` in that it will rollback for not only the
+specified dataset, but also for all that dataset's children.
+.Bl -tag -width Ds
+.It Fl d Ar depth
+Limit the recursion to
+.Ar depth .
+A
+.Ar depth
+of 1 will rollback only the dataset and its direct children.
+.It Fl f
+Typically used with the
+.Op Fl R
+option to force an unmount of any clone file systems that are to be destroyed.
+.It Fl h
+Print a summary of
+.Cm recurseback Ap s
+command\[hy]line options and then exit.
+.It Fl n
+Dry\[hy]run. Perform a trial run with no actions actually performed.
+.It Fl r
+Destroy any snapshots and bookmarks more recent than the one specified.
+.It Fl R
+Destroy any snapshots and bookmarks more recent than the one specified, as well
+as any clones of those snapshots.
+.It Fl v
+Verbose output.
+.El
+.
+.Ss snapshot
+The purpose of
+.Nm Cm snapshot
+is simple: to create snapshots.
+.Bl -tag -width Ds
+.It Fl a Ar TTL
+How long the snapshots should be kept. If not declared, the default
+.Ar TTL
+is one month. See
+.Sx TTL SYNTAX
+for more information.
+.It Fl h
+Print a summary of
+.Cm snapshot Ap s
+command\[hy]line options and then exit.
+.It Fl n
+Dry\[hy]run. Perform a trial run with no actions actually performed.
+.It Fl p Ar prefix
+Prefix to apply when naming snapshots for all ZFS file systems that follow this
+option.
+.It Fl P
+Don't apply any prefix when naming snapshots for all ZFS file systems that
+follow this option.
+.It Fl r
+Create recursive snapshots of all ZFS file systems that follow this option.
+.It Fl R
+Create non\[hy]recursive snapshots for each ZFS file system that follows this
+option.
+.It Fl s
+Skip pools that are resilvering.
+.It Fl S
+Skip pools that are scrubbing.
+.It Fl v
+Verbose output.
+.It Fl z
+Round snapshot creation time down to 00 seconds.
+.El
+.
+.Sh TTL SYNTAX
+The Time\[hy]To\[hy]Live
+.Pq TTL
+contains numbers and modifiers. Valid modifiers are:
+.Bl -tag -width 8n -offset 4n
+.It Ar y
+years
+.Pq calendar
+.It Ar m
+months
+.Pq calendar
+.It Ar w
+weeks
+.It Ar d
+days
+.It Ar h
+hours
+.It Ar M
+minutes
+.It Ar s
+seconds
+.It Ar forever
+a special\[hy]case modifier that will never expire and cannot be used with other
+TTL modifiers. Both
+.Op Fl F
+and
+.Op Fl D
+will delete snapshots with a TTL of
+.Ar forever .
+.El
+.Pp
+You do not need to use all of the modifiers, but they must be used in the above order
+.Pq i.e. sequentially .
+.Pp
+TTL numbers must be greater than zero and cannot have leading zeros
+.Po e.g. Both
+.Ar 0y
+and
+.Ar 09d
+are invalid
+.Pc .
+.Pp
+The default TTL is
+.Ar 1m
+.Pq one month .
+.
+.Ss TTL Math
+When a TTL is added to a date, each field is added independently, then any month
+overflows are carried into years, and then all overflows are carried normally
+from right to left.
+.Pp
+For example, with a date of 2009\-02\-27 and a TTL of
+.Ar 1m3d ,
+the expiration date is 2009\-03\-30 rather than 2009\-04\-02.
+.Pp
+As a corner case, adding a TTL of
+.Ar 1m
+.Pq one month
+to the date 2009\-10\-31 will result in an expiration date of 2009\-12\-01
+rather than 2009\-11\-30. Because there are only 30 days in November, precisely
+one month after October 31st is ambiguous. The TTL math chooses the more conservative
+.Pq later
+result.
+.
+.Ss TTL Examples
+.Bl -tag -width 8n
+.It Ar 1y6m5d2h
+One year, six months, five days, and two hours
+.It Ar 18m
+Eighteen months
+.It Ar 90M
+Ninety minutes
+.It Ar 86400s
+Eighty\[hy]six thousand and four hundred seconds
+.Pq 1 day
+.El
+.
+.Sh EXIT STATUS
+.Nm
+exits 0 on success and 1 if an error occurs.
+.
+.Sh EXAMPLES
+.Nm
+was designed to work with cron. Thus, some of these examples will include cron
+markup. Provide concrete values for minute (m), hour (h), day of month (dom),
+month (m), and day of week (dow) or use '*' in these fields (for 'any').
+.Pp
+Every hour, on the hour, create recursive snapshots of an entire pool and keep for 5 days.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+0      *    *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+.Ed
+.Pp
+Every 20 minutes, create recursive snapshots of an entire pool and keep for 5 days.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+*/20   *    *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+.Ed
+.Pp
+Every 2 hours, at 10 minutes after, create recursive snapshots of an entire pool and keep for 5 days.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+10     */2  *    *    *    root  /sbin/zfsnap snapshot \-a 5d \-r zpool
+.Ed
+.Pp
+.Cm Caution
+Make sure that the minute value is specified, otherwise you will create a snapshot
+every minute the larger crontime matches.
+.Pp
+Create snapshots of different datasets in different zpools and keep for 2 weeks.
+.Pp
+.Dl zfsnap snapshot \-a 2w zpool2/git zpool2/jails \-r zpool2/jails/main zpool1/var
+.Pp
+Note that
+.Op Fl a ,
+.Op Fl r ,
+and
+.Op Fl R
+can be used many times in a single line.
+.Pp
+Now, for a more complex example. Here,
+.Nm
+will snapshot
+.Bl -dash -compact -offset 2n
+.It
+zpool/var recursively and hold it for 1 year
+.It
+zpool/home recursively and hold it for 6 minutes
+.It
+zpool/usr recursively and hold it for 3 months
+.It
+zpool/root non\[hy]recursively and hold it for 3 months.
+.El
+.Pp
+.Dl zfsnap snapshot \-a 1y \-r zpool/var \-a 6M zpool/home \-a 3m zpool/usr \-R zpool/root
+.Pp
+Deleting ZFS snapshots is much slower than creating them, and it's usually not
+a problem if snapshots live a few hours longer. Thus, it is usually best to
+delete old snapshots once a day.
+.Bd -literal -offset indent
+# m    h    dom  mon  dow  who   command
+0      1    *    *    *    root  /sbin/zfsnap destroy \-r zpool
+.Ed
+.
+.Sh SEE ALSO
+.Xr cron 8 ,
+.Xr zfs 8 ,
+.Xr zpool 8
+.Pp
+The zfsnap website is available at
+.Lk http://www.zfsnap.org
+.Pp
+Please report any bugs to
+.Lk https://github.com/zfsnap/zfsnap/issues
+.Pp
+General questions and discussion can be directed to our mailing list at
+.Mt zfsnap@librelist.com
+.Pq gmane.comp.sysutils.zfsnap on gmane .
+.
+.Sh AUTHORS
+.Nm
+was created by
+.An -nosplit
+.An Aldis Berjoza ,
+.Mt graudeejs@yandex.com ,
+and is co\[hy]maintained with
+.An Alex Waite
+.Mt alex@waite.eu .
+See the AUTHORS file for more information.
+.
+.Sh COPYRIGHT
+.Nm
+is released under the
+.Qq BSD\[hy]3\[hy]Clause License.
+See the LICENSE file for more information.
+.
