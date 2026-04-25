@@ -369,9 +369,9 @@ while [ "$1" ]; do
             ;;
         '-D')
             if [ "$zopt" != '-r' ]; then
-                delete_specific_fs_snapshots="$delete_specific_fs_snapshots $2"
+                delete_specific_fs_snapshots="${delete_specific_fs_snapshots:+$delete_specific_fs_snapshots }$2"
             else
-                delete_specific_fs_snapshots_recursively="$delete_specific_fs_snapshots_recursively $2"
+                delete_specific_fs_snapshots_recursively="${delete_specific_fs_snapshots_recursively:+$delete_specific_fs_snapshots_recursively }$2"
             fi
             shift 2
             ;;
@@ -421,16 +421,20 @@ if IsTrue $delete_snapshots || [ $force_delete_snapshots_age -ne -1 ]; then
         if IsTrue $delete_snapshots; then
             stay_time=$(TTL2Seconds `echo $i | $ESED -e "s/^(${prefixes})?${date_pattern}--//"`)
             [ $current_time -gt $(($create_time + $stay_time)) ] \
-                && rm_snapshot_pattern="$rm_snapshot_pattern $i"
+                && rm_snapshot_pattern="${rm_snapshot_pattern:+$rm_snapshot_pattern }$i"
         fi
         if [ "$force_delete_snapshots_age" -ne -1 ]; then
             [ $current_time -gt $(($create_time + $force_delete_snapshots_age)) ] \
-                && rm_snapshot_pattern="$rm_snapshot_pattern $i"
+                && rm_snapshot_pattern="${rm_snapshot_pattern:+$rm_snapshot_pattern }$i"
         fi
     done
 
     if [ "$rm_snapshot_pattern" != '' ]; then
-        rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -e "@`echo $rm_snapshot_pattern | sed -e 's/ /|/g'`" | sort -u)
+        # Write patterns to temp file to avoid ARG_MAX with many snapshots
+        _rm_pattern_file=$(mktemp)
+        echo "$rm_snapshot_pattern" | tr ' ' '\n' | sed -e '/^$/d; s/^/@/' > "$_rm_pattern_file"
+        rm_snapshots=$(echo $zfs_snapshots | xargs printf '%s\n' | grep -E -f "$_rm_pattern_file" | sort -u)
+        rm -f "$_rm_pattern_file"
         for i in $rm_snapshots; do
             RmZfsSnapshot -r $i
         done
