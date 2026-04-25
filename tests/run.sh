@@ -2,13 +2,13 @@
 
 exit_with_error=0
 
-cd unit
-for t in `ls`; do
-  sh $t
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+
+cd "$script_dir/unit" || exit 1
+for t in *.sh; do
+  sh "$t"
   [ $? -ne 0 ] && exit_with_error=1
 done
-cd ..
-
 
 echo
 if [ $exit_with_error -eq 0 ]; then
