@@ -13,8 +13,8 @@
 readonly VERSION='2.0.0.beta3'
 
 # COMMANDS
-ZFS_CMD='/sbin/zfs'
-ZPOOL_CMD='/sbin/zpool'
+ZFS_CMD=${ZFS_CMD:-/sbin/zfs}
+ZPOOL_CMD=${ZPOOL_CMD:-/sbin/zpool}
 
 # VARIABLES
 TTL='1m'                            # default snapshot TTL
