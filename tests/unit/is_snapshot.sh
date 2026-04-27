@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # These are snapshots and should be accepted
 ItReturns "IsSnapshot z@2011-04-05_02.06.00--1y" 0                      # single character zpool name w/ snapshot

@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # These include a date matching the "date pattern", and should be trimmed accordingly
 ItsRetvalIs "TrimToDate 'zpool@2009-04-05_23.32.00--1y'" "2009-04-05_23.32.00" 0                      # a full dataset name

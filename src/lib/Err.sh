@@ -1,0 +1,1 @@
+printf '%s\n' "ERROR: $*" >&2

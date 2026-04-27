@@ -4,7 +4,7 @@
 
 . ../spec_helper.sh
 
-zfsnap='../../sbin/zfsnap.sh'
+zfsnap="${ZFSNAP_PREFIX:+$ZFSNAP_PREFIX/sbin/}../../src/sbin/zfsnap.sh"
 zfs=`which zfs`
 
 DATASET="$TEST_POOL/$TEST_DATASET"

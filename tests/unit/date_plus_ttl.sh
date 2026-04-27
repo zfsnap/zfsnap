@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # Easy additions
 ItsRetvalIs "DatePlusTTL '2011-12-05_02.06.00' '1s'" "2011-12-05_02.06.01" 0 # 1 second

@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 ItReturns "IsFalse 'false'" 0
 ItReturns "IsFalse 'true'" 1

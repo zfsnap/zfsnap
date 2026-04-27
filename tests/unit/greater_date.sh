@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # First date is greater, and should return 0
 ItReturns "GreaterDate 2012-04-08_12.34.54 2011-04-08_12.34.54" 0 # one year greater

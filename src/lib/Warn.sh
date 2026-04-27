@@ -1,0 +1,1 @@
+printf '%s\n' "WARNING: $*" >&2

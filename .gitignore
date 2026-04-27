@@ -1,1 +1,13 @@
 .vagrant
+
+# Build artifacts
+*.tar.gz
+*.tar.gz.sha256
+
+# dist/ build output (keep packaging/ tracked)
+dist/completion/
+dist/man/
+dist/periodic/
+dist/sbin/
+dist/share/
+dist/tools/

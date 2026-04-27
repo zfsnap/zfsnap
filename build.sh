@@ -1,5 +1,6 @@
 #!/bin/sh
 # POSIX build script: copy src -> dist, normalize shebangs, set execute bits, create tarball
+# Source lives in src/, distribution output goes to dist/, packaging files in dist/packaging/
 set -eu
 
 SRC=${1:-src}
@@ -34,8 +35,8 @@ fi
 find "$DEST/share" -type f -name '*.sh' -exec chmod 0755 {} \; 2>/dev/null || true
 
 # Create a tarball if NEWS file exists to derive version
-if [ -f "$SRC/NEWS" ]; then
-	VER=$(head -n1 "$SRC/NEWS" 2>/dev/null | awk '{print $1}' | tr -d 'v' || echo "0.0.0")
+if [ -f "docs/NEWS" ]; then
+	VER=$(head -n1 "docs/NEWS" 2>/dev/null | awk '{print $1}' | tr -d 'v' || echo "0.0.0")
 else
 	VER=0.0.0
 fi

@@ -1,0 +1,167 @@
+name: zfsnap
+help: Create and delete rolling ZFS snapshots
+version: 2.0.0.beta4
+
+commands:
+  - name: snapshot
+    alias: snap
+    help: Create ZFS snapshots
+
+    environment:
+      - name: ZFSNAP_PREEPER
+        help: Override the default library directory location
+
+    args:
+      - name: filesystem
+        required: true
+        multiple: true
+        help: ZFS pool/filesystem to snapshot
+
+    flags:
+      - long: --ttl
+        short: -a
+        arg: ttl
+        help: "How long the snapshot(s) should be kept (default: 1 month). See TTL syntax."
+      - long: --help
+        short: -h
+        help: Print help and exit
+      - long: --dry-run
+        short: -n
+        help: Perform a trial run with no actions actually performed
+      - long: --prefix
+        short: -p
+        arg: prefix
+        help: Prefix to use when naming snapshots. Can be specified multiple times.
+      - long: --no-prefix
+        short: -P
+        help: Don't apply any prefix when naming snapshots
+      - long: --recursive
+        short: -r
+        help: Create recursive snapshots for all ZFS file systems
+      - long: --no-recursive
+        short: -R
+        help: Create non-recursive snapshots
+      - long: --skip-resilver
+        short: -s
+        help: Skip pools that are resilvering
+      - long: --skip-scrub
+        short: -S
+        help: Skip pools that are scrubbing
+      - long: --verbose
+        short: -v
+        help: Verbose output
+      - long: --zero-seconds
+        short: -z
+        help: Round snapshot creation time down to 00 seconds
+
+    examples:
+      - zfsnap snapshot -a 5d -r zpool
+      - zfsnap snapshot -a 2w zpool2/git zpool2/jails -r zpool2/jails/main zpool1/var
+      - zfsnap snapshot -a 1y -r zpool/var -a 6M zpool/home -a 3m zpool/usr -R zpool/root
+
+    environment_variables:
+      - name: ZFSNAP_LIB_DIR
+        help: Override the default library directory location
+      - name: CURRENT_DATE
+        help: Override the current date (used for testing)
+
+  - name: destroy
+    alias: rm
+    help: Delete expired ZFS snapshots
+
+    args:
+      - name: filesystem
+        required: true
+        multiple: true
+        help: ZFS pool/filesystem to process
+
+    flags:
+      - long: --delete-all
+        short: -D
+        help: "Delete *all* zfsnap snapshots — regardless of TTL expiration"
+      - long: --force-age
+        short: -F
+        arg: age
+        help: Force delete all snapshots exceeding age (in TTL format)
+      - long: --help
+        short: -h
+        help: Print help and exit
+      - long: --dry-run
+        short: -n
+        help: Perform a trial run with no actions actually performed
+      - long: --prefix
+        short: -p
+        arg: prefix
+        help: Filter to only consider snapshots with prefix. Can be specified multiple times.
+      - long: --no-prefix
+        short: -P
+        help: Disable filtering for prefixes
+      - long: --recursive
+        short: -r
+        help: Operate recursively on all ZFS file systems
+      - long: --no-recursive
+        short: -R
+        help: Do not operate recursively
+      - long: --skip-resilver
+        short: -s
+        help: Skip pools that are resilvering
+      - long: --skip-scrub
+        short: -S
+        help: Skip pools that are scrubbing
+      - long: --verbose
+        short: -v
+        help: Verbose output
+
+    examples:
+      - zfsnap destroy -r zpool
+      - zfsnap destroy -D -r zpool
+      - zfsnap destroy -p weekly -r zpool
+
+    environment_variables:
+      - name: ZFSNAP_LIB_DIR
+        help: Override the default library directory location
+      - name: CURRENT_DATE
+        help: Override the current date (used for testing)
+
+  - name: recurseback
+    alias: rb
+    help: Rollback a dataset and all its children to a snapshot
+
+    args:
+      - name: snapshot
+        required: true
+        multiple: true
+        help: ZFS pool/filesystem@snapshot to rollback to
+
+    flags:
+      - long: --depth
+        short: -d
+        arg: depth
+        help: "Limit recursion to depth. A depth of 1 rolls back only the dataset and its direct children."
+      - long: --force
+        short: -f
+        help: Force unmount of any clone file systems that are to be destroyed
+      - long: --help
+        short: -h
+        help: Print help and exit
+      - long: --dry-run
+        short: -n
+        help: Perform a trial run with no actions actually performed
+      - long: --recent
+        short: -r
+        help: Destroy any snapshots and bookmarks more recent than the one specified
+      - long: --recent-clones
+        short: -R
+        help: "Destroy recent snapshots/bookmarks, as well as any clones of those snapshots"
+      - long: --verbose
+        short: -v
+        help: Verbose output
+
+    examples:
+      - zfsnap recurseback zpool/var@daily-2020-01-01_10.00.00--1m
+      - zfsnap recurseback -r -f zpool/var@weekly-2020-01-01_10.00.00--6m
+      - zfsnap recurseback -d 1 zpool/jails@snapshot-name
+
+    environment_variables:
+      - name: ZFSNAP_LIB_DIR
+        help: Override the default library directory location

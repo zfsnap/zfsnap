@@ -10,10 +10,10 @@ TEST_SUBDATASETS="subds1 subds2"
 : ${ZFSNAP_PREFIX:=}
 if [ -n "$ZFSNAP_PREFIX" ]; then
 	# expected location of core lib in distributable layout
-	ZFSNAP_LIB_DIR="$ZFSNAP_PREFIX/share/zfsnap"
+	ZFSNAP_LIB="$ZFSNAP_PREFIX/share/zfsnap/core.sh"
 else
-	# during development the source tree lives under src/
-	ZFSNAP_LIB_DIR=".."/src/share/zfsnap
+	# during development, source the compiled zfsnap at project root
+	ZFSNAP_LIB="../../zfsnap"
 fi
 
 ZFS=${ZFS:-$(which zfs)}

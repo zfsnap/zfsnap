@@ -1,1 +1,0 @@
-zfsnap-completion.bash

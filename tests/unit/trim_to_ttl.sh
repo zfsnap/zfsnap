@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # These include a TTL delimiter, and should be trimmed accordingly
 ItsRetvalIs "TrimToTTL 'zpool@2011-04-05_02.06.00--1y'" "1y" 0                      # pool w/o child w/ snapshot

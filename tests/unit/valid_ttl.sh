@@ -3,7 +3,7 @@
 # See the AUTHORS and LICENSE files for more information.
 
 . ../spec_helper.sh
-. "$ZFSNAP_LIB_DIR/core.sh"
+ZFSNAP_SOURCE_ONLY=true; . "$ZFSNAP_LIB"
 
 # These are valid TTLs and should be accepted
 ItReturns "ValidTTL 1y2m3w4d5h6M7s" 0 # test all valid modifiers in order

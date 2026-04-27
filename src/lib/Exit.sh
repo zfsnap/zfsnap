@@ -1,0 +1,1 @@
+IsTrue "$TEST_MODE" || exit $1

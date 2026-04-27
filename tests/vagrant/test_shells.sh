@@ -55,8 +55,8 @@ for BANG in $SHELLS_TO_TEST; do
     SHE='#!/bin/'
 
     # change the shebangs
-    find ../ -type d \( -name tools -o -name vagrant \) -prune -o -type f \
-        -exec ../tools/mod_shebang.sh -s "${SHE}${BANG}" {} \;
+    find ../src -type f \
+        -exec ../src/tools/mod_shebang.sh -s "${SHE}${BANG}" {} \;
 
     ./run.sh
     [ "$?" -ne 0 ] && FAILED_SHELLS="${FAILED_SHELLS:+$FAILED_SHELLS }$BANG"
