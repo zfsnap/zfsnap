@@ -64,7 +64,7 @@ while [ "$1" ]; do
     done
 
     # discard all arguments processed thus far
-    shift $(($OPTIND - 1))
+    shift $((OPTIND - 1))
 
     # create snapshots
     if [ "$1" ]; then
