@@ -5,12 +5,24 @@
 . ../spec_helper.sh
 . ../../share/zfsnap/core.sh
 
-# These include a snapshot, and should be trimmed accordingly
-FS_LIST='zpool
+# Override the FSExists function for unit tests
+FSExists() {
+    FS_LIST='zpool
 z--pool
 zpool/child
 zpool/child/grandchild
 data/archive'
+
+    local i
+    for i in $FS_LIST; do
+        [ "$1" = "$i" ] && return 0
+    done
+
+    return 1
+}
+
+# These include a snapshot, and should be trimmed accordingly
+
 ItsRetvalIs "TrimToFileSystem 'zpool'"                                "zpool"                  0  # pool
 ItsRetvalIs "TrimToFileSystem 'data/archive'"                         "data/archive"           0  # pool w/ child
 ItsRetvalIs "TrimToFileSystem 'zpool/child/grandchild'"               "zpool/child/grandchild" 0  # pool w/ grandchild
