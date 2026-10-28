@@ -1,0 +1,45 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run shellcheck on all shell scripts
+        run: |
+          set -o pipefail
+          find . -type f -name '*.sh' -not -path './.git/*' -print0 \
+            | xargs -0 -r shellcheck -s sh --severity=error
+
+  shells:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # every Bourne shell that zfsnap supports (see PORTABILITY and
+        # tests/vagrant/test_shells.sh). pdksh/posh live in universe and may
+        # not be installable on every runner; the job skips them if absent.
+        shell: [ash, bash, dash, lksh, mksh, pdksh, posh, zsh]
+    steps:
+      - uses: actions/checkout@master
+      - name: Install POSIX shells
+        run: |
+          sudo apt-get update
+          for pkg in bash dash mksh pdksh posh zsh; do
+            sudo apt-get install -y "$pkg" || echo "package '$pkg' unavailable; skipping if shell missing"
+          done
+      - name: Run unit tests under ${{ matrix.shell }}
+        run: |
+          cd tests/unit
+          if ! command -v "${{ matrix.shell }}" >/dev/null 2>&1; then
+            echo "shell '${{ matrix.shell }}' not available on this runner; skipping"
+            exit 0
+          fi
+          failed=0
+          for t in ./*; do
+            "${{ matrix.shell }}" "$t" || { echo "FAILED: $t under ${{ matrix.shell }}"; failed=1; }
+          done
+          exit "$failed"

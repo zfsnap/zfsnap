@@ -16,3 +16,26 @@ jobs:
         run: cd tests && sudo sh prepare.sh
       - name: Run tests
         run: cd tests && sudo env RUN_TESTS="unit integration system" sh ./run.sh
+
+  # unit + integration tests need no ZFS, so they can run inside containers
+  # on other major distro families than Ubuntu
+  Distro:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container: [debian:13, fedora:45]
+    container: ${{ matrix.container }}
+    steps:
+      - name: Ensure git is available (needed by checkout)
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            apt-get update && apt-get install -y git
+          elif command -v dnf >/dev/null 2>&1; then
+            dnf install -y git
+          else
+            echo "no package manager found" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@master
+      - name: Run tests
+        run: cd tests && RUN_TESTS="unit integration" sh ./run.sh
